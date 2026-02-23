@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 20: Appraisal Outputs - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; <a href="../index.html" class="hover:text-blue-600">Sections</a> &rarr; Section 20</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 20: Appraisal Outputs</h1>
+    <p class="text-gray-600 mb-8">The final section containing the formal appraisal outcome statements, declarations, and signatures from both the doctor and appraiser(s).</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_20_AppraisalOutputs</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::appraisalOutputs()</code><br>
+        <strong>Navigation label:</strong> Appraisal outputs
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD OVERVIEW -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr class="border-b-2 border-gray-200"><td colspan="3" class="font-semibold text-gray-600 text-sm pt-4">Outcome Statements</td></tr>
+                <tr><td><code>statementOne</code></td><td>Radio (Agree/Disagree)</td><td>Statement 1 agreement</td></tr>
+                <tr><td><code>statementTwo</code></td><td>Radio (Agree/Disagree)</td><td>Statement 2 agreement</td></tr>
+                <tr><td><code>statementThree</code></td><td>Radio (Agree/Disagree)</td><td>Statement 3 agreement</td></tr>
+                <tr><td><code>statementFour</code></td><td>Radio (Agree/Disagree)</td><td>Statement 4 agreement</td></tr>
+                <tr><td><code>statementFive</code></td><td>Radio (Agree/Disagree)</td><td>Statement 5 agreement</td></tr>
+                <tr class="border-b-2 border-gray-200"><td colspan="3" class="font-semibold text-gray-600 text-sm pt-4">Appraiser Comments</td></tr>
+                <tr><td><code>appraiserComments</code></td><td>Textarea</td><td>Appraiser comments to assist the responsible officer</td></tr>
+                <tr><td><code>appraiserIssues</code></td><td>Textarea</td><td>Other issues for the responsible officer</td></tr>
+                <tr class="border-b-2 border-gray-200"><td colspan="3" class="font-semibold text-gray-600 text-sm pt-4">Doctor's Response</td></tr>
+                <tr><td><code>doctorResponse</code></td><td>Textarea</td><td>Doctor's response to appraiser comments</td></tr>
+                <tr class="border-b-2 border-gray-200"><td colspan="3" class="font-semibold text-gray-600 text-sm pt-4">Doctor Declaration</td></tr>
+                <tr><td><code>doctorChk</code></td><td>Checkbox</td><td>Doctor's declaration confirmation</td></tr>
+                <tr><td><code>doctorFullName</code></td><td>Text</td><td>Doctor's full name</td></tr>
+                <tr><td><code>doctorGMCNumber</code></td><td>Text</td><td>Doctor's GMC number</td></tr>
+                <tr class="border-b-2 border-gray-200"><td colspan="3" class="font-semibold text-gray-600 text-sm pt-4">First Appraiser Declaration</td></tr>
+                <tr><td><code>appraiserOneChk</code></td><td>Checkbox</td><td>First appraiser declaration confirmation</td></tr>
+                <tr><td><code>appraiserOneFullName</code></td><td>Text</td><td>First appraiser full name</td></tr>
+                <tr><td><code>appraiserOneGMCNumber</code></td><td>Textarea</td><td>First appraiser GMC number</td></tr>
+                <tr class="border-b-2 border-gray-200"><td colspan="3" class="font-semibold text-gray-600 text-sm pt-4">Second Appraiser Declaration</td></tr>
+                <tr><td><code>appraiserTwoChk</code></td><td>Checkbox</td><td>Second appraiser declaration confirmation</td></tr>
+                <tr><td><code>appraiserTwoFullName</code></td><td>Text</td><td>Second appraiser full name</td></tr>
+                <tr><td><code>appraiserTwoGMCNumber</code></td><td>Text</td><td>Second appraiser GMC number</td></tr>
+                <tr class="border-b-2 border-gray-200"><td colspan="3" class="font-semibold text-gray-600 text-sm pt-4">Meeting Details</td></tr>
+                <tr><td><code>dateOfMeeting</code></td><td>Date</td><td>Date of the appraisal meeting</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="text-sm text-gray-500 mb-8">There are no repeatable items or conditional fields in this section. The five statement fields are simple radio groups (not conditional triggers). The second appraiser fields are always present in the datasets XML; their visibility in the rendered form is controlled by the <code>requireSecondAppraiser</code> radio in Section 3.</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Appraisal Outputs
+$data = XfaPdf::read('Section_20_AppraisalOutputs');
+
+// Or using the fluent accessor
+$data = XfaPdf::appraisalOutputs()->read();
+
+// $data looks like:
+// [
+//     'statementOne' => 'Agree',
+//     'statementTwo' => 'Agree',
+//     'statementThree' => 'Agree',
+//     'statementFour' => 'Agree',
+//     'statementFive' => 'Agree',
+//     'appraiserComments' => 'No additional comments for the responsible officer.',
+//     'appraiserIssues' => '',
+//     'doctorResponse' => 'I agree with the appraiser\'s summary.',
+//     'doctorChk' => '1',
+//     'doctorFullName' => 'Dr Sarah Mitchell',
+//     'doctorGMCNumber' => '1234567',
+//     'appraiserOneChk' => '1',
+//     'appraiserOneFullName' => 'Dr James Henderson',
+//     'appraiserOneGMCNumber' => '7654321',
+//     'appraiserTwoChk' => '',
+//     'appraiserTwoFullName' => '',
+//     'appraiserTwoGMCNumber' => '',
+//     'dateOfMeeting' => '2025-01-15',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$statement = XfaPdf::appraisalOutputs()->readField('statementOne');
+// 'Agree'
+
+$meetingDate = XfaPdf::appraisalOutputs()->readField('dateOfMeeting');
+// '2025-01-15'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- STATEMENT RADIO FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Statement Radio Fields</h2>
+    <p class="text-gray-700 mb-4">The five outcome statements are radio button groups with two options: <code>"Agree"</code> and <code>"Disagree"</code>. These record the formal outcome of the appraisal discussion. Both the doctor and appraiser must agree or disagree with each statement.</p>
+
+    <!-- statementOne -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Statement 1</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>statementOne</code></p>
+    <p class="text-gray-700 mb-3">The first formal outcome statement. Set to <code>"Agree"</code> or <code>"Disagree"</code>.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'statementOne',
+    'Agree'
+);</code></pre>
+    </div>
+
+    <!-- statementTwo -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Statement 2</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>statementTwo</code></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'statementTwo',
+    'Agree'
+);</code></pre>
+    </div>
+
+    <!-- statementThree -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Statement 3</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>statementThree</code></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'statementThree',
+    'Agree'
+);</code></pre>
+    </div>
+
+    <!-- statementFour -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Statement 4</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>statementFour</code></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'statementFour',
+    'Agree'
+);</code></pre>
+    </div>
+
+    <!-- statementFive -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Statement 5</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>statementFive</code></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'statementFive',
+    'Agree'
+);</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">You can also set all five statements at once using <code>update()</code>:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->update([
+    'statementOne'   => 'Agree',
+    'statementTwo'   => 'Agree',
+    'statementThree' => 'Agree',
+    'statementFour'  => 'Agree',
+    'statementFive'  => 'Agree',
+]);</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-6">
+        <strong>Note:</strong> The value must be exactly <code>"Agree"</code> or <code>"Disagree"</code> (capitalised). These match the radio button options in the XFA template. An unrecognised value will still be written to the datasets XML but may not display correctly in Adobe Acrobat.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT / TEXTAREA FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text &amp; Textarea Fields</h2>
+    <p class="text-gray-700 mb-4">These fields capture the appraiser's comments, any issues for the responsible officer, the doctor's response, and the identity details for both parties.</p>
+
+    <!-- appraiserComments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser comments</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserComments</code></p>
+    <p class="text-gray-700 mb-3">Comments from the appraiser to assist the responsible officer. This is a multiline textarea for any observations, recommendations, or context the appraiser wishes to provide.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'appraiserComments',
+    'No additional comments for the responsible officer. Dr Mitchell has '
+    . 'provided comprehensive evidence across all domains and I am '
+    . 'satisfied that she is meeting the requirements for revalidation. '
+    . 'Her portfolio was well-organised and her reflections were '
+    . 'thoughtful and demonstrated genuine learning.'
+);</code></pre>
+    </div>
+
+    <!-- appraiserIssues -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser issues</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserIssues</code></p>
+    <p class="text-gray-700 mb-3">Any other issues the appraiser wishes to bring to the attention of the responsible officer. This is typically left empty when there are no concerns.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'appraiserIssues',
+    ''
+);</code></pre>
+    </div>
+
+    <!-- doctorResponse -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Doctor's response</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>doctorResponse</code></p>
+    <p class="text-gray-700 mb-3">The doctor's response to the appraiser's summary and comments. This gives the doctor an opportunity to add context or respond to any observations.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'doctorResponse',
+    'I agree with the appraiser\'s summary and am satisfied that the '
+    . 'appraisal discussion was thorough and fair. The agreed PDP goals '
+    . 'are appropriate and achievable within the coming appraisal year. '
+    . 'I found the discussion about musculoskeletal medicine development '
+    . 'particularly helpful in shaping my plans for the year ahead.'
+);</code></pre>
+    </div>
+
+    <!-- doctorFullName -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Doctor's full name</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>doctorFullName</code></p>
+    <p class="text-gray-700 mb-3">The doctor's full name as it appears in the declaration.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'doctorFullName',
+    'Dr Sarah Mitchell'
+);</code></pre>
+    </div>
+
+    <!-- doctorGMCNumber -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Doctor's GMC number</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>doctorGMCNumber</code></p>
+    <p class="text-gray-700 mb-3">The doctor's GMC registration number in the declaration section.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'doctorGMCNumber',
+    '1234567'
+);</code></pre>
+    </div>
+
+    <!-- appraiserOneFullName -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">First appraiser's full name</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserOneFullName</code></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'appraiserOneFullName',
+    'Dr James Henderson'
+);</code></pre>
+    </div>
+
+    <!-- appraiserOneGMCNumber -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">First appraiser's GMC number</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserOneGMCNumber</code></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'appraiserOneGMCNumber',
+    '7654321'
+);</code></pre>
+    </div>
+
+    <!-- appraiserTwoFullName -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Second appraiser's full name</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserTwoFullName</code></p>
+    <p class="text-gray-700 mb-3">Only relevant when a second appraiser is required (controlled by <code>requireSecondAppraiser</code> in Section 3).</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'appraiserTwoFullName',
+    'Dr Patricia Clarke'
+);</code></pre>
+    </div>
+
+    <!-- appraiserTwoGMCNumber -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Second appraiser's GMC number</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserTwoGMCNumber</code></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'appraiserTwoGMCNumber',
+    '9876543'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- CHECKBOX FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Checkbox Fields</h2>
+    <p class="text-gray-700 mb-4">The declaration checkboxes confirm that the doctor and appraiser(s) agree with the formal declarations. Set to <code>"1"</code> for checked or <code>""</code> (empty string) for unchecked.</p>
+
+    <!-- doctorChk -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Doctor's declaration</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>doctorChk</code></p>
+    <p class="text-gray-700 mb-3">Confirms the doctor agrees with the declaration statement. The declaration covers accuracy of information, fitness to practise, and consent for the appraisal output to be shared with the responsible officer.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'doctorChk',
+    '1'
+);</code></pre>
+    </div>
+
+    <!-- appraiserOneChk -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">First appraiser's declaration</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserOneChk</code></p>
+    <p class="text-gray-700 mb-3">Confirms the first appraiser agrees with the declaration statement.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'appraiserOneChk',
+    '1'
+);</code></pre>
+    </div>
+
+    <!-- appraiserTwoChk -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Second appraiser's declaration</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserTwoChk</code></p>
+    <p class="text-gray-700 mb-3">Confirms the second appraiser agrees with the declaration statement. Only relevant when a second appraiser is required.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// When a second appraiser is present
+XfaPdf::appraisalOutputs()->updateField(
+    'appraiserTwoChk',
+    '1'
+);
+
+// When no second appraiser, leave unchecked
+XfaPdf::appraisalOutputs()->updateField(
+    'appraiserTwoChk',
+    ''
+);</code></pre>
+    </div>
+
+    <div class="info-box green mb-6">
+        <strong>Tip:</strong> Checkbox values in XFA are <code>"1"</code> for checked and <code>""</code> (empty string) for unchecked. Do not use <code>"true"</code>/<code>"false"</code> or <code>"yes"</code>/<code>"no"</code> &mdash; these will be written to the XML but may not render correctly in Adobe Acrobat.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- DATE FIELD -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Date Field</h2>
+
+    <!-- dateOfMeeting -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Date of the appraisal meeting</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>dateOfMeeting</code></p>
+    <p class="text-gray-700 mb-3">The date when the appraisal meeting took place. Use <code>YYYY-MM-DD</code> format.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalOutputs()->updateField(
+    'dateOfMeeting',
+    '2025-01-15'
+);</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-6">
+        <strong>Note:</strong> Use the <code>YYYY-MM-DD</code> format for date fields. This matches the XFA date format specification <code>date{YYYY-MM-DD}</code> used in the template. Other formats may not display correctly.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Appraisal Outputs section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillAppraisalOutputs()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+
+        // -----------------------------------------------
+        // 1. Fill all output fields
+        // -----------------------------------------------
+        XfaPdf::setFile($pdfPath);
+
+        XfaPdf::appraisalOutputs()->update([
+            // Outcome statements
+            'statementOne'   => 'Agree',
+            'statementTwo'   => 'Agree',
+            'statementThree' => 'Agree',
+            'statementFour'  => 'Agree',
+            'statementFive'  => 'Agree',
+
+            // Appraiser comments
+            'appraiserComments' =>
+                'No additional comments for the responsible officer. '
+                . 'Dr Mitchell has provided comprehensive evidence across '
+                . 'all domains and I am satisfied that she is meeting the '
+                . 'requirements for revalidation. Her portfolio was '
+                . 'well-organised and her reflections were thoughtful.',
+
+            'appraiserIssues' => '',
+
+            // Doctor's response
+            'doctorResponse' =>
+                'I agree with the appraiser\'s summary and am satisfied '
+                . 'that the appraisal discussion was thorough and fair. '
+                . 'The agreed PDP goals are appropriate and achievable '
+                . 'within the coming appraisal year.',
+
+            // Doctor declaration
+            'doctorChk'       => '1',
+            'doctorFullName'  => 'Dr Sarah Mitchell',
+            'doctorGMCNumber' => '1234567',
+
+            // First appraiser declaration
+            'appraiserOneChk'       => '1',
+            'appraiserOneFullName'  => 'Dr James Henderson',
+            'appraiserOneGMCNumber' => '7654321',
+
+            // Second appraiser (leave empty if not required)
+            'appraiserTwoChk'       => '',
+            'appraiserTwoFullName'  => '',
+            'appraiserTwoGMCNumber' => '',
+
+            // Meeting date
+            'dateOfMeeting' => '2025-01-15',
+        ]);
+
+        // -----------------------------------------------
+        // 2. Save the PDF
+        // -----------------------------------------------
+        XfaPdf::save();
+
+        return redirect()->back()->with('success', 'Appraisal Outputs saved.');
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::appraisalOutputs()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::appraisalOutputs()->readField('statementOne')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::appraisalOutputs()->updateField('statementOne', 'Agree')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::appraisalOutputs()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Set all statements to Agree</td>
+                    <td><code>XfaPdf::appraisalOutputs()->update(['statementOne' => 'Agree', ..., 'statementFive' => 'Agree'])</code></td>
+                </tr>
+                <tr>
+                    <td>Check doctor declaration</td>
+                    <td><code>XfaPdf::appraisalOutputs()->updateField('doctorChk', '1')</code></td>
+                </tr>
+                <tr>
+                    <td>Set meeting date</td>
+                    <td><code>XfaPdf::appraisalOutputs()->updateField('dateOfMeeting', '2025-01-15')</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="appraisal-summary.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 19: Appraisal Summary</span>
+        </a>
+        <a href="../cli-commands.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">CLI Commands &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

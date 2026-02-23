@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exceptions - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Exceptions</h1>
+    <p class="text-gray-600 mb-6">All exceptions extend <code>XfaPdfException</code> and use static factory methods with descriptive messages.</p>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">InvalidPdfException</h2>
+    <p class="text-gray-700 mb-3">Thrown when the PDF file is invalid, missing, or unreadable.</p>
+    <div class="space-y-2">
+        <div class="p-3 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="type">static</span> <span class="name">fileNotFound</span>(<span class="type">string</span> <span class="param">$path</span>): <span class="type">self</span></p>
+        </div>
+        <div class="p-3 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="type">static</span> <span class="name">unreadable</span>(<span class="type">string</span> <span class="param">$path</span>): <span class="type">self</span></p>
+        </div>
+        <div class="p-3 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="type">static</span> <span class="name">invalidFormat</span>(): <span class="type">self</span></p>
+        </div>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">NoXfaDataException</h2>
+    <p class="text-gray-700 mb-3">Thrown when the PDF does not contain valid XFA data.</p>
+    <div class="space-y-2">
+        <div class="p-3 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="type">static</span> <span class="name">noDatasetsFound</span>(): <span class="type">self</span></p>
+        </div>
+        <div class="p-3 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="type">static</span> <span class="name">noTemplateFound</span>(): <span class="type">self</span></p>
+        </div>
+        <div class="p-3 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="type">static</span> <span class="name">failedToParse</span>(): <span class="type">self</span></p>
+        </div>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">FieldNotFoundException</h2>
+    <p class="text-gray-700 mb-3">Thrown when a field path or repeatable container cannot be found.</p>
+    <div class="space-y-2">
+        <div class="p-3 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="type">static</span> <span class="name">atPath</span>(<span class="type">string</span> <span class="param">$fieldPath</span>): <span class="type">self</span></p>
+        </div>
+        <div class="p-3 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="type">static</span> <span class="name">containerNotFound</span>(<span class="type">string</span> <span class="param">$sectionName</span>, <span class="type">string</span> <span class="param">$containerName</span>): <span class="type">self</span></p>
+        </div>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Usage Example</h2>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+use Xfa\Pdf\Exceptions\InvalidPdfException;
+use Xfa\Pdf\Exceptions\NoXfaDataException;
+use Xfa\Pdf\Exceptions\FieldNotFoundException;
+
+try {
+    XfaPdf::setFile('/path/to/file.pdf');
+    $value = XfaPdf::readField('Section_3', 'missingField');
+} catch (InvalidPdfException $e) {
+    // File not found, unreadable, or invalid format
+    logger()->error($e->getMessage());
+} catch (NoXfaDataException $e) {
+    // PDF has no XFA datasets or template
+    logger()->error($e->getMessage());
+} catch (FieldNotFoundException $e) {
+    // Field path doesn't exist in datasets
+    logger()->error($e->getMessage());
+}</code></pre>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="repeatables.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Repeatable Items</span>
+        </a>
+        <a href="xfa-reference.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">XFA Reference &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Start - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Quick Start</h1>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Load &amp; Read</h2>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load a PDF
+XfaPdf::setFile('/path/to/form.pdf');
+
+// List all sections
+$sections = XfaPdf::sections();
+// ['CommonSections', 'Section_3_AppraisalDetails', ...]
+
+// Read all fields in a section
+$data = XfaPdf::read('Section_3_AppraisalDetails');
+// ['appraisalYear' => '2024', 'appriseeName' => 'Dr Smith', ...]
+
+// Read a single field
+$year = XfaPdf::readField('Section_3_AppraisalDetails', 'appraisalYear');
+// '2024'</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Update &amp; Save</h2>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Update multiple fields at once
+XfaPdf::update('Section_3_AppraisalDetails', [
+    'appraisalYear' => '2025',
+    'appriseeName'  => 'Dr Jane Smith',
+    'contactEmail'  => 'jane@example.com',
+]);
+
+// Save changes (incremental update, preserves original PDF)
+XfaPdf::save();
+
+// Or save to a new file
+XfaPdf::save('/path/to/output.pdf');</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Fluent Section API</h2>
+    <p class="text-gray-700 mb-3">Use named section accessors for cleaner code:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read via section accessor
+$details = XfaPdf::personalDetails()->read();
+$year = XfaPdf::personalDetails()->readField('appraisalYear');
+
+// Fluent updates
+XfaPdf::personalDetails()
+    ->update([
+        'appraisalYear' => '2025',
+        'appriseeName'  => 'Dr Smith',
+    ]);
+
+XfaPdf::cpd()
+    ->updateField('commentaryOnActivities', 'Completed 50 hours of CPD');
+
+XfaPdf::save();</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Generate Preview</h2>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Generate an HTML preview of the form
+$html = XfaPdf::preview();
+
+// Return as a response in a controller
+return response($html);</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Get Raw Data</h2>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Get the raw XFA datasets XML
+$xml = XfaPdf::rawXml();
+
+// Convert entire form to a nested array
+$allData = XfaPdf::toArray();
+
+// Get field metadata (types, options, captions)
+$meta = XfaPdf::fieldMetadata();
+
+// Get repeatable subform definitions
+$repeatables = XfaPdf::repeatableSubforms();
+
+// Get navigation section labels
+$navLabels = XfaPdf::navigationSections();</code></pre>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="configuration.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Configuration</span>
+        </a>
+        <a href="facade-api.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Facade API &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 13: Probity and Health - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; Sections</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 13: Probity and Health</h1>
+    <p class="text-gray-600 mb-8">This section captures the doctor's probity and health declarations. The doctor confirms they have no outstanding probity or health issues, or declares any concerns. It includes checkbox confirmations and a conditional text area that appears when the doctor has something to declare.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_13_Probity</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::probity()</code><br>
+        <strong>Navigation label:</strong> Probity and health statements
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD OVERVIEW -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>probityChk</code></td><td>Checkbox</td><td>Probity confirmation checkbox (value "0" or "1")</td></tr>
+                <tr><td><code>anythingToDeclare</code></td><td>Radio (nothing/something)</td><td>Anything to declare? (CONDITIONAL TRIGGER)</td></tr>
+                <tr class="border-t-2 border-yellow-200" style="background: #fffbeb;">
+                    <td><code>suspendedOrRestricted</code></td><td>Textarea</td><td>Declaration details if suspended/restricted (conditional)</td>
+                </tr>
+                <tr class="border-t-2 border-gray-300"><td><code>healthChk</code></td><td>Checkbox</td><td>Health confirmation checkbox (value "0" or "1")</td></tr>
+                <tr><td><code>commentsToAppraiser</code></td><td>Textarea</td><td>Additional comments to appraiser</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- CONDITIONAL NOTE -->
+    <!-- ======================================== -->
+    <div class="info-box yellow mb-8">
+        <strong>Conditional fields:</strong> The highlighted field above (<code>suspendedOrRestricted</code>) is only visible in the XFA form when <code>anythingToDeclare</code> is set to <strong>"something"</strong>. When set to "nothing", the declaration text area is hidden. In our package, you can always read and write the field regardless of the radio value &mdash; the conditional visibility only applies within Adobe Reader.
+    </div>
+
+    <p class="text-sm text-gray-500 mb-8">This section has <strong>no repeatable items</strong>. All fields are standalone.</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Probity and Health
+$data = XfaPdf::read('Section_13_Probity');
+
+// Or using the fluent accessor
+$data = XfaPdf::probity()->read();
+
+// $data looks like:
+// [
+//     'probityChk' => '1',
+//     'anythingToDeclare' => 'nothing',
+//     'suspendedOrRestricted' => '',
+//     'healthChk' => '1',
+//     'commentsToAppraiser' => '',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$probityConfirmed = XfaPdf::probity()->readField('probityChk');
+// '1' (checked) or '0' (unchecked)
+
+$declaration = XfaPdf::probity()->readField('anythingToDeclare');
+// 'nothing' or 'something'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- CHECKBOX FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Checkbox Fields</h2>
+    <p class="text-gray-700 mb-4">The two checkbox fields use <code>"1"</code> for checked and <code>"0"</code> for unchecked. These are confirmation checkboxes where the doctor acknowledges they have read and understood the probity and health statements.</p>
+
+    <!-- probityChk -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Probity confirmation</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>probityChk</code></p>
+    <p class="text-gray-700 mb-3">The doctor confirms they understand and comply with the probity requirements set out by the GMC. Set to <code>"1"</code> for checked or <code>"0"</code> for unchecked.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Check the probity confirmation
+XfaPdf::probity()->updateField('probityChk', '1');
+
+// Uncheck the probity confirmation
+XfaPdf::probity()->updateField('probityChk', '0');</code></pre>
+    </div>
+
+    <!-- healthChk -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Health confirmation</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>healthChk</code></p>
+    <p class="text-gray-700 mb-3">The doctor confirms they understand and comply with the health requirements. They acknowledge they have no health conditions that could impair their fitness to practise, or that any conditions are being appropriately managed.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Check the health confirmation
+XfaPdf::probity()->updateField('healthChk', '1');
+
+// Uncheck the health confirmation
+XfaPdf::probity()->updateField('healthChk', '0');</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-6">
+        <strong>Checkbox values:</strong> Always use the string <code>"1"</code> for checked and <code>"0"</code> for unchecked. Do not use boolean <code>true</code>/<code>false</code> or integer values &mdash; XFA datasets store all values as text nodes in the XML.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- RADIO / CONDITIONAL FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Radio / Conditional Fields</h2>
+    <p class="text-gray-700 mb-4">The <code>anythingToDeclare</code> field is a radio button group that controls the visibility of the <code>suspendedOrRestricted</code> text area. The radio accepts two values: <code>"nothing"</code> and <code>"something"</code>.</p>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Anything to declare?</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>anythingToDeclare</code></p>
+    <p class="text-gray-700 mb-3">This radio group asks whether the doctor has any probity concerns to declare. Set it to <code>"nothing"</code> or <code>"something"</code>.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// No concerns to declare
+XfaPdf::probity()->updateField(
+    'anythingToDeclare',
+    'nothing'
+);
+
+// Has something to declare
+XfaPdf::probity()->updateField(
+    'anythingToDeclare',
+    'something'
+);</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-6">
+        <strong>Important:</strong> The radio values are <code>"nothing"</code> and <code>"something"</code> (not "yes"/"no"). Setting <code>anythingToDeclare</code> to <code>"something"</code> in the datasets XML does <em>not</em> automatically make the conditional field visible in the saved PDF &mdash; XFA visibility is controlled by JavaScript scripts within the template. However, when Adobe Reader opens the PDF and processes the XFA layer, the radio value will trigger the script and the <code>suspendedOrRestricted</code> field will appear with whatever data you have written into it. Always populate the conditional field when setting the radio to "something".
+    </div>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Setting the radio and conditional field together</h3>
+    <p class="text-gray-700 mb-3">When the doctor has something to declare, set the radio and the declaration text in a single call:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// When there IS something to declare, set the radio + declaration text
+XfaPdf::probity()->update([
+    'anythingToDeclare'      => 'something',
+    'suspendedOrRestricted'  => 'I was subject to a conditions of practice '
+        . 'undertaking by the GMC from January to June 2024, relating to '
+        . 'record-keeping standards. The undertaking has since been lifted '
+        . 'and all conditions have been satisfactorily met.',
+]);
+
+// When there is NOTHING to declare, just set the radio
+XfaPdf::probity()->update([
+    'anythingToDeclare' => 'nothing',
+]);</code></pre>
+    </div>
+
+    <!-- suspendedOrRestricted -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Declaration details</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>suspendedOrRestricted</code></p>
+    <p class="text-gray-700 mb-3">This text area is conditionally visible when <code>anythingToDeclare</code> is set to "something". The doctor provides details about any suspension, restriction, or other probity concern. This is a multiline text field.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::probity()->updateField(
+    'suspendedOrRestricted',
+    'I was subject to a conditions of practice undertaking by the GMC '
+    . 'from January to June 2024, relating to record-keeping standards. '
+    . 'The undertaking has since been lifted and all conditions have been '
+    . 'satisfactorily met. Full details were provided to my Responsible '
+    . 'Officer at the time.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+
+    <!-- commentsToAppraiser -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Comments to appraiser</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>commentsToAppraiser</code></p>
+    <p class="text-gray-700 mb-3">A free-text area where the doctor can provide any additional comments to their appraiser regarding probity or health matters. This field is always visible regardless of the radio selection.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::probity()->updateField(
+    'commentsToAppraiser',
+    'I have no probity or health concerns to raise this year. '
+    . 'I continue to maintain appropriate professional boundaries '
+    . 'and comply with GMC guidance on Good Medical Practice. '
+    . 'I had my annual occupational health review in March 2024 '
+    . 'with no issues identified.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Probity and Health section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillProbity(Request $request)
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Set the probity confirmation checkbox
+        // -----------------------------------------------
+        XfaPdf::probity()->updateField('probityChk', '1');
+
+        // -----------------------------------------------
+        // 2. Check if there is anything to declare and
+        //    fill conditional fields accordingly
+        // -----------------------------------------------
+        $hasSomethingToDeclare = $request->input('has_declaration', false);
+
+        if ($hasSomethingToDeclare) {
+            // Doctor has something to declare: set radio
+            // to "something" and populate the details field
+            XfaPdf::probity()->update([
+                'anythingToDeclare'     => 'something',
+                'suspendedOrRestricted' => $request->input(
+                    'declaration_details',
+                    ''
+                ),
+            ]);
+        } else {
+            // Nothing to declare: just set the radio
+            XfaPdf::probity()->updateField(
+                'anythingToDeclare',
+                'nothing'
+            );
+        }
+
+        // -----------------------------------------------
+        // 3. Set the health confirmation checkbox
+        // -----------------------------------------------
+        XfaPdf::probity()->updateField('healthChk', '1');
+
+        // -----------------------------------------------
+        // 4. Add any comments to the appraiser
+        // -----------------------------------------------
+        $comments = $request->input('comments_to_appraiser', '');
+        if ($comments) {
+            XfaPdf::probity()->updateField(
+                'commentsToAppraiser',
+                $comments
+            );
+        }
+
+        // -----------------------------------------------
+        // 5. Save the PDF
+        // -----------------------------------------------
+        XfaPdf::save();
+
+        return redirect()->back()->with(
+            'success',
+            'Probity and Health saved.'
+        );
+    }
+
+    /**
+     * Read and display existing Probity and Health data.
+     */
+    public function showProbity()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        $data = XfaPdf::probity()->read();
+
+        // Check if conditional field should be shown
+        $hasDeclaration = ($data['anythingToDeclare'] ?? '') === 'something';
+
+        return view('appraisal.probity', [
+            'probityConfirmed'      => ($data['probityChk'] ?? '0') === '1',
+            'hasDeclaration'        => $hasDeclaration,
+            'suspendedOrRestricted' => $data['suspendedOrRestricted'] ?? '',
+            'healthConfirmed'       => ($data['healthChk'] ?? '0') === '1',
+            'commentsToAppraiser'   => $data['commentsToAppraiser'] ?? '',
+        ]);
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::probity()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::probity()->readField('probityChk')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::probity()->updateField('probityChk', '1')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::probity()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Check probity checkbox</td>
+                    <td><code>XfaPdf::probity()->updateField('probityChk', '1')</code></td>
+                </tr>
+                <tr>
+                    <td>Check health checkbox</td>
+                    <td><code>XfaPdf::probity()->updateField('healthChk', '1')</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio to "nothing"</td>
+                    <td><code>XfaPdf::probity()->updateField('anythingToDeclare', 'nothing')</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio to "something"</td>
+                    <td><code>XfaPdf::probity()->updateField('anythingToDeclare', 'something')</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio + declaration together</td>
+                    <td><code>XfaPdf::probity()->update(['anythingToDeclare' => 'something', 'suspendedOrRestricted' => '...'])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- PAGE NAVIGATION -->
+    <!-- ======================================== -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="achievements-challenges.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 12: Achievements &amp; Challenges</span>
+        </a>
+        <a href="additional-info.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 14: Additional Info &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

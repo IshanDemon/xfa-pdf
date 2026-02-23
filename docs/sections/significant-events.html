@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 9: Significant Events - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; <a href="../index.html" class="hover:text-blue-600">Sections</a> &rarr; Section 9</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 9: Significant Events</h1>
+    <p class="text-gray-600 mb-8">This section records significant events the doctor has been involved in, such as serious incidents, near misses, or clinical errors. The doctor declares whether they have been involved in any significant events and provides details if so.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_9_SignificantEvents</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::significantEvents()</code>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>haveBeenInvolved</code></td><td>Radio (not/have)</td><td>Whether the doctor has been involved in significant events (conditional trigger)</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>significantAttachments</code> &gt; <code>attach</code></td><td>Repeatable rows</td><td>Individual significant event entries (shown when "have")</td></tr>
+                <tr><td>&nbsp;&nbsp;<code>role</code></td><td>Select</td><td>Doctor's role in the event</td></tr>
+                <tr><td>&nbsp;&nbsp;<code>description</code></td><td>Textarea</td><td>Description of the significant event</td></tr>
+                <tr><td>&nbsp;&nbsp;<code>outcome</code></td><td>Textarea</td><td>Outcome and actions taken</td></tr>
+                <tr><td>&nbsp;&nbsp;<code>supportLocation</code></td><td>Select</td><td>Where the supporting evidence is located</td></tr>
+                <tr><td>&nbsp;&nbsp;<code>firstEntry</code></td><td>Text</td><td>Date of first entry</td></tr>
+                <tr><td>&nbsp;&nbsp;<code>amendData</code></td><td>Text</td><td>Date of last amendment</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>commentary</code></td><td>Textarea</td><td>Overall commentary on significant events (shown when "have")</td></tr>
+                <tr><td><code>appraiserComments</code></td><td>Textarea</td><td>Appraiser's comments (mirrors to Section 19)</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="info-box yellow mb-8">
+        <strong>Conditional fields:</strong> The <code>haveBeenInvolved</code> radio uses the values <code>"not"</code> and <code>"have"</code> &mdash; not "yes"/"no". When set to <code>"have"</code>, the repeatable event table (<code>attach</code>) and the <code>commentary</code> field become visible. When set to <code>"not"</code>, both are hidden.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Significant Events
+$data = XfaPdf::read('Section_9_SignificantEvents');
+
+// Or using the fluent accessor
+$data = XfaPdf::significantEvents()->read();
+
+// $data looks like:
+// [
+//     'haveBeenInvolved' => 'have',
+//     'significantAttachments' => [
+//         'attach' => [
+//             [
+//                 'role' => 'Lead clinician',
+//                 'description' => 'Delayed diagnosis of sepsis...',
+//                 'outcome' => 'Root cause analysis completed...',
+//                 'supportLocation' => 'Attached',
+//                 'firstEntry' => '2024-03-15',
+//                 'amendData' => '2024-06-20',
+//             ],
+//         ],
+//     ],
+//     'commentary' => 'I was involved in one significant event...',
+//     'appraiserComments' => '',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$involved = XfaPdf::significantEvents()->readField('haveBeenInvolved');
+// 'have' or 'not'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- RADIO / CONDITIONAL FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Radio / Conditional Fields</h2>
+    <p class="text-gray-700 mb-4">The <code>haveBeenInvolved</code> field is a radio group that controls whether the event table and commentary are shown. It accepts two values:</p>
+
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Value</th><th>Meaning</th><th>Effect</th></tr></thead>
+            <tbody>
+                <tr><td><code>"not"</code></td><td>Not been involved in any significant events</td><td>Hides the event table and commentary field</td></tr>
+                <tr><td><code>"have"</code></td><td>Have been involved in significant events</td><td>Shows the event table and commentary field</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Setting the radio value</h3>
+    <p class="text-gray-700 mb-3">When the doctor has been involved in significant events:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Doctor has been involved in significant events
+XfaPdf::significantEvents()->updateField('haveBeenInvolved', 'have');</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">When the doctor has not been involved:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Doctor has NOT been involved in significant events
+XfaPdf::significantEvents()->updateField('haveBeenInvolved', 'not');</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-6">
+        <strong>Important:</strong> If you set <code>haveBeenInvolved</code> to <code>"have"</code>, you should also populate at least one event row in the <code>attach</code> repeatable table. If set to <code>"not"</code>, the event rows and commentary will be hidden in the rendered XFA form regardless of their content.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- SIGNIFICANT EVENTS (REPEATABLE) -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Significant Events (Repeatable Table)</h2>
+    <p class="text-gray-700 mb-4">Each row in the significant events table represents one event. Rows live inside <code>significantAttachments</code> and are named <code>attach</code>. Each row contains six fields:</p>
+
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What to put here</th></tr></thead>
+            <tbody>
+                <tr><td><code>role</code></td><td>Select</td><td>The doctor's role in the event (e.g. "Lead clinician", "Team member")</td></tr>
+                <tr><td><code>description</code></td><td>Textarea</td><td>What happened, including the nature and severity of the event</td></tr>
+                <tr><td><code>outcome</code></td><td>Textarea</td><td>The outcome, investigation findings, and actions taken</td></tr>
+                <tr><td><code>supportLocation</code></td><td>Select</td><td>Where the supporting evidence is filed (e.g. "Attached", "Held locally")</td></tr>
+                <tr><td><code>firstEntry</code></td><td>Text</td><td>Date the event was first recorded</td></tr>
+                <tr><td><code>amendData</code></td><td>Text</td><td>Date of the most recent amendment</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ADD A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding a new event row</h3>
+    <p class="text-gray-700 mb-3">To add a single significant event:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Add a significant event row
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf,
+    'Section_9_SignificantEvents',   // section name
+    'significantAttachments',         // container name
+    [
+        'role'            => 'Lead clinician',
+        'description'     => 'Delayed diagnosis of sepsis in a 72-year-old patient presenting '
+                           . 'with non-specific symptoms. Initial assessment did not identify '
+                           . 'early warning signs. Patient deteriorated over 6 hours before '
+                           . 'escalation to acute medical team.',
+        'outcome'         => 'Root cause analysis completed. Patient recovered fully after '
+                           . 'ICU admission. New sepsis screening protocol implemented in '
+                           . 'practice. All clinical staff completed sepsis awareness training.',
+        'supportLocation' => 'Attached',
+        'firstEntry'      => '2024-03-15',
+        'amendData'       => '2024-06-20',
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ADD MULTIPLE ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding multiple events</h3>
+    <p class="text-gray-700 mb-3">If you need to add several events, call <code>addRepeatableItem()</code> for each one:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Event 1: Delayed diagnosis
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_9_SignificantEvents', 'significantAttachments', [
+    'role'            => 'Lead clinician',
+    'description'     => 'Delayed diagnosis of sepsis in a 72-year-old patient. '
+                       . 'Initial assessment missed early warning signs.',
+    'outcome'         => 'Root cause analysis completed. New sepsis screening '
+                       . 'protocol implemented. All staff completed training.',
+    'supportLocation' => 'Attached',
+    'firstEntry'      => '2024-03-15',
+    'amendData'       => '2024-06-20',
+]);
+
+// Event 2: Prescribing error
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_9_SignificantEvents', 'significantAttachments', [
+    'role'            => 'Prescriber',
+    'description'     => 'Prescribing error involving methotrexate. Weekly dose '
+                       . 'was incorrectly entered as daily on repeat prescription. '
+                       . 'Error caught by community pharmacist before dispensing.',
+    'outcome'         => 'Near miss reported via Datix. Prescription corrected '
+                       . 'immediately. Practice prescribing protocol updated to '
+                       . 'include mandatory high-risk drug review at each reauthorisation.',
+    'supportLocation' => 'Held locally',
+    'firstEntry'      => '2024-07-02',
+    'amendData'       => '2024-07-10',
+]);
+
+// Event 3: Safeguarding concern
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_9_SignificantEvents', 'significantAttachments', [
+    'role'            => 'Team member',
+    'description'     => 'Safeguarding referral for a vulnerable adult following '
+                       . 'home visit. Patient showed signs of neglect and possible '
+                       . 'financial exploitation by a family member.',
+    'outcome'         => 'Multi-agency safeguarding meeting held. Social services '
+                       . 'involved and care plan established. Regular review visits '
+                       . 'scheduled. Case discussed at practice MDT.',
+    'supportLocation' => 'Attached',
+    'firstEntry'      => '2024-09-18',
+    'amendData'       => '2024-11-05',
+]);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- REPLACE ALL ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Replacing all event rows</h3>
+    <p class="text-gray-700 mb-3">If you want to clear existing rows and set new ones from scratch, use <code>setRepeatableItems()</code>:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf,
+    'Section_9_SignificantEvents',   // section
+    'significantAttachments',         // container
+    'attach',                         // element name
+    [
+        [
+            'role'            => 'Lead clinician',
+            'description'     => 'Delayed diagnosis of sepsis in elderly patient.',
+            'outcome'         => 'Root cause analysis completed. Sepsis protocol updated.',
+            'supportLocation' => 'Attached',
+            'firstEntry'      => '2024-03-15',
+            'amendData'       => '2024-06-20',
+        ],
+        [
+            'role'            => 'Prescriber',
+            'description'     => 'Methotrexate prescribing error caught by pharmacist.',
+            'outcome'         => 'Near miss reported. Prescribing protocol updated.',
+            'supportLocation' => 'Held locally',
+            'firstEntry'      => '2024-07-02',
+            'amendData'       => '2024-07-10',
+        ],
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- READ ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Reading existing event rows</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$rows = $manager->getRepeatableItems(
+    $xfaPdf,
+    'Section_9_SignificantEvents',
+    'significantAttachments'
+);
+
+foreach ($rows as $index => $row) {
+    echo "Event {$index}: {$row['role']} - {$row['description']}\n";
+}
+// Event 0: Lead clinician - Delayed diagnosis of sepsis in elderly patient.
+// Event 1: Prescriber - Methotrexate prescribing error caught by pharmacist.</code></pre>
+    </div>
+
+    <!-- REMOVE A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Removing an event row</h3>
+    <p class="text-gray-700 mb-3">Remove an event by its index (0-based):</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Remove the second event (index 1)
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf,
+    'Section_9_SignificantEvents',
+    'significantAttachments',
+    1
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+    <p class="text-gray-700 mb-4">Below the event table, there are two free-text fields. The <code>commentary</code> field is conditionally shown (only visible when <code>haveBeenInvolved</code> is <code>"have"</code>), while <code>appraiserComments</code> is always available.</p>
+
+    <!-- commentary -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Commentary on significant events</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>commentary</code></p>
+    <p class="text-gray-700 mb-3">This is where the doctor provides an overall reflection on their significant events, including what they have learned and how their practice has changed as a result. Only shown when <code>haveBeenInvolved</code> is <code>"have"</code>.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::significantEvents()->updateField(
+    'commentary',
+    'I was involved in two significant events during this appraisal period. '
+    . 'The delayed sepsis diagnosis prompted a thorough review of our acute '
+    . 'assessment processes and led to the implementation of a standardised '
+    . 'sepsis screening tool. The prescribing near miss reinforced the '
+    . 'importance of robust repeat prescribing systems for high-risk drugs. '
+    . 'Both events were discussed openly at practice meetings and the learning '
+    . 'has been shared across the primary care network.'
+);</code></pre>
+    </div>
+
+    <!-- appraiserComments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser's comments</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserComments</code></p>
+    <p class="text-gray-700 mb-3">Written by the appraiser, summarising their view of the doctor's significant events and reflective practice. This field mirrors to Section 19 (Appraisal Summary).</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::significantEvents()->updateField(
+    'appraiserComments',
+    'Dr Smith has demonstrated excellent reflective practice following two '
+    . 'significant events. The sepsis case has led to meaningful systemic '
+    . 'change within the practice, and the prescribing near miss was handled '
+    . 'proactively with appropriate protocol changes. Both events show a '
+    . 'commitment to patient safety and continuous improvement.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Significant Events section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillSignificantEvents()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        $manager = app('xfa-pdf');
+        $xfaPdf = $manager->load($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Set the conditional radio
+        // -----------------------------------------------
+        XfaPdf::setFile($pdfPath);
+        XfaPdf::significantEvents()->updateField('haveBeenInvolved', 'have');
+
+        // -----------------------------------------------
+        // 2. Add significant event rows
+        // -----------------------------------------------
+        $xfaPdf = $manager->setRepeatableItems(
+            $xfaPdf,
+            'Section_9_SignificantEvents',
+            'significantAttachments',
+            'attach',
+            [
+                [
+                    'role'            => 'Lead clinician',
+                    'description'     => 'Delayed diagnosis of sepsis in a '
+                                       . '72-year-old patient presenting with '
+                                       . 'non-specific symptoms. Patient '
+                                       . 'deteriorated over 6 hours before '
+                                       . 'escalation to acute medical team.',
+                    'outcome'         => 'Root cause analysis completed. Patient '
+                                       . 'recovered fully after ICU admission. '
+                                       . 'New sepsis screening protocol '
+                                       . 'implemented. All clinical staff '
+                                       . 'completed sepsis awareness training.',
+                    'supportLocation' => 'Attached',
+                    'firstEntry'      => '2024-03-15',
+                    'amendData'       => '2024-06-20',
+                ],
+                [
+                    'role'            => 'Prescriber',
+                    'description'     => 'Prescribing error involving methotrexate. '
+                                       . 'Weekly dose incorrectly entered as daily '
+                                       . 'on repeat prescription. Caught by '
+                                       . 'community pharmacist before dispensing.',
+                    'outcome'         => 'Near miss reported via Datix. Prescription '
+                                       . 'corrected immediately. High-risk drug '
+                                       . 'review now mandatory at each repeat '
+                                       . 'reauthorisation.',
+                    'supportLocation' => 'Held locally',
+                    'firstEntry'      => '2024-07-02',
+                    'amendData'       => '2024-07-10',
+                ],
+            ]
+        );
+
+        // -----------------------------------------------
+        // 3. Fill text fields
+        // -----------------------------------------------
+        XfaPdf::significantEvents()->update([
+            'commentary' =>
+                'I was involved in two significant events this year. '
+                . 'The delayed sepsis diagnosis prompted a thorough review '
+                . 'of our acute assessment processes and led to a new '
+                . 'standardised screening tool. The prescribing near miss '
+                . 'reinforced the importance of robust repeat prescribing '
+                . 'systems. Both events were discussed at practice meetings '
+                . 'and learning shared across the PCN.',
+
+            'appraiserComments' =>
+                'Dr Smith has demonstrated excellent reflective practice. '
+                . 'The sepsis case led to meaningful systemic change, and '
+                . 'the prescribing near miss was handled proactively. Both '
+                . 'events show a commitment to patient safety and continuous '
+                . 'improvement.',
+        ]);
+
+        // -----------------------------------------------
+        // 4. Save the PDF
+        // -----------------------------------------------
+        $manager->saveXfaPdf($xfaPdf);
+        // Or: XfaPdf::save();
+
+        return redirect()->back()->with('success', 'Significant Events saved.');
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::significantEvents()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::significantEvents()->readField('haveBeenInvolved')</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio to "have"</td>
+                    <td><code>XfaPdf::significantEvents()->updateField('haveBeenInvolved', 'have')</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio to "not"</td>
+                    <td><code>XfaPdf::significantEvents()->updateField('haveBeenInvolved', 'not')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::significantEvents()->updateField('commentary', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::significantEvents()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Get event rows</td>
+                    <td><code>$manager->getRepeatableItems($xfaPdf, 'Section_9_SignificantEvents', 'significantAttachments')</code></td>
+                </tr>
+                <tr>
+                    <td>Add an event row</td>
+                    <td><code>$manager->addRepeatableItem($xfaPdf, 'Section_9_SignificantEvents', 'significantAttachments', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Remove an event row</td>
+                    <td><code>$manager->removeRepeatableItem($xfaPdf, 'Section_9_SignificantEvents', 'significantAttachments', $index)</code></td>
+                </tr>
+                <tr>
+                    <td>Replace all rows</td>
+                    <td><code>$manager->setRepeatableItems($xfaPdf, 'Section_9_SignificantEvents', 'significantAttachments', 'attach', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="quality-improvement.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 8: Quality Improvement</span>
+        </a>
+        <a href="colleague-patient-feedback.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 10: Colleague and Patient Feedback &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

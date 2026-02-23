@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 15: Supporting Information - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; <a href="../index.html" class="hover:text-blue-600">Sections</a> &rarr; Section 15</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 15: Supporting Information</h1>
+    <p class="text-gray-600 mb-8">A minimal section that tracks the total size of supporting information attachments. This is one of the simplest sections in the form &mdash; it contains only a single numeric field with no repeatable items or conditional logic.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_15_SupportingInformation</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::supportingInformation()</code><br>
+        <strong>Navigation label:</strong> Supporting information
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD OVERVIEW -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>attachmentTotalSize</code></td><td>Number</td><td>Total size of all supporting information attachments</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-sm text-gray-500 mb-8">This section has <strong>no repeatable items</strong> and <strong>no conditional fields</strong>. It contains only a single standalone numeric field.</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before reading or writing this field, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Supporting Information
+$data = XfaPdf::read('Section_15_SupportingInformation');
+
+// Or using the fluent accessor
+$data = XfaPdf::supportingInformation()->read();
+
+// $data looks like:
+// [
+//     'attachmentTotalSize' => '2048',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read the single field directly:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$totalSize = XfaPdf::supportingInformation()->readField('attachmentTotalSize');
+// '2048'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- UPDATING THE FIELD -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Updating the Field</h2>
+    <p class="text-gray-700 mb-4">The <code>attachmentTotalSize</code> field is a numeric value representing the total size of all supporting information attachments. In the XFA form this uses a <code>numericEdit</code> control. Pass the value as a string (all XFA field values are stored as strings in the datasets XML).</p>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Attachment total size</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>attachmentTotalSize</code></p>
+    <p class="text-gray-700 mb-3">Set the total size of all supporting information attachments. The value is typically calculated by the XFA form itself as attachments are added, but you can also set it programmatically.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Set the total attachment size
+XfaPdf::supportingInformation()->updateField(
+    'attachmentTotalSize',
+    '4096'
+);
+
+// Save the PDF
+XfaPdf::save();</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">You can also use the <code>update()</code> method with an array, though with only one field the difference is minimal:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::supportingInformation()->update([
+    'attachmentTotalSize' => '4096',
+]);
+
+XfaPdf::save();</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-6">
+        <strong>Note:</strong> Although this is a numeric field, always pass the value as a <strong>string</strong>. All XFA dataset values are stored as text nodes in the XML. The XFA renderer in Adobe Reader handles numeric formatting and validation based on the template definition.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example reading and updating the Supporting Information section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillSupportingInformation(Request $request)
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Calculate total attachment size from uploaded
+        //    files or stored records
+        // -----------------------------------------------
+        $totalBytes = $request->input('total_attachment_size', 0);
+
+        // -----------------------------------------------
+        // 2. Update the field
+        // -----------------------------------------------
+        XfaPdf::supportingInformation()->updateField(
+            'attachmentTotalSize',
+            (string) $totalBytes
+        );
+
+        // -----------------------------------------------
+        // 3. Save the PDF
+        // -----------------------------------------------
+        XfaPdf::save();
+
+        return redirect()->back()->with(
+            'success',
+            'Supporting Information saved.'
+        );
+    }
+
+    /**
+     * Read and display existing Supporting Information data.
+     */
+    public function showSupportingInformation()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        $data = XfaPdf::supportingInformation()->read();
+
+        return view('appraisal.supporting-information', [
+            'attachmentTotalSize' => $data['attachmentTotalSize'] ?? '0',
+        ]);
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::supportingInformation()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read the field</td>
+                    <td><code>XfaPdf::supportingInformation()->readField('attachmentTotalSize')</code></td>
+                </tr>
+                <tr>
+                    <td>Update the field</td>
+                    <td><code>XfaPdf::supportingInformation()->updateField('attachmentTotalSize', '4096')</code></td>
+                </tr>
+                <tr>
+                    <td>Update via array</td>
+                    <td><code>XfaPdf::supportingInformation()->update(['attachmentTotalSize' => '4096'])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- PAGE NAVIGATION -->
+    <!-- ======================================== -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="additional-info.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 14: Additional Info</span>
+        </a>
+        <a href="pre-appraisal-prep.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 16: Pre-Appraisal Prep &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

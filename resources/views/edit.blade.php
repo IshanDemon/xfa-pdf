@@ -51,6 +51,7 @@
   .btn-remove-item { background: none; color: #dc3545; border: 1px solid #dc3545; border-radius: 4px; padding: 2px 10px; font-size: 11px; cursor: pointer; margin-left: 10px; transition: all 0.15s; vertical-align: middle; }
   .btn-remove-item:hover { background: #dc3545; color: #fff; }
   .save-bar { position: sticky; bottom: 0; background: #fff; padding: 16px 30px; border-top: 2px solid #003087; display: flex; justify-content: flex-end; gap: 10px; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 10; }
+  [data-cond-target].cond-hidden { display: none; }
 </style>
 @endsection
 
@@ -92,6 +93,7 @@
               'parentPath' => $sectionKey,
               'fieldMeta' => $fieldMeta,
               'repeatables' => $repeatables,
+              'conditionalRules' => $conditionalRules ?? [],
             ])
           </div>
         </div>
@@ -99,7 +101,8 @@
 
       <div class="save-bar">
         <a href="{{ route('xfa-pdf.show', $document->id) }}" class="btn btn-secondary">Cancel</a>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <button type="submit" class="btn btn-primary" style="background:#28a745;border-color:#28a745;" onclick="this.form.action='{{ route('xfa-pdf.download', $document->id) }}';this.form.querySelector('input[name=_method]').value='POST';" >Generate &amp; Download PDF</button>
+        <button type="submit" class="btn btn-primary" onclick="this.form.action='{{ route('xfa-pdf.update', $document->id) }}';this.form.querySelector('input[name=_method]').value='PUT';">Save Changes</button>
       </div>
     </div>
   </div>
@@ -167,5 +170,50 @@ function updateRepeatableGroup(group) {
   var badge = group.querySelector(':scope > .group-title > .list-count');
   if (badge) badge.textContent = items.length + ' items';
 }
+
+// Conditional field visibility
+var condRules = @json($conditionalRules ?? []);
+
+function applyConditionalVisibility(triggerKey, value) {
+  var rule = condRules[triggerKey];
+  if (!rule) return;
+  var targets = rule.targets || [];
+  var visibleKeys = rule.visibleWhen[value] || rule.visibleWhen['_default'] || [];
+
+  targets.forEach(function(targetKey) {
+    var els = document.querySelectorAll('[data-cond-target="' + targetKey + '"]');
+    els.forEach(function(el) {
+      if (visibleKeys.indexOf(targetKey) !== -1) {
+        el.classList.remove('cond-hidden');
+      } else {
+        el.classList.add('cond-hidden');
+      }
+    });
+  });
+}
+
+// Attach listeners to trigger elements
+document.querySelectorAll('[data-cond-trigger]').forEach(function(el) {
+  var triggerKey = el.getAttribute('data-cond-trigger');
+
+  if (el.tagName === 'SELECT') {
+    el.addEventListener('change', function() {
+      applyConditionalVisibility(triggerKey, this.value);
+    });
+    // Apply initial state
+    applyConditionalVisibility(triggerKey, el.value);
+  } else {
+    // Radio group container
+    var radios = el.querySelectorAll('input[type="radio"]');
+    radios.forEach(function(radio) {
+      radio.addEventListener('change', function() {
+        applyConditionalVisibility(triggerKey, this.value);
+      });
+    });
+    // Apply initial state from checked radio
+    var checked = el.querySelector('input[type="radio"]:checked');
+    applyConditionalVisibility(triggerKey, checked ? checked.value : '');
+  }
+});
 </script>
 @endsection

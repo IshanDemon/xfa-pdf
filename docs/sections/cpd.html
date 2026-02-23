@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 7: CPD - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; <a href="../index.html" class="hover:text-blue-600">Sections</a> &rarr; Section 7</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 7: Continuing Professional Development (CPD)</h1>
+    <p class="text-gray-600 mb-8">This section records the doctor's CPD activities, including whether they belong to a Royal College faculty, whether they hold a CPD certificate, and a detailed table of CPD activities with descriptions, outcomes, and credits.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_7_CPD</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::cpd()</code>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>memberOfFaculty</code></td><td>Radio (yes/no)</td><td>Member of a Royal College faculty? (conditional trigger)</td></tr>
+                <tr><td><code>annualCertificate</code></td><td>Radio (yes/no)</td><td>Has annual CPD certificate? (shown when memberOfFaculty = "yes")</td></tr>
+                <tr><td><code>annualCertAttachment</code></td><td>Nested</td><td>Attachment for certificate (<code>attachmentID</code>, <code>fileName</code>)</td></tr>
+                <tr><td><code>additionalCPDActivities</code></td><td>Radio (yes/no)</td><td>Has additional CPD record? (shown when memberOfFaculty = "yes")</td></tr>
+                <tr><td><code>additionalCPDAttachment</code></td><td>Nested</td><td>Attachment for additional CPD record (<code>attachmentID</code>, <code>fileName</code>)</td></tr>
+                <tr><td><code>CPDActivities</code></td><td>Radio (yes/no)</td><td>Has own CPD record? (shown when memberOfFaculty = "no")</td></tr>
+                <tr><td><code>CPDAttachment</code></td><td>Nested</td><td>Attachment for own CPD record (<code>attachmentID</code>, <code>fileName</code>)</td></tr>
+                <tr><td><code>commentaryOnActivities</code></td><td>Textarea</td><td>Commentary on how CPD supports scope of work</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>cpdList</code> &gt; <code>cpd</code></td><td>Repeatable</td><td>CPD activity rows (role, description, outcome, credits, supportLocation)</td></tr>
+                <tr><td><code>appraiserComments</code></td><td>Textarea</td><td>Appraiser comments (mirrors to Section 19)</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- CONDITIONAL NOTE -->
+    <!-- ======================================== -->
+    <div class="info-box yellow mb-8">
+        <strong>Conditional fields:</strong> The <code>memberOfFaculty</code> radio acts as a trigger. When set to <code>"yes"</code>, the fields <code>annualCertificate</code> and <code>additionalCPDActivities</code> become visible. When set to <code>"no"</code>, the field <code>CPDActivities</code> becomes visible instead. Your code should set the appropriate branch of fields based on the radio value.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in CPD
+$data = XfaPdf::read('Section_7_CPD');
+
+// Or using the fluent accessor
+$data = XfaPdf::cpd()->read();
+
+// $data looks like:
+// [
+//     'memberOfFaculty' => 'yes',
+//     'annualCertificate' => 'yes',
+//     'annualCertAttachment' => [
+//         'attachmentID' => 'att-001',
+//         'fileName' => 'RCGP_CPD_Certificate_2024.pdf',
+//     ],
+//     'additionalCPDActivities' => 'yes',
+//     'additionalCPDAttachment' => [
+//         'attachmentID' => 'att-002',
+//         'fileName' => 'Additional_CPD_Log.pdf',
+//     ],
+//     'CPDActivities' => '',
+//     'CPDAttachment' => ['attachmentID' => '', 'fileName' => ''],
+//     'commentaryOnActivities' => 'My CPD activities are closely aligned...',
+//     'cpdList' => [
+//         'cpd' => [
+//             [
+//                 'role' => 'GP',
+//                 'description' => 'RCGP Annual Conference 2024',
+//                 'outcome' => 'Updated knowledge on diabetes management...',
+//                 'credits' => '12',
+//                 'supportLocation' => 'Attached',
+//             ],
+//             [
+//                 'role' => 'GP Trainer',
+//                 'description' => 'Safeguarding Level 3 Training',
+//                 'outcome' => 'Completed mandatory safeguarding update...',
+//                 'credits' => '6',
+//                 'supportLocation' => 'Emailed to appraiser',
+//             ],
+//         ],
+//     ],
+//     'appraiserComments' => '',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$commentary = XfaPdf::cpd()->readField('commentaryOnActivities');
+// 'My CPD activities are closely aligned with my scope of work...'
+
+$isMember = XfaPdf::cpd()->readField('memberOfFaculty');
+// 'yes'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- CPD ACTIVITIES (REPEATABLE) -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">CPD Activities (Repeatable Table)</h2>
+    <p class="text-gray-700 mb-4">Each row in the CPD table represents one CPD activity. The repeatable element <code>cpd</code> lives inside the <code>cpdList</code> container. Each row has these fields:</p>
+
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Row Field</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>role</code></td><td>Select</td><td>The role this CPD relates to (e.g. "GP", "GP Trainer")</td></tr>
+                <tr><td><code>description</code></td><td>Textarea</td><td>Description of the CPD activity</td></tr>
+                <tr><td><code>outcome</code></td><td>Textarea</td><td>What was learned or changed as a result</td></tr>
+                <tr><td><code>credits</code></td><td>Number</td><td>CPD credits awarded</td></tr>
+                <tr><td><code>supportLocation</code></td><td>Select</td><td>"Attached", "Emailed to appraiser", "Provided separately", or "Not available"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ADD A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding a new CPD activity</h3>
+    <p class="text-gray-700 mb-3">To add a new row with all fields filled in:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Add a CPD activity row
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf,
+    'Section_7_CPD',        // section name
+    'cpdList',              // container name
+    [
+        'role'            => 'GP',
+        'description'     => 'RCGP Annual Conference 2024 - Attended three-day conference covering advances in primary care, diabetes management, and mental health.',
+        'outcome'         => 'Updated knowledge on NICE guidelines for Type 2 diabetes. Implemented new HbA1c monitoring protocol at practice.',
+        'credits'         => '12',
+        'supportLocation' => 'Attached',
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- REPLACE ALL ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Replacing all CPD activities</h3>
+    <p class="text-gray-700 mb-3">If you want to clear existing rows and set new ones from scratch, use <code>setRepeatableItems()</code>:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf,
+    'Section_7_CPD',        // section
+    'cpdList',              // container
+    'cpd',                  // element name
+    [
+        [
+            'role'            => 'GP',
+            'description'     => 'RCGP Annual Conference 2024 - Three-day conference on primary care advances.',
+            'outcome'         => 'Updated diabetes management protocols. Adopted new HbA1c monitoring approach.',
+            'credits'         => '12',
+            'supportLocation' => 'Attached',
+        ],
+        [
+            'role'            => 'GP Trainer',
+            'description'     => 'Safeguarding Level 3 Training - Full-day mandatory safeguarding course.',
+            'outcome'         => 'Refreshed knowledge on child protection referral pathways and documentation.',
+            'credits'         => '6',
+            'supportLocation' => 'Emailed to appraiser',
+        ],
+        [
+            'role'            => 'GP',
+            'description'     => 'BMJ Learning Module: Chronic Pain Management in Primary Care.',
+            'outcome'         => 'Improved understanding of non-pharmacological approaches. Started referring to local pain management programme.',
+            'credits'         => '4',
+            'supportLocation' => 'Attached',
+        ],
+        [
+            'role'            => 'Clinical Lead - PCN',
+            'description'     => 'NHS England Respiratory Webinar Series (6 sessions).',
+            'outcome'         => 'Applied updated asthma pathway across the PCN. Reduced emergency admissions by 15% in Q3.',
+            'credits'         => '6',
+            'supportLocation' => 'Provided separately',
+        ],
+        [
+            'role'            => 'GP',
+            'description'     => 'Practice-based significant event audit on missed sepsis diagnosis.',
+            'outcome'         => 'Developed practice-wide sepsis screening checklist now used in all urgent appointments.',
+            'credits'         => '3',
+            'supportLocation' => 'Attached',
+        ],
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- READ ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Reading existing CPD activities</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$rows = $manager->getRepeatableItems(
+    $xfaPdf,
+    'Section_7_CPD',
+    'cpdList'
+);
+
+foreach ($rows as $index => $row) {
+    echo "Activity {$index}: {$row['description']} ({$row['credits']} credits)\n";
+}
+// Activity 0: RCGP Annual Conference 2024 - Three-day conference... (12 credits)
+// Activity 1: Safeguarding Level 3 Training - Full-day mandatory... (6 credits)
+// Activity 2: BMJ Learning Module: Chronic Pain Management... (4 credits)
+
+// Calculate total credits
+$totalCredits = array_sum(array_column($rows, 'credits'));
+echo "Total CPD credits: {$totalCredits}\n";
+// Total CPD credits: 31</code></pre>
+    </div>
+
+    <!-- REMOVE A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Removing a CPD activity</h3>
+    <p class="text-gray-700 mb-3">Remove a row by its index (0-based):</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Remove the third activity (index 2)
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf,
+    'Section_7_CPD',
+    'cpdList',
+    2
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- RADIO / CONDITIONAL FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Radio / Conditional Fields</h2>
+    <p class="text-gray-700 mb-4">The <code>memberOfFaculty</code> radio controls which fields are visible in the XFA form. When you fill data programmatically, you should set the appropriate branch of fields based on the radio value.</p>
+
+    <!-- memberOfFaculty = yes -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">When the doctor IS a faculty member</h3>
+    <p class="text-gray-500 text-sm mb-1">Trigger: <code>memberOfFaculty</code> = <code>"yes"</code></p>
+    <p class="text-gray-700 mb-3">When the doctor is a member of a Royal College faculty, the form shows questions about their annual CPD certificate and any additional CPD activities.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::cpd()->update([
+    // Set the trigger radio
+    'memberOfFaculty' => 'yes',
+
+    // These fields appear when memberOfFaculty = "yes"
+    'annualCertificate' => 'yes',
+    'additionalCPDActivities' => 'yes',
+]);
+
+// If you need to set attachment metadata for the certificate
+XfaPdf::cpd()->update([
+    'annualCertAttachment/attachmentID' => 'cert-2024-001',
+    'annualCertAttachment/fileName' => 'RCGP_CPD_Certificate_2024.pdf',
+]);
+
+// And for the additional CPD record
+XfaPdf::cpd()->update([
+    'additionalCPDAttachment/attachmentID' => 'cpd-extra-001',
+    'additionalCPDAttachment/fileName' => 'Additional_CPD_Record_2024.pdf',
+]);</code></pre>
+    </div>
+
+    <!-- memberOfFaculty = no -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">When the doctor is NOT a faculty member</h3>
+    <p class="text-gray-500 text-sm mb-1">Trigger: <code>memberOfFaculty</code> = <code>"no"</code></p>
+    <p class="text-gray-700 mb-3">When the doctor is not a faculty member, the form shows a different question about whether they maintain their own CPD record.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::cpd()->update([
+    // Set the trigger radio
+    'memberOfFaculty' => 'no',
+
+    // This field appears when memberOfFaculty = "no"
+    'CPDActivities' => 'yes',
+]);
+
+// Attach the CPD record
+XfaPdf::cpd()->update([
+    'CPDAttachment/attachmentID' => 'cpd-own-001',
+    'CPDAttachment/fileName' => 'Personal_CPD_Log_2024.pdf',
+]);</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-6 mt-6">
+        <strong>Important:</strong> When reading data, both branches of conditional fields will be present in the returned array. Check the value of <code>memberOfFaculty</code> to determine which branch is relevant. The inactive branch will typically contain empty values.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+    <p class="text-gray-700 mb-4">Below the CPD table and radio questions, there are two free-text fields. These are standalone (not repeatable).</p>
+
+    <!-- commentaryOnActivities -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Commentary on CPD activities</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>commentaryOnActivities</code></p>
+    <p class="text-gray-700 mb-3">This is where the doctor explains how their CPD activities relate to their scope of work. The form label reads: <em>"Please provide a brief commentary on how these CPD activities have supported you in your various roles."</em></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::cpd()->updateField(
+    'commentaryOnActivities',
+    'My CPD activities this year have been closely aligned with my scope '
+    . 'of work. The RCGP conference and BMJ learning modules directly '
+    . 'support my clinical GP role, particularly in diabetes and chronic '
+    . 'pain management where I have seen measurable improvements in patient '
+    . 'outcomes. The safeguarding training is essential for my GP Trainer '
+    . 'role, ensuring I can properly supervise registrars. The respiratory '
+    . 'webinar series has been invaluable for my PCN Clinical Lead work, '
+    . 'leading to a 15% reduction in emergency respiratory admissions across '
+    . 'the network. The significant event audit has strengthened our whole '
+    . 'practice approach to sepsis identification.'
+);</code></pre>
+    </div>
+
+    <!-- appraiserComments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser's comments</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserComments</code></p>
+    <p class="text-gray-700 mb-3">Written by the appraiser, summarising their view of the doctor's CPD activities. This field mirrors to Section 19 (Appraisal Summary).</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::cpd()->updateField(
+    'appraiserComments',
+    'Dr Smith has undertaken a comprehensive and well-targeted CPD programme '
+    . 'this year totalling 31 credits. Activities are clearly mapped to their '
+    . 'scope of work across all three roles. The impact of the respiratory '
+    . 'webinar series on PCN emergency admissions is particularly noteworthy. '
+    . 'I would encourage continued focus on chronic disease management CPD '
+    . 'and further development of the sepsis screening protocol.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire CPD section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillCpd()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        $manager = app('xfa-pdf');
+        $xfaPdf = $manager->load($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Set radio / conditional fields
+        // -----------------------------------------------
+        XfaPdf::setFile($pdfPath);
+
+        XfaPdf::cpd()->update([
+            'memberOfFaculty' => 'yes',
+            'annualCertificate' => 'yes',
+            'additionalCPDActivities' => 'yes',
+        ]);
+
+        // Attachment metadata
+        XfaPdf::cpd()->update([
+            'annualCertAttachment/attachmentID' => 'cert-2024-001',
+            'annualCertAttachment/fileName' => 'RCGP_CPD_Certificate_2024.pdf',
+            'additionalCPDAttachment/attachmentID' => 'cpd-extra-001',
+            'additionalCPDAttachment/fileName' => 'Additional_CPD_Record_2024.pdf',
+        ]);
+
+        // -----------------------------------------------
+        // 2. Set CPD activity rows (repeatable)
+        // -----------------------------------------------
+        $xfaPdf = $manager->setRepeatableItems(
+            $xfaPdf,
+            'Section_7_CPD',
+            'cpdList',
+            'cpd',
+            [
+                [
+                    'role'            => 'GP',
+                    'description'     => 'RCGP Annual Conference 2024 - Three-day '
+                                       . 'conference covering primary care advances, '
+                                       . 'diabetes management, and mental health.',
+                    'outcome'         => 'Updated diabetes management protocols. '
+                                       . 'Implemented new HbA1c monitoring approach '
+                                       . 'at practice level.',
+                    'credits'         => '12',
+                    'supportLocation' => 'Attached',
+                ],
+                [
+                    'role'            => 'GP Trainer',
+                    'description'     => 'Safeguarding Level 3 Training - Full-day '
+                                       . 'mandatory safeguarding course at the Deanery.',
+                    'outcome'         => 'Refreshed child protection referral pathways '
+                                       . 'and documentation requirements. Updated '
+                                       . 'practice safeguarding policy.',
+                    'credits'         => '6',
+                    'supportLocation' => 'Emailed to appraiser',
+                ],
+                [
+                    'role'            => 'GP',
+                    'description'     => 'BMJ Learning Module: Chronic Pain Management '
+                                       . 'in Primary Care.',
+                    'outcome'         => 'Improved understanding of non-pharmacological '
+                                       . 'approaches. Started referring patients to '
+                                       . 'local pain management programme.',
+                    'credits'         => '4',
+                    'supportLocation' => 'Attached',
+                ],
+                [
+                    'role'            => 'Clinical Lead - PCN',
+                    'description'     => 'NHS England Respiratory Webinar Series '
+                                       . '(6 sessions over 3 months).',
+                    'outcome'         => 'Applied updated asthma pathway across the '
+                                       . 'PCN. Reduced emergency respiratory admissions '
+                                       . 'by 15% in Q3.',
+                    'credits'         => '6',
+                    'supportLocation' => 'Provided separately',
+                ],
+                [
+                    'role'            => 'GP',
+                    'description'     => 'Practice-based significant event audit on '
+                                       . 'missed sepsis diagnosis.',
+                    'outcome'         => 'Developed practice-wide sepsis screening '
+                                       . 'checklist now used in all urgent appointments.',
+                    'credits'         => '3',
+                    'supportLocation' => 'Attached',
+                ],
+            ]
+        );
+
+        // -----------------------------------------------
+        // 3. Fill text fields
+        // -----------------------------------------------
+        XfaPdf::cpd()->update([
+            'commentaryOnActivities' =>
+                'My CPD activities this year have been closely aligned with '
+                . 'my scope of work. The RCGP conference and BMJ modules '
+                . 'directly support my clinical GP role, particularly in '
+                . 'diabetes and chronic pain management. The safeguarding '
+                . 'training is essential for my GP Trainer role. The '
+                . 'respiratory webinar series has been invaluable for my '
+                . 'PCN Clinical Lead work, leading to a 15% reduction in '
+                . 'emergency respiratory admissions. The significant event '
+                . 'audit strengthened our practice approach to sepsis.',
+
+            'appraiserComments' =>
+                'Dr Smith has undertaken a comprehensive CPD programme '
+                . 'totalling 31 credits, well-targeted across all three '
+                . 'roles. The impact on PCN respiratory admissions is '
+                . 'particularly noteworthy. I would encourage continued '
+                . 'focus on chronic disease management and further '
+                . 'development of the sepsis screening protocol.',
+        ]);
+
+        // -----------------------------------------------
+        // 4. Save the PDF
+        // -----------------------------------------------
+        $manager->saveXfaPdf($xfaPdf);
+        // Or: XfaPdf::save();
+
+        return redirect()->back()->with('success', 'CPD section saved.');
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::cpd()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::cpd()->readField('commentaryOnActivities')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::cpd()->updateField('commentaryOnActivities', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::cpd()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio (faculty member)</td>
+                    <td><code>XfaPdf::cpd()->updateField('memberOfFaculty', 'yes')</code></td>
+                </tr>
+                <tr>
+                    <td>Get CPD activity rows</td>
+                    <td><code>$manager->getRepeatableItems($xfaPdf, 'Section_7_CPD', 'cpdList')</code></td>
+                </tr>
+                <tr>
+                    <td>Add a CPD activity</td>
+                    <td><code>$manager->addRepeatableItem($xfaPdf, 'Section_7_CPD', 'cpdList', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Remove a CPD activity</td>
+                    <td><code>$manager->removeRepeatableItem($xfaPdf, 'Section_7_CPD', 'cpdList', $index)</code></td>
+                </tr>
+                <tr>
+                    <td>Replace all activities</td>
+                    <td><code>$manager->setRepeatableItems($xfaPdf, 'Section_7_CPD', 'cpdList', 'cpd', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="pdp-review.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 6: Last Year's PDP</span>
+        </a>
+        <a href="quality-improvement.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 8: Quality Improvement &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

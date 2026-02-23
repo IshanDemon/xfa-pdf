@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 17: Appraisal Checklist - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; <a href="../index.html" class="hover:text-blue-600">Sections</a> &rarr; Section 17</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 17: Appraisal Checklist</h1>
+    <p class="text-gray-600 mb-8">A checklist of 20 confirmation items that the doctor and appraiser must tick before completing the appraisal. All fields are checkboxes using <code>"1"</code> for checked and <code>"0"</code> for unchecked.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_17_Checklist</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::checklist()</code><br>
+        <strong>Navigation label:</strong> Appraisal checklist
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD OVERVIEW -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <p class="text-gray-700 mb-3">The checklist is divided into two groups of items, followed by a final agreement checkbox. All 20 fields are checkboxes.</p>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td colspan="3" class="font-semibold bg-gray-50">Pre-appraisal checklist (4 items)</td></tr>
+                <tr><td><code>section1_a</code></td><td>Checkbox</td><td>Pre-appraisal checklist item A</td></tr>
+                <tr><td><code>section1_b</code></td><td>Checkbox</td><td>Pre-appraisal checklist item B</td></tr>
+                <tr><td><code>section1_c</code></td><td>Checkbox</td><td>Pre-appraisal checklist item C</td></tr>
+                <tr><td><code>section1_d</code></td><td>Checkbox</td><td>Pre-appraisal checklist item D</td></tr>
+                <tr><td colspan="3" class="font-semibold bg-gray-50">Appraisal meeting checklist (15 items)</td></tr>
+                <tr><td><code>section2_a</code></td><td>Checkbox</td><td>Appraisal meeting checklist item A</td></tr>
+                <tr><td><code>section2_b</code></td><td>Checkbox</td><td>Appraisal meeting checklist item B</td></tr>
+                <tr><td><code>section2_c</code></td><td>Checkbox</td><td>Appraisal meeting checklist item C</td></tr>
+                <tr><td><code>section2_d</code></td><td>Checkbox</td><td>Appraisal meeting checklist item D</td></tr>
+                <tr><td><code>section2_e</code></td><td>Checkbox</td><td>Appraisal meeting checklist item E</td></tr>
+                <tr><td><code>section2_f</code></td><td>Checkbox</td><td>Appraisal meeting checklist item F</td></tr>
+                <tr><td><code>section2_g</code></td><td>Checkbox</td><td>Appraisal meeting checklist item G</td></tr>
+                <tr><td><code>section2_h</code></td><td>Checkbox</td><td>Appraisal meeting checklist item H</td></tr>
+                <tr><td><code>section2_i</code></td><td>Checkbox</td><td>Appraisal meeting checklist item I</td></tr>
+                <tr><td><code>section2_j</code></td><td>Checkbox</td><td>Appraisal meeting checklist item J</td></tr>
+                <tr><td><code>section2_k</code></td><td>Checkbox</td><td>Appraisal meeting checklist item K</td></tr>
+                <tr><td><code>section2_l</code></td><td>Checkbox</td><td>Appraisal meeting checklist item L</td></tr>
+                <tr><td><code>section2_m</code></td><td>Checkbox</td><td>Appraisal meeting checklist item M</td></tr>
+                <tr><td><code>section2_n</code></td><td>Checkbox</td><td>Appraisal meeting checklist item N</td></tr>
+                <tr><td><code>section2_o</code></td><td>Checkbox</td><td>Appraisal meeting checklist item O</td></tr>
+                <tr><td colspan="3" class="font-semibold bg-gray-50">Final agreement</td></tr>
+                <tr><td><code>agreementChk</code></td><td>Checkbox</td><td>Final agreement confirmation</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-sm text-gray-500 mb-8">This section has <strong>no repeatable items</strong> and <strong>no conditional fields</strong>. All 20 fields are standalone checkboxes.</p>
+
+    <div class="info-box yellow mb-8">
+        <strong>Checkbox values:</strong> XFA checkboxes in this form use <code>"1"</code> for checked and <code>"0"</code> for unchecked. These are string values &mdash; always pass <code>"1"</code> or <code>"0"</code> as strings, not boolean <code>true</code>/<code>false</code> or integer <code>1</code>/<code>0</code>.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in the Checklist
+$data = XfaPdf::read('Section_17_Checklist');
+
+// Or using the fluent accessor
+$data = XfaPdf::checklist()->read();
+
+// $data looks like:
+// [
+//     'section1_a' => '1',
+//     'section1_b' => '1',
+//     'section1_c' => '0',
+//     'section1_d' => '1',
+//     'section2_a' => '1',
+//     'section2_b' => '0',
+//     'section2_c' => '0',
+//     ...
+//     'section2_o' => '0',
+//     'agreementChk' => '0',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single checkbox:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$isChecked = XfaPdf::checklist()->readField('section1_a');
+// '1' (checked) or '0' (unchecked)
+
+$agreed = XfaPdf::checklist()->readField('agreementChk');
+// '1' or '0'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- UPDATING CHECKBOXES -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Updating Checkboxes</h2>
+    <p class="text-gray-700 mb-4">Each checkbox accepts <code>"1"</code> (checked) or <code>"0"</code> (unchecked). You can update them one at a time or in bulk.</p>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Setting a single checkbox</h3>
+    <p class="text-gray-700 mb-3">To check or uncheck an individual item:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Check the first pre-appraisal item
+XfaPdf::checklist()->updateField('section1_a', '1');
+
+// Uncheck the final agreement
+XfaPdf::checklist()->updateField('agreementChk', '0');
+
+XfaPdf::save();</code></pre>
+    </div>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Bulk update &mdash; checking all items</h3>
+    <p class="text-gray-700 mb-3">To check all 20 checklist items at once, pass them all in a single <code>update()</code> call:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Check all pre-appraisal items
+XfaPdf::checklist()->update([
+    'section1_a' => '1',
+    'section1_b' => '1',
+    'section1_c' => '1',
+    'section1_d' => '1',
+]);
+
+XfaPdf::save();</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Or check all appraisal meeting items:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Check all appraisal meeting items
+XfaPdf::checklist()->update([
+    'section2_a' => '1',
+    'section2_b' => '1',
+    'section2_c' => '1',
+    'section2_d' => '1',
+    'section2_e' => '1',
+    'section2_f' => '1',
+    'section2_g' => '1',
+    'section2_h' => '1',
+    'section2_i' => '1',
+    'section2_j' => '1',
+    'section2_k' => '1',
+    'section2_l' => '1',
+    'section2_m' => '1',
+    'section2_n' => '1',
+    'section2_o' => '1',
+]);
+
+XfaPdf::save();</code></pre>
+    </div>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Bulk update &mdash; checking everything at once</h3>
+    <p class="text-gray-700 mb-3">You can check all 20 items and the final agreement in a single call. This is useful when programmatically completing the checklist from a data source:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Check every checkbox in the section
+XfaPdf::checklist()->update([
+    // Pre-appraisal checklist
+    'section1_a' => '1',
+    'section1_b' => '1',
+    'section1_c' => '1',
+    'section1_d' => '1',
+
+    // Appraisal meeting checklist
+    'section2_a' => '1',
+    'section2_b' => '1',
+    'section2_c' => '1',
+    'section2_d' => '1',
+    'section2_e' => '1',
+    'section2_f' => '1',
+    'section2_g' => '1',
+    'section2_h' => '1',
+    'section2_i' => '1',
+    'section2_j' => '1',
+    'section2_k' => '1',
+    'section2_l' => '1',
+    'section2_m' => '1',
+    'section2_n' => '1',
+    'section2_o' => '1',
+
+    // Final agreement
+    'agreementChk' => '1',
+]);
+
+XfaPdf::save();</code></pre>
+    </div>
+
+    <div class="info-box green mb-6">
+        <strong>Tip:</strong> You can build the checklist array dynamically from a form submission. For example, if your HTML form uses checkbox inputs with the same field names, you can map the submitted values to <code>"1"</code> or <code>"0"</code> and pass the entire array to <code>update()</code>.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the Checklist section from a form submission in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    /**
+     * All checkbox field names in this section.
+     */
+    private const CHECKLIST_FIELDS = [
+        'section1_a', 'section1_b', 'section1_c', 'section1_d',
+        'section2_a', 'section2_b', 'section2_c', 'section2_d',
+        'section2_e', 'section2_f', 'section2_g', 'section2_h',
+        'section2_i', 'section2_j', 'section2_k', 'section2_l',
+        'section2_m', 'section2_n', 'section2_o',
+        'agreementChk',
+    ];
+
+    public function fillChecklist(Request $request)
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Build the checkbox values from form input.
+        //    HTML checkboxes only submit when checked,
+        //    so we default to "0" for unchecked items.
+        // -----------------------------------------------
+        $checklistData = [];
+        foreach (self::CHECKLIST_FIELDS as $field) {
+            $checklistData[$field] = $request->has($field) ? '1' : '0';
+        }
+
+        // -----------------------------------------------
+        // 2. Update all checkboxes in one call
+        // -----------------------------------------------
+        XfaPdf::checklist()->update($checklistData);
+
+        // -----------------------------------------------
+        // 3. Save the PDF
+        // -----------------------------------------------
+        XfaPdf::save();
+
+        return redirect()->back()->with(
+            'success',
+            'Checklist saved.'
+        );
+    }
+
+    /**
+     * Read and display existing Checklist data.
+     */
+    public function showChecklist()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        $data = XfaPdf::checklist()->read();
+
+        // Convert "1"/"0" strings to booleans for Blade
+        $checkboxes = [];
+        foreach (self::CHECKLIST_FIELDS as $field) {
+            $checkboxes[$field] = ($data[$field] ?? '0') === '1';
+        }
+
+        return view('appraisal.checklist', [
+            'checkboxes' => $checkboxes,
+        ]);
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::checklist()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one checkbox</td>
+                    <td><code>XfaPdf::checklist()->readField('section1_a')</code></td>
+                </tr>
+                <tr>
+                    <td>Check a checkbox</td>
+                    <td><code>XfaPdf::checklist()->updateField('section1_a', '1')</code></td>
+                </tr>
+                <tr>
+                    <td>Uncheck a checkbox</td>
+                    <td><code>XfaPdf::checklist()->updateField('section1_a', '0')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple checkboxes</td>
+                    <td><code>XfaPdf::checklist()->update(['section1_a' => '1', 'section1_b' => '1', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Check the final agreement</td>
+                    <td><code>XfaPdf::checklist()->updateField('agreementChk', '1')</code></td>
+                </tr>
+                <tr>
+                    <td>Read the final agreement</td>
+                    <td><code>XfaPdf::checklist()->readField('agreementChk')</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- PAGE NAVIGATION -->
+    <!-- ======================================== -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="pre-appraisal-prep.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 16: Pre-Appraisal Prep</span>
+        </a>
+        <a href="agreed-pdp.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 18: The Agreed PDP &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

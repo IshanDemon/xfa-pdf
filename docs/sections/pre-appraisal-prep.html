@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 16: Pre-Appraisal Preparation - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; <a href="../index.html" class="hover:text-blue-600">Sections</a> &rarr; Section 16</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 16: Pre-Appraisal Preparation</h1>
+    <p class="text-gray-600 mb-8">The doctor prepares for the appraisal by summarising their evidence against the four GMC Good Medical Practice domains, plus a general comment field. This section is titled "Review of GMC Good Medical Practice domains" in the form navigation.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_16_preApprisalPrep</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::preAppraisalPrep()</code><br>
+        <strong>Navigation label:</strong> Review of GMC Good Medical Practice domains
+    </div>
+
+    <div class="info-box yellow mb-8">
+        <strong>Note the typo:</strong> The actual section name in the XFA template is <code>Section_16_preApprisalPrep</code> (with "Apprisal" instead of "Appraisal"). This typo exists in the original PDF form data and must be used exactly as-is when referencing the section programmatically. The fluent accessor <code>preAppraisalPrep()</code> handles this mapping for you.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD OVERVIEW -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>domain1</code></td><td>Textarea</td><td>Summary of knowledge, skills and performance</td></tr>
+                <tr><td><code>domain2</code></td><td>Textarea</td><td>Summary of safety and quality</td></tr>
+                <tr><td><code>domain3</code></td><td>Textarea</td><td>Summary of communication, partnership and teamwork</td></tr>
+                <tr><td><code>domain4</code></td><td>Textarea</td><td>Summary of maintaining trust</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>generalComment</code></td><td>Textarea</td><td>General comments and PDP draft ideas</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-sm text-gray-500 mb-8">This section has <strong>no repeatable items</strong> and <strong>no conditional fields</strong>. All five fields are standalone multiline text areas.</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Pre-Appraisal Preparation
+$data = XfaPdf::read('Section_16_preApprisalPrep');
+
+// Or using the fluent accessor
+$data = XfaPdf::preAppraisalPrep()->read();
+
+// $data looks like:
+// [
+//     'domain1' => 'I have maintained my clinical skills through...',
+//     'domain2' => 'I have participated in clinical audit...',
+//     'domain3' => 'I have worked collaboratively with colleagues...',
+//     'domain4' => 'I have acted with honesty and integrity...',
+//     'generalComment' => 'Key areas for next year\'s PDP include...',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$domain1 = XfaPdf::preAppraisalPrep()->readField('domain1');
+// 'I have maintained my clinical skills through...'
+
+$general = XfaPdf::preAppraisalPrep()->readField('generalComment');
+// 'Key areas for next year\'s PDP include...'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- DOMAIN FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Domain Fields</h2>
+    <p class="text-gray-700 mb-4">The four domain fields correspond to the four domains of the GMC's Good Medical Practice framework. Each field is a multiline textarea where the doctor summarises their evidence and reflections for that domain.</p>
+
+    <!-- domain1 -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Domain 1: Knowledge, skills and performance</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>domain1</code></p>
+    <p class="text-gray-700 mb-3">The doctor summarises their evidence relating to maintaining and developing their knowledge and skills. This includes CPD activities, clinical competence, and keeping up to date with current practice.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::preAppraisalPrep()->updateField(
+    'domain1',
+    'I have maintained my clinical skills through regular CPD activities '
+    . 'including completion of the Advanced Life Support (ALS) course and '
+    . 'the RCGP diabetes management update. I have attended 12 educational '
+    . 'events this year and completed 52 hours of CPD. My clinical audit '
+    . 'of antibiotic prescribing demonstrated that I am prescribing in '
+    . 'line with NICE guidance. I have also completed the NHS Leadership '
+    . 'Academy Edward Jenner programme to develop my leadership skills.'
+);</code></pre>
+    </div>
+
+    <!-- domain2 -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Domain 2: Safety and quality</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>domain2</code></p>
+    <p class="text-gray-700 mb-3">The doctor summarises their evidence relating to patient safety and quality improvement. This includes audit activity, significant event analysis, and contributions to safe practice.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::preAppraisalPrep()->updateField(
+    'domain2',
+    'I have participated in clinical audit throughout the year. My '
+    . 'antibiotic prescribing audit showed a 15% reduction in unnecessary '
+    . 'prescriptions against the baseline. I contributed to the practice '
+    . 'significant event review process and attended all monthly SEA '
+    . 'meetings. I have been involved in two significant events this year, '
+    . 'both of which were reviewed with appropriate learning identified '
+    . 'and acted upon. I completed mandatory safeguarding training at '
+    . 'Level 3 in October.'
+);</code></pre>
+    </div>
+
+    <!-- domain3 -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Domain 3: Communication, partnership and teamwork</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>domain3</code></p>
+    <p class="text-gray-700 mb-3">The doctor summarises their evidence relating to communication with patients and colleagues, teamwork, and collaborative working relationships.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::preAppraisalPrep()->updateField(
+    'domain3',
+    'I have worked collaboratively with colleagues across the practice '
+    . 'and the wider PCN. As Clinical Lead for the respiratory pathway, '
+    . 'I have established regular MDT meetings with secondary care '
+    . 'colleagues. Colleague feedback collected this year was positive, '
+    . 'highlighting my approachability and willingness to support the '
+    . 'team. Patient feedback via the Friends and Family Test showed '
+    . '94% satisfaction. I have supervised two GP registrars this year '
+    . 'with positive feedback from both.'
+);</code></pre>
+    </div>
+
+    <!-- domain4 -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Domain 4: Maintaining trust</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>domain4</code></p>
+    <p class="text-gray-700 mb-3">The doctor summarises their evidence relating to probity, honesty, and maintaining patient and public trust. This includes declarations of interests, health status, and ethical conduct.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::preAppraisalPrep()->updateField(
+    'domain4',
+    'I have acted with honesty and integrity throughout the year. I '
+    . 'have no complaints or concerns to declare. My probity statement '
+    . 'is up to date and I have no conflicts of interest to declare '
+    . 'beyond those already registered with the practice. I have '
+    . 'maintained appropriate professional boundaries in all clinical '
+    . 'interactions. My DBS check was renewed in September and remains '
+    . 'clear. I confirm that my health does not affect my fitness to '
+    . 'practise.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- GENERAL COMMENT -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">General Comment</h2>
+
+    <!-- generalComment -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">General comments and PDP draft ideas</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>generalComment</code></p>
+    <p class="text-gray-700 mb-3">A free-text area for any additional comments or draft ideas for the upcoming Personal Development Plan. The doctor can use this to flag topics for discussion at the appraisal meeting.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::preAppraisalPrep()->updateField(
+    'generalComment',
+    'Key areas for next year\'s PDP include:\n'
+    . '- Completing the musculoskeletal diploma (currently 6 of 8 modules done)\n'
+    . '- Developing skills in mental health assessment for primary care\n'
+    . '- Expanding the PCN respiratory pathway to include COPD pulmonary rehab\n'
+    . '- Undertaking a re-audit of antibiotic prescribing to measure sustained improvement\n\n'
+    . 'I would also like to discuss the possibility of taking on a CCG advisory '
+    . 'role for respiratory services from April next year.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Pre-Appraisal Preparation section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillPreAppraisalPrep(Request $request)
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Fill all five domain and comment fields
+        //    in a single update call
+        // -----------------------------------------------
+        XfaPdf::preAppraisalPrep()->update([
+            'domain1' =>
+                'I have maintained my clinical skills through regular '
+                . 'CPD activities including completion of the ALS course '
+                . 'and the RCGP diabetes management update. I attended '
+                . '12 educational events and completed 52 hours of CPD. '
+                . 'My antibiotic prescribing audit demonstrated that I '
+                . 'am prescribing in line with NICE guidance.',
+
+            'domain2' =>
+                'I have participated in clinical audit throughout the '
+                . 'year. My prescribing audit showed a 15% reduction in '
+                . 'unnecessary prescriptions. I contributed to the '
+                . 'practice significant event review process and attended '
+                . 'all monthly SEA meetings. I completed mandatory '
+                . 'safeguarding training at Level 3 in October.',
+
+            'domain3' =>
+                'I have worked collaboratively with colleagues across '
+                . 'the practice and wider PCN. As Clinical Lead for the '
+                . 'respiratory pathway, I established regular MDT '
+                . 'meetings with secondary care. Colleague feedback was '
+                . 'positive. Patient satisfaction via FFT was 94%. I '
+                . 'supervised two GP registrars with positive feedback.',
+
+            'domain4' =>
+                'I have acted with honesty and integrity throughout the '
+                . 'year. No complaints or concerns to declare. Probity '
+                . 'statement is up to date with no conflicts of interest '
+                . 'beyond those registered with the practice. DBS check '
+                . 'renewed in September and remains clear. My health '
+                . 'does not affect my fitness to practise.',
+
+            'generalComment' =>
+                'Key areas for next year\'s PDP: completing the MSK '
+                . 'diploma, developing mental health assessment skills, '
+                . 'expanding the PCN respiratory pathway to include COPD '
+                . 'pulmonary rehab, and re-auditing antibiotic prescribing. '
+                . 'I would also like to discuss taking on a CCG advisory '
+                . 'role for respiratory services from April.',
+        ]);
+
+        // -----------------------------------------------
+        // 2. Save the PDF
+        // -----------------------------------------------
+        XfaPdf::save();
+
+        return redirect()->back()->with(
+            'success',
+            'Pre-Appraisal Preparation saved.'
+        );
+    }
+
+    /**
+     * Read and display existing Pre-Appraisal Preparation data.
+     */
+    public function showPreAppraisalPrep()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        $data = XfaPdf::preAppraisalPrep()->read();
+
+        return view('appraisal.pre-appraisal-prep', [
+            'domain1'        => $data['domain1'] ?? '',
+            'domain2'        => $data['domain2'] ?? '',
+            'domain3'        => $data['domain3'] ?? '',
+            'domain4'        => $data['domain4'] ?? '',
+            'generalComment' => $data['generalComment'] ?? '',
+        ]);
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::preAppraisalPrep()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::preAppraisalPrep()->readField('domain1')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::preAppraisalPrep()->updateField('domain1', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::preAppraisalPrep()->update(['domain1' => '...', 'domain2' => '...', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Update Domain 1</td>
+                    <td><code>XfaPdf::preAppraisalPrep()->updateField('domain1', 'Knowledge summary...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update Domain 2</td>
+                    <td><code>XfaPdf::preAppraisalPrep()->updateField('domain2', 'Safety summary...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update Domain 3</td>
+                    <td><code>XfaPdf::preAppraisalPrep()->updateField('domain3', 'Communication summary...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update Domain 4</td>
+                    <td><code>XfaPdf::preAppraisalPrep()->updateField('domain4', 'Trust summary...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update general comment</td>
+                    <td><code>XfaPdf::preAppraisalPrep()->updateField('generalComment', 'PDP ideas...')</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- PAGE NAVIGATION -->
+    <!-- ======================================== -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="supporting-information.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 15: Supporting Information</span>
+        </a>
+        <a href="checklist.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 17: Checklist &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

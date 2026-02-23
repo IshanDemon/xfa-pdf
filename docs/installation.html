@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Installation</h1>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Requirements</h2>
+    <ul class="list-disc list-inside text-gray-700 space-y-1">
+        <li>PHP 7.4+</li>
+        <li>Laravel 6.x</li>
+        <li><code>ext-dom</code> &mdash; XML parsing</li>
+        <li><code>ext-zlib</code> &mdash; PDF stream decompression</li>
+    </ul>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Via Composer (Path Repository)</h2>
+    <p class="text-gray-700 mb-3">If you have the package locally, add a path repository to your host app's <code>composer.json</code>:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-json">{
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../xfa-pdf"
+        }
+    ]
+}</code></pre>
+    </div>
+
+    <p class="text-gray-700 mb-3">Then require the package:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-bash">composer require xfa/pdf</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Auto-Discovery</h2>
+    <p class="text-gray-700 mb-3">The service provider and facade are registered automatically via Laravel's package auto-discovery. For manual registration:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// config/app.php
+
+'providers' => [
+    Xfa\Pdf\XfaPdfServiceProvider::class,
+],
+
+'aliases' => [
+    'XfaPdf' => Xfa\Pdf\Facades\XfaPdf::class,
+],</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Publish Assets</h2>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-bash"># Publish configuration
+php artisan vendor:publish --tag=xfa-pdf-config
+
+# Publish views (optional, for customization)
+php artisan vendor:publish --tag=xfa-pdf-views
+
+# Publish migrations (optional, only for Web UI document storage)
+php artisan vendor:publish --tag=xfa-pdf-migrations
+php artisan migrate</code></pre>
+    </div>
+
+    <div class="info-box blue">
+        <strong>Tip:</strong> Migrations are only needed for the Web UI (upload/list/manage documents). The PHP API and CLI work without any database.
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Verify Installation</h2>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-bash"># Check the CLI command is registered
+php artisan xfa-pdf:manage --help
+
+# Check routes are registered
+php artisan route:list --path=xfa-pdf</code></pre>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="index.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Introduction</span>
+        </a>
+        <a href="configuration.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Configuration &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="shared.js"></script>
+</body>
+</html>

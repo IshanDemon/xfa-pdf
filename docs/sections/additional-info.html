@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 14: Additional Information - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; Sections</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 14: Additional Information</h1>
+    <p class="text-gray-600 mb-8">This section captures any additional information requested by the Responsible Officer. If specific information has been requested, the doctor provides details and supporting attachments.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_14_AdditionalInfo</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::additionalInfo()</code><br>
+        <strong>Navigation label:</strong> Additional information
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD OVERVIEW -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>specificInfoRequested</code></td><td>Radio (yes/no)</td><td>Has specific information been requested by the RO? (CONDITIONAL TRIGGER)</td></tr>
+                <tr class="border-t-2 border-yellow-200" style="background: #fffbeb;">
+                    <td><code>specificInfoDetails</code></td><td>Multiline text</td><td>Details of what was requested (shown when "yes")</td>
+                </tr>
+                <tr class="border-t-2 border-gray-300"><td><code>additionalAttachments</code> &gt; <code>attach</code></td><td>Repeatable</td><td>Additional attachment rows</td></tr>
+                <tr><td class="pl-8"><code>role</code></td><td>Select</td><td>Type of supporting information</td></tr>
+                <tr><td class="pl-8"><code>description</code></td><td>Multiline text</td><td>Description of the attachment</td></tr>
+                <tr><td class="pl-8"><code>outcome</code></td><td>Multiline text</td><td>Outcome or learning from the information</td></tr>
+                <tr><td class="pl-8"><code>supportLocation</code></td><td>Select</td><td>Where the supporting evidence is held</td></tr>
+                <tr><td class="pl-8"><code>firstEntry</code></td><td>Text</td><td>Initial entry reference</td></tr>
+                <tr><td class="pl-8"><code>amendData</code></td><td>Text</td><td>Amendment data reference</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>appraiserComments</code></td><td>Multiline text</td><td>Appraiser comments (mirrors to Section 19)</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- CONDITIONAL NOTE -->
+    <!-- ======================================== -->
+    <div class="info-box yellow mb-8">
+        <strong>Conditional fields:</strong> The highlighted field above (<code>specificInfoDetails</code>) is only visible in the XFA form when <code>specificInfoRequested</code> is set to <strong>"yes"</strong>. When set to "no", that field is hidden. In our package, you can always read and write it regardless of the radio value &mdash; the conditional visibility only applies within Adobe Reader.
+    </div>
+
+    <p class="text-sm text-gray-500 mb-8">The <code>attach</code> rows within <code>additionalAttachments</code> are <strong>repeatable</strong> &mdash; each row represents one piece of additional information or attachment. The remaining fields are standalone.</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Additional Information
+$data = XfaPdf::read('Section_14_AdditionalInfo');
+
+// Or using the fluent accessor
+$data = XfaPdf::additionalInfo()->read();
+
+// $data looks like:
+// [
+//     'specificInfoRequested' => 'yes',
+//     'specificInfoDetails' => 'Please provide evidence of CPD related to...',
+//     'additionalAttachments' => [
+//         'attach' => [
+//             [
+//                 'role' => 'CPD',
+//                 'description' => 'Certificate from RCGP conference...',
+//                 'outcome' => 'Updated knowledge on respiratory management...',
+//                 'supportLocation' => 'Uploaded',
+//                 'firstEntry' => '',
+//                 'amendData' => '',
+//             ],
+//         ],
+//     ],
+//     'appraiserComments' => '',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$requested = XfaPdf::additionalInfo()->readField('specificInfoRequested');
+// 'yes' or 'no'
+
+$details = XfaPdf::additionalInfo()->readField('specificInfoDetails');
+// 'Please provide evidence of CPD related to...'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- RADIO / CONDITIONAL FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Radio / Conditional Fields</h2>
+    <p class="text-gray-700 mb-4">The <code>specificInfoRequested</code> field is a radio button group (yes/no) that controls the visibility of the <code>specificInfoDetails</code> textarea. In the XFA form, selecting "yes" reveals the details field; selecting "no" hides it.</p>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Has specific information been requested?</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>specificInfoRequested</code></p>
+    <p class="text-gray-700 mb-3">This radio group asks whether the Responsible Officer has requested specific additional information from the doctor. Set it to <code>"yes"</code> or <code>"no"</code>.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Indicate that specific information has been requested
+XfaPdf::additionalInfo()->updateField(
+    'specificInfoRequested',
+    'yes'
+);
+
+// Or indicate no information was requested
+XfaPdf::additionalInfo()->updateField(
+    'specificInfoRequested',
+    'no'
+);</code></pre>
+    </div>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Details of requested information</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>specificInfoDetails</code></p>
+    <p class="text-gray-700 mb-3">When the RO has requested specific information, describe what was requested and the doctor's response. This field is only visible in Adobe Reader when <code>specificInfoRequested</code> is set to "yes".</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::additionalInfo()->updateField(
+    'specificInfoDetails',
+    'The Responsible Officer requested evidence of CPD activity related '
+    . 'to safeguarding training completed in the last 12 months. A copy '
+    . 'of the Level 3 safeguarding certificate has been attached below.'
+);</code></pre>
+    </div>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Setting the radio and details together</h3>
+    <p class="text-gray-700 mb-3">When specific information has been requested, set the radio and the details field in a single call:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// When information HAS been requested, set the radio + details
+XfaPdf::additionalInfo()->update([
+    'specificInfoRequested' => 'yes',
+    'specificInfoDetails'   => 'The RO requested evidence of safeguarding '
+                             . 'training and a reflection on the clinical '
+                             . 'incident reported in Q3 2024.',
+]);
+
+// When no information was requested, just set the radio
+XfaPdf::additionalInfo()->update([
+    'specificInfoRequested' => 'no',
+]);</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-6">
+        <strong>Important:</strong> Setting <code>specificInfoRequested</code> to <code>"yes"</code> in the datasets XML does <em>not</em> automatically make the <code>specificInfoDetails</code> field visible in the saved PDF &mdash; XFA visibility is controlled by JavaScript scripts within the template. However, when Adobe Reader opens the PDF and processes the XFA layer, the radio value will trigger the script and the conditional field will appear with whatever data you have written into it. Always populate <code>specificInfoDetails</code> when setting the radio to "yes".
+    </div>
+
+    <!-- ======================================== -->
+    <!-- ADDITIONAL ATTACHMENTS (REPEATABLE) -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Additional Attachments (Repeatable Table)</h2>
+    <p class="text-gray-700 mb-4">Each row in the additional attachments table represents one piece of supporting information or evidence. You can add multiple rows, remove them, or replace all of them. Each row contains six fields: <code>role</code>, <code>description</code>, <code>outcome</code>, <code>supportLocation</code>, <code>firstEntry</code>, and <code>amendData</code>.</p>
+
+    <!-- ADD A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding a new attachment row</h3>
+    <p class="text-gray-700 mb-3">To add a new row with all fields filled in:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Add an attachment row
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf,
+    'Section_14_AdditionalInfo',       // section name
+    'additionalAttachments',           // container name
+    [
+        'role'            => 'CPD',
+        'description'     => 'Level 3 Safeguarding Children and Adults certificate '
+                           . 'completed via e-Learning for Healthcare (e-LfH) on '
+                           . '15 March 2024.',
+        'outcome'         => 'Updated knowledge on recognising and responding to '
+                           . 'safeguarding concerns. Applied learning to practice '
+                           . 'safeguarding policy review.',
+        'supportLocation' => 'Uploaded',
+        'firstEntry'      => '',
+        'amendData'       => '',
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- REPLACE ALL ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Replacing all rows</h3>
+    <p class="text-gray-700 mb-3">If you want to clear existing rows and set new ones from scratch, use <code>setRepeatableItems()</code>:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf,
+    'Section_14_AdditionalInfo',       // section
+    'additionalAttachments',           // container
+    'attach',                          // element name
+    [
+        [
+            'role'            => 'CPD',
+            'description'     => 'Level 3 Safeguarding certificate from e-LfH.',
+            'outcome'         => 'Updated safeguarding knowledge applied to '
+                               . 'practice policy review.',
+            'supportLocation' => 'Uploaded',
+            'firstEntry'      => '',
+            'amendData'       => '',
+        ],
+        [
+            'role'            => 'Audit',
+            'description'     => 'Clinical incident reflection report requested '
+                               . 'by RO following Q3 2024 serious event review.',
+            'outcome'         => 'Identified system improvements for patient '
+                               . 'handover processes. Changes implemented and '
+                               . 'shared with practice team.',
+            'supportLocation' => 'Uploaded',
+            'firstEntry'      => '',
+            'amendData'       => '',
+        ],
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- READ ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Reading existing rows</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$rows = $manager->getRepeatableItems(
+    $xfaPdf,
+    'Section_14_AdditionalInfo',
+    'additionalAttachments'
+);
+
+foreach ($rows as $index => $row) {
+    echo "Row {$index}: [{$row['role']}] {$row['description']}\n";
+}
+// Row 0: [CPD] Level 3 Safeguarding certificate from e-LfH.
+// Row 1: [Audit] Clinical incident reflection report requested by RO...</code></pre>
+    </div>
+
+    <!-- REMOVE A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Removing a row</h3>
+    <p class="text-gray-700 mb-3">Remove a row by its index (0-based):</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Remove the second row (index 1)
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf,
+    'Section_14_AdditionalInfo',
+    'additionalAttachments',
+    1
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+
+    <!-- appraiserComments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser's comments</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserComments</code></p>
+    <p class="text-gray-700 mb-3">Written by the appraiser, summarising their view of the additional information provided. This field mirrors its content to Section 19 (Appraisal Summary) so the appraiser's comments appear in both places.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::additionalInfo()->updateField(
+    'appraiserComments',
+    'The Responsible Officer requested evidence of safeguarding training '
+    . 'and a reflection on the clinical incident from Q3 2024. Dr Smith '
+    . 'has provided both items. The safeguarding certificate confirms '
+    . 'completion of Level 3 training. The incident reflection is thorough '
+    . 'and demonstrates appropriate learning and system improvement.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Additional Information section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillAdditionalInfo(Request $request)
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        $manager = app('xfa-pdf');
+        $xfaPdf = $manager->load($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Set the radio and conditional details
+        // -----------------------------------------------
+        XfaPdf::setFile($pdfPath);
+
+        $infoRequested = $request->input('info_requested', false);
+
+        if ($infoRequested) {
+            // RO has requested specific information
+            XfaPdf::additionalInfo()->update([
+                'specificInfoRequested' => 'yes',
+                'specificInfoDetails'   => $request->input(
+                    'info_details',
+                    'The RO requested evidence of safeguarding training '
+                    . 'and a reflection on the Q3 2024 clinical incident.'
+                ),
+            ]);
+        } else {
+            // No specific information requested
+            XfaPdf::additionalInfo()->updateField(
+                'specificInfoRequested',
+                'no'
+            );
+        }
+
+        // -----------------------------------------------
+        // 2. Add attachment rows
+        // -----------------------------------------------
+        $xfaPdf = $manager->setRepeatableItems(
+            $xfaPdf,
+            'Section_14_AdditionalInfo',
+            'additionalAttachments',
+            'attach',
+            [
+                [
+                    'role'            => 'CPD',
+                    'description'     => 'Level 3 Safeguarding Children and '
+                                       . 'Adults certificate. Completed via '
+                                       . 'e-Learning for Healthcare on '
+                                       . '15 March 2024.',
+                    'outcome'         => 'Updated knowledge on recognising '
+                                       . 'and responding to safeguarding '
+                                       . 'concerns. Applied to practice '
+                                       . 'safeguarding policy review.',
+                    'supportLocation' => 'Uploaded',
+                    'firstEntry'      => '',
+                    'amendData'       => '',
+                ],
+                [
+                    'role'            => 'Audit',
+                    'description'     => 'Clinical incident reflection '
+                                       . 'report: patient handover failure '
+                                       . 'in Q3 2024. Structured reflection '
+                                       . 'using Gibbs reflective cycle.',
+                    'outcome'         => 'Identified system improvements '
+                                       . 'for handover processes. New '
+                                       . 'checklist implemented and shared '
+                                       . 'with the practice team.',
+                    'supportLocation' => 'Uploaded',
+                    'firstEntry'      => '',
+                    'amendData'       => '',
+                ],
+            ]
+        );
+
+        // -----------------------------------------------
+        // 3. Appraiser comments
+        // -----------------------------------------------
+        XfaPdf::additionalInfo()->updateField(
+            'appraiserComments',
+            'The RO requested safeguarding evidence and an incident '
+            . 'reflection. Dr Smith has provided both. The safeguarding '
+            . 'certificate confirms Level 3 completion. The incident '
+            . 'reflection is thorough and demonstrates appropriate '
+            . 'learning with tangible system improvements.'
+        );
+
+        // -----------------------------------------------
+        // 4. Save the PDF
+        // -----------------------------------------------
+        $manager->saveXfaPdf($xfaPdf);
+        // Or: XfaPdf::save();
+
+        return redirect()->back()->with(
+            'success',
+            'Additional Information saved.'
+        );
+    }
+
+    /**
+     * Read and display existing Additional Information data.
+     */
+    public function showAdditionalInfo()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        $manager = app('xfa-pdf');
+        $xfaPdf = $manager->load($pdfPath);
+
+        XfaPdf::setFile($pdfPath);
+
+        $data = XfaPdf::additionalInfo()->read();
+
+        // Check if conditional field should be shown
+        $showDetails = ($data['specificInfoRequested'] ?? '') === 'yes';
+
+        // Get attachment rows
+        $attachments = $manager->getRepeatableItems(
+            $xfaPdf,
+            'Section_14_AdditionalInfo',
+            'additionalAttachments'
+        );
+
+        return view('appraisal.additional-info', [
+            'infoRequested'    => $showDetails,
+            'infoDetails'      => $data['specificInfoDetails'] ?? '',
+            'attachments'      => $attachments,
+            'appraiserComments' => $data['appraiserComments'] ?? '',
+        ]);
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::additionalInfo()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::additionalInfo()->readField('specificInfoRequested')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::additionalInfo()->updateField('specificInfoRequested', 'yes')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::additionalInfo()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio to "yes"</td>
+                    <td><code>XfaPdf::additionalInfo()->updateField('specificInfoRequested', 'yes')</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio to "no"</td>
+                    <td><code>XfaPdf::additionalInfo()->updateField('specificInfoRequested', 'no')</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio + conditional field</td>
+                    <td><code>XfaPdf::additionalInfo()->update(['specificInfoRequested' => 'yes', 'specificInfoDetails' => '...'])</code></td>
+                </tr>
+                <tr>
+                    <td>Get attachment rows</td>
+                    <td><code>$manager->getRepeatableItems($xfaPdf, 'Section_14_AdditionalInfo', 'additionalAttachments')</code></td>
+                </tr>
+                <tr>
+                    <td>Add an attachment row</td>
+                    <td><code>$manager->addRepeatableItem($xfaPdf, 'Section_14_AdditionalInfo', 'additionalAttachments', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Remove an attachment row</td>
+                    <td><code>$manager->removeRepeatableItem($xfaPdf, 'Section_14_AdditionalInfo', 'additionalAttachments', $index)</code></td>
+                </tr>
+                <tr>
+                    <td>Replace all rows</td>
+                    <td><code>$manager->setRepeatableItems($xfaPdf, 'Section_14_AdditionalInfo', 'additionalAttachments', 'attach', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- PAGE NAVIGATION -->
+    <!-- ======================================== -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="probity-health.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 13: Probity and Health</span>
+        </a>
+        <a href="supporting-info.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 15: Supporting Information &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

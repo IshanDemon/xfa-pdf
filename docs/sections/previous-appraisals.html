@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 5: Previous Appraisals - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; Sections</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 5: Previous Appraisals</h1>
+    <p class="text-gray-600 mb-8">Records details of previous appraisals including the date, appraiser name, responsible officer, and designated body. If any details have changed since the last appraisal, the doctor can provide updated information.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_5_PreviousAppraisals</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::previousAppraisals()</code><br>
+        <strong>Navigation label:</strong> Record of annual appraisals
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD OVERVIEW -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>dateOfLastAppraisal</code></td><td>Date</td><td>Date of last appraisal</td></tr>
+                <tr><td><code>appraisalDetailsChangeRdo</code></td><td>Radio (yes/no)</td><td>Have any details changed since last appraisal?</td></tr>
+                <tr class="border-t-2 border-yellow-200" style="background: #fffbeb;">
+                    <td><code>nameOfLastAppraiser</code></td><td>Multiline text</td><td>Name of appraiser at last appraisal (conditional)</td>
+                </tr>
+                <tr style="background: #fffbeb;">
+                    <td><code>nameOfResponsibleOfficer</code></td><td>Multiline text</td><td>Name of responsible officer (conditional)</td>
+                </tr>
+                <tr style="background: #fffbeb;">
+                    <td><code>nameOfDesignatedBody</code></td><td>Multiline text</td><td>Name of designated body (conditional)</td>
+                </tr>
+                <tr class="border-t-2 border-gray-300"><td><code>attachmentID</code></td><td>Text</td><td>Internal attachment reference</td></tr>
+                <tr><td><code>fileName</code></td><td>Text</td><td>Attachment filename</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- CONDITIONAL NOTE -->
+    <!-- ======================================== -->
+    <div class="info-box yellow mb-8">
+        <strong>Conditional fields:</strong> The three highlighted fields above (<code>nameOfLastAppraiser</code>, <code>nameOfResponsibleOfficer</code>, <code>nameOfDesignatedBody</code>) are only visible in the XFA form when <code>appraisalDetailsChangeRdo</code> is set to <strong>"yes"</strong>. When set to "no", those fields are hidden. In our package, you can always read and write them regardless of the radio value &mdash; the conditional visibility only applies within Adobe Reader.
+    </div>
+
+    <p class="text-sm text-gray-500 mb-8">This section has <strong>no repeatable items</strong>. All fields are standalone.</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Previous Appraisals
+$data = XfaPdf::read('Section_5_PreviousAppraisals');
+
+// Or using the fluent accessor
+$data = XfaPdf::previousAppraisals()->read();
+
+// $data looks like:
+// [
+//     'dateOfLastAppraisal' => '2024-09-15',
+//     'appraisalDetailsChangeRdo' => 'yes',
+//     'nameOfLastAppraiser' => 'Dr. James Patterson',
+//     'nameOfResponsibleOfficer' => 'Dr. Sarah Mitchell',
+//     'nameOfDesignatedBody' => 'NHS England',
+//     'attachmentID' => '',
+//     'fileName' => '',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$date = XfaPdf::previousAppraisals()->readField('dateOfLastAppraisal');
+// '2024-09-15'
+
+$changed = XfaPdf::previousAppraisals()->readField('appraisalDetailsChangeRdo');
+// 'yes' or 'no'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- DATE FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Date Fields</h2>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Date of last appraisal</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>dateOfLastAppraisal</code></p>
+    <p class="text-gray-700 mb-3">The date when the doctor's most recent appraisal took place. The XFA form uses a <code>dateTimeEdit</code> control with a <code>YYYY-MM-DD</code> format pattern.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Set the date of last appraisal (use YYYY-MM-DD format)
+XfaPdf::previousAppraisals()->updateField(
+    'dateOfLastAppraisal',
+    '2024-09-15'
+);
+
+// You can also use Carbon to format the date
+use Carbon\Carbon;
+
+$lastAppraisalDate = Carbon::parse('15 September 2024');
+XfaPdf::previousAppraisals()->updateField(
+    'dateOfLastAppraisal',
+    $lastAppraisalDate->format('Y-m-d')
+);</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-6">
+        <strong>Date format:</strong> Always use <code>YYYY-MM-DD</code> (ISO 8601) when writing date values. The XFA template defines its display format via the <code>&lt;picture&gt;</code> element, so Adobe Reader will format it appropriately for display. Passing dates in other formats (e.g. <code>DD/MM/YYYY</code>) may cause parsing errors in the XFA renderer.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- RADIO / CONDITIONAL FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Radio / Conditional Fields</h2>
+    <p class="text-gray-700 mb-4">The <code>appraisalDetailsChangeRdo</code> field is a radio button group (yes/no) that controls the visibility of three dependent fields. In the XFA form, selecting "yes" reveals the fields for entering changed details; selecting "no" hides them.</p>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Have details changed?</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraisalDetailsChangeRdo</code></p>
+    <p class="text-gray-700 mb-3">This radio group asks whether the appraiser, responsible officer, or designated body has changed since the last appraisal. Set it to <code>"yes"</code> or <code>"no"</code>.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Indicate that details have changed
+XfaPdf::previousAppraisals()->updateField(
+    'appraisalDetailsChangeRdo',
+    'yes'
+);
+
+// Or indicate no changes
+XfaPdf::previousAppraisals()->updateField(
+    'appraisalDetailsChangeRdo',
+    'no'
+);</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-6">
+        <strong>Important:</strong> Setting <code>appraisalDetailsChangeRdo</code> to <code>"yes"</code> in the datasets XML does <em>not</em> automatically make the conditional fields visible in the saved PDF &mdash; XFA visibility is controlled by JavaScript scripts within the template. However, when Adobe Reader opens the PDF and processes the XFA layer, the radio value will trigger the script and the conditional fields will appear with whatever data you have written into them. Always populate the conditional fields when setting the radio to "yes".
+    </div>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Setting the radio and conditional fields together</h3>
+    <p class="text-gray-700 mb-3">When details have changed, set the radio and all three dependent fields in a single call:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// When details HAVE changed, set the radio + all conditional fields
+XfaPdf::previousAppraisals()->update([
+    'appraisalDetailsChangeRdo' => 'yes',
+    'nameOfLastAppraiser'       => 'Dr. James Patterson',
+    'nameOfResponsibleOfficer'  => 'Dr. Sarah Mitchell',
+    'nameOfDesignatedBody'      => 'NHS England',
+]);
+
+// When details have NOT changed, just set the radio
+XfaPdf::previousAppraisals()->update([
+    'appraisalDetailsChangeRdo' => 'no',
+]);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+    <p class="text-gray-700 mb-4">These three fields are conditional &mdash; they are only visible in Adobe Reader when <code>appraisalDetailsChangeRdo</code> is set to "yes". They allow the doctor to record updated details about their previous appraisal if anything has changed.</p>
+
+    <!-- nameOfLastAppraiser -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Name of last appraiser</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>nameOfLastAppraiser</code></p>
+    <p class="text-gray-700 mb-3">The name of the appraiser who conducted the doctor's most recent appraisal. This is a multiline text field, so you can include additional context such as their role or organisation.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::previousAppraisals()->updateField(
+    'nameOfLastAppraiser',
+    'Dr. James Patterson'
+);
+
+// With additional context
+XfaPdf::previousAppraisals()->updateField(
+    'nameOfLastAppraiser',
+    "Dr. James Patterson\nGP Partner, Oakwood Surgery\nManchester"
+);</code></pre>
+    </div>
+
+    <!-- nameOfResponsibleOfficer -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Name of responsible officer</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>nameOfResponsibleOfficer</code></p>
+    <p class="text-gray-700 mb-3">The responsible officer (RO) overseeing the doctor's revalidation. This is typically a senior medical professional within the designated body.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::previousAppraisals()->updateField(
+    'nameOfResponsibleOfficer',
+    'Dr. Sarah Mitchell'
+);
+
+// With role details
+XfaPdf::previousAppraisals()->updateField(
+    'nameOfResponsibleOfficer',
+    "Dr. Sarah Mitchell\nResponsible Officer, NHS England (North West)"
+);</code></pre>
+    </div>
+
+    <!-- nameOfDesignatedBody -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Name of designated body</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>nameOfDesignatedBody</code></p>
+    <p class="text-gray-700 mb-3">The designated body with which the doctor holds a prescribed connection for revalidation purposes. This is typically an NHS trust, CCG, or NHS England regional team.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::previousAppraisals()->updateField(
+    'nameOfDesignatedBody',
+    'NHS England'
+);
+
+// With full details
+XfaPdf::previousAppraisals()->updateField(
+    'nameOfDesignatedBody',
+    "NHS England (North West Region)\nPiccadilly Place, Manchester M1 3BN"
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Previous Appraisals section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillPreviousAppraisals(Request $request)
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Set the date of last appraisal
+        // -----------------------------------------------
+        XfaPdf::previousAppraisals()->updateField(
+            'dateOfLastAppraisal',
+            '2024-09-15'
+        );
+
+        // -----------------------------------------------
+        // 2. Check if details have changed and fill
+        //    conditional fields accordingly
+        // -----------------------------------------------
+        $detailsChanged = $request->input('details_changed', false);
+
+        if ($detailsChanged) {
+            // Details have changed: set radio to "yes"
+            // and populate all three conditional fields
+            XfaPdf::previousAppraisals()->update([
+                'appraisalDetailsChangeRdo' => 'yes',
+                'nameOfLastAppraiser'       => $request->input(
+                    'last_appraiser',
+                    'Dr. James Patterson'
+                ),
+                'nameOfResponsibleOfficer'  => $request->input(
+                    'responsible_officer',
+                    'Dr. Sarah Mitchell'
+                ),
+                'nameOfDesignatedBody'      => $request->input(
+                    'designated_body',
+                    'NHS England'
+                ),
+            ]);
+        } else {
+            // No changes: just set the radio to "no"
+            XfaPdf::previousAppraisals()->updateField(
+                'appraisalDetailsChangeRdo',
+                'no'
+            );
+        }
+
+        // -----------------------------------------------
+        // 3. Save the PDF
+        // -----------------------------------------------
+        XfaPdf::save();
+
+        return redirect()->back()->with(
+            'success',
+            'Previous Appraisals saved.'
+        );
+    }
+
+    /**
+     * Read and display existing Previous Appraisals data.
+     */
+    public function showPreviousAppraisals()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        $data = XfaPdf::previousAppraisals()->read();
+
+        // Check if conditional fields should be shown
+        $showChangedDetails = ($data['appraisalDetailsChangeRdo'] ?? '') === 'yes';
+
+        return view('appraisal.previous-appraisals', [
+            'dateOfLastAppraisal'      => $data['dateOfLastAppraisal'] ?? '',
+            'detailsChanged'           => $showChangedDetails,
+            'nameOfLastAppraiser'      => $data['nameOfLastAppraiser'] ?? '',
+            'nameOfResponsibleOfficer' => $data['nameOfResponsibleOfficer'] ?? '',
+            'nameOfDesignatedBody'     => $data['nameOfDesignatedBody'] ?? '',
+        ]);
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::previousAppraisals()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::previousAppraisals()->readField('dateOfLastAppraisal')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::previousAppraisals()->updateField('dateOfLastAppraisal', '2024-09-15')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::previousAppraisals()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio to "yes"</td>
+                    <td><code>XfaPdf::previousAppraisals()->updateField('appraisalDetailsChangeRdo', 'yes')</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio to "no"</td>
+                    <td><code>XfaPdf::previousAppraisals()->updateField('appraisalDetailsChangeRdo', 'no')</code></td>
+                </tr>
+                <tr>
+                    <td>Set radio + conditional fields</td>
+                    <td><code>XfaPdf::previousAppraisals()->update(['appraisalDetailsChangeRdo' => 'yes', 'nameOfLastAppraiser' => '...', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- PAGE NAVIGATION -->
+    <!-- ======================================== -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="scope-of-work.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 4: Scope of Work</span>
+        </a>
+        <a href="last-years-pdp.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 6: Last Year's PDP &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 8: Quality Improvement - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; <a href="../index.html" class="hover:text-blue-600">Sections</a> &rarr; Quality Improvement</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 8: Quality Improvement Activity</h1>
+    <p class="text-gray-600 mb-8">This section captures the doctor's quality improvement activities such as clinical audits, case reviews, and service improvement projects. It includes a commentary field and a repeatable table of activities.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_8_QualityImprovement</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::qualityImprovement()</code>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>evidenceOfParticipation</code></td><td>Multiline text</td><td>Commentary on QI activities and how they demonstrate Good Medical Practice</td></tr>
+                <tr><td><code>appriaserComments</code></td><td>Multiline text</td><td>Appraiser comments on QI activities (note: field name contains original typo)</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>improvementActivities</code> &gt; <code>activity</code></td><td>Repeatable</td><td>QI activity rows, each with role, description, outcome, and supporting details</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="text-sm text-gray-500 mb-8">Each <code>activity</code> row inside <code>improvementActivities</code> contains: <code>role</code> (select), <code>description</code> (textarea), <code>outcome</code> (textarea), <code>supportLocation</code> (select), <code>firstEntry</code> (text), <code>amendData</code> (text).</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Quality Improvement
+$data = XfaPdf::read('Section_8_QualityImprovement');
+
+// Or using the fluent accessor
+$data = XfaPdf::qualityImprovement()->read();
+
+// $data looks like:
+// [
+//     'evidenceOfParticipation' => 'I have undertaken several QI activities...',
+//     'appriaserComments' => '',
+//     'improvementActivities' => [
+//         'activity' => [
+//             [
+//                 'role' => 'Lead',
+//                 'description' => 'Clinical audit of diabetes management outcomes...',
+//                 'outcome' => 'Identified 15% improvement in HbA1c control...',
+//                 'supportLocation' => 'Portfolio',
+//                 'firstEntry' => '2024-03-15',
+//                 'amendData' => '',
+//             ],
+//             [
+//                 'role' => 'Participant',
+//                 'description' => 'Review of emergency admission pathways...',
+//                 'outcome' => 'Reduced unnecessary admissions by 12%...',
+//                 'supportLocation' => 'Portfolio',
+//                 'firstEntry' => '2024-07-01',
+//                 'amendData' => '',
+//             ],
+//         ],
+//     ],
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$evidence = XfaPdf::qualityImprovement()->readField('evidenceOfParticipation');
+// 'I have undertaken several QI activities this year...'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUALITY IMPROVEMENT ACTIVITIES (REPEATABLE) -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quality Improvement Activities (Repeatable Table)</h2>
+    <p class="text-gray-700 mb-4">Each row in the quality improvement table represents one QI activity. You can add multiple rows, remove them, or replace all of them. Each row contains the following fields:</p>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Row field</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>role</code></td><td>Select</td><td>The doctor's role in the activity (e.g. Lead, Participant)</td></tr>
+                <tr><td><code>description</code></td><td>Textarea</td><td>Description of the quality improvement activity</td></tr>
+                <tr><td><code>outcome</code></td><td>Textarea</td><td>Outcomes and learning from the activity</td></tr>
+                <tr><td><code>supportLocation</code></td><td>Select</td><td>Where supporting evidence is held (e.g. Portfolio, Attached)</td></tr>
+                <tr><td><code>firstEntry</code></td><td>Text</td><td>Date the activity was first recorded</td></tr>
+                <tr><td><code>amendData</code></td><td>Text</td><td>Date of any subsequent amendments</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ADD A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding a new activity row</h3>
+    <p class="text-gray-700 mb-3">To add a new QI activity row:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Add a quality improvement activity
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf,
+    'Section_8_QualityImprovement',    // section name
+    'improvementActivities',            // container name
+    [
+        'role'            => 'Lead',
+        'description'     => 'Clinical audit of diabetes management outcomes across the practice. '
+                           . 'Reviewed HbA1c targets, medication adherence, and annual review rates '
+                           . 'for all Type 2 diabetes patients over a 12-month period.',
+        'outcome'         => 'Identified that 15% of patients had not received an annual review. '
+                           . 'Implemented a recall system which improved review rates from 78% to 94%. '
+                           . 'HbA1c control improved in 23% of patients reviewed.',
+        'supportLocation' => 'Portfolio',
+        'firstEntry'      => '2024-03-15',
+        'amendData'       => '',
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- REPLACE ALL ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Replacing all activity rows</h3>
+    <p class="text-gray-700 mb-3">If you want to clear existing rows and set new ones from scratch, use <code>setRepeatableItems()</code>:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf,
+    'Section_8_QualityImprovement',    // section
+    'improvementActivities',            // container
+    'activity',                         // element name
+    [
+        [
+            'role'            => 'Lead',
+            'description'     => 'Clinical audit of diabetes management outcomes. Reviewed HbA1c targets, '
+                               . 'medication adherence, and annual review rates for 840 Type 2 diabetes patients.',
+            'outcome'         => 'Annual review rates improved from 78% to 94% after implementing a structured '
+                               . 'recall system. HbA1c control improved in 23% of patients reviewed.',
+            'supportLocation' => 'Portfolio',
+            'firstEntry'      => '2024-03-15',
+            'amendData'       => '',
+        ],
+        [
+            'role'            => 'Participant',
+            'description'     => 'Review of emergency admission pathways for elderly patients with falls. '
+                               . 'Multi-disciplinary team project with A&E consultants and physiotherapy.',
+            'outcome'         => 'Developed a community-based falls assessment pathway. Reduced unnecessary '
+                               . 'hospital admissions by 12% over 6 months. Presented findings at regional meeting.',
+            'supportLocation' => 'Portfolio',
+            'firstEntry'      => '2024-07-01',
+            'amendData'       => '',
+        ],
+        [
+            'role'            => 'Lead',
+            'description'     => 'Service improvement project: streamlining repeat prescription requests. '
+                               . 'Audited turnaround times and identified bottlenecks in the workflow.',
+            'outcome'         => 'Reduced average processing time from 72 hours to 24 hours. Patient complaints '
+                               . 'regarding prescription delays decreased by 60%. Adopted as standard practice.',
+            'supportLocation' => 'Attached',
+            'firstEntry'      => '2024-09-20',
+            'amendData'       => '2024-11-05',
+        ],
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- READ ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Reading existing activity rows</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$activities = $manager->getRepeatableItems(
+    $xfaPdf,
+    'Section_8_QualityImprovement',
+    'improvementActivities'
+);
+
+foreach ($activities as $index => $activity) {
+    echo "Activity {$index}: [{$activity['role']}] {$activity['description']}\n";
+    echo "  Outcome: {$activity['outcome']}\n";
+}
+// Activity 0: [Lead] Clinical audit of diabetes management outcomes...
+//   Outcome: Annual review rates improved from 78% to 94%...
+// Activity 1: [Participant] Review of emergency admission pathways...
+//   Outcome: Developed a community-based falls assessment pathway...
+// Activity 2: [Lead] Service improvement project: streamlining repeat prescription requests...
+//   Outcome: Reduced average processing time from 72 hours to 24 hours...</code></pre>
+    </div>
+
+    <!-- REMOVE A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Removing an activity row</h3>
+    <p class="text-gray-700 mb-3">Remove a row by its index (0-based):</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Remove the second activity (index 1)
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf,
+    'Section_8_QualityImprovement',
+    'improvementActivities',
+    1
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+    <p class="text-gray-700 mb-4">In addition to the repeatable activity table, this section has two standalone text fields for commentary.</p>
+
+    <!-- evidenceOfParticipation -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Evidence of participation</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>evidenceOfParticipation</code></p>
+    <p class="text-gray-700 mb-3">This is where the doctor provides an overall commentary on their quality improvement activities and how they demonstrate Good Medical Practice. The form label reads: <em>"Please provide commentary on your quality improvement activities."</em></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::qualityImprovement()->updateField(
+    'evidenceOfParticipation',
+    'I have undertaken three quality improvement activities this year, covering '
+    . 'clinical audit, multi-disciplinary pathway redesign, and service improvement. '
+    . 'The diabetes audit (Domain 1: Knowledge) demonstrated my commitment to '
+    . 'evidence-based practice and resulted in measurable improvements in patient '
+    . 'outcomes. The falls pathway project (Domain 2: Safety) involved working '
+    . 'across organisational boundaries to reduce avoidable hospital admissions. '
+    . 'The prescription workflow project (Domain 3: Communication) improved '
+    . 'patient experience and practice efficiency.'
+);</code></pre>
+    </div>
+
+    <!-- appriaserComments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser's comments</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appriaserComments</code></p>
+    <div class="info-box yellow mb-3">
+        <strong>Note:</strong> The field name <code>appriaserComments</code> contains a typo (missing 'p' in "appraiser"). This matches the actual field name in the MAG42 dataset XML. Use the exact spelling shown here.
+    </div>
+    <p class="text-gray-700 mb-3">Written by the appraiser, summarising their view of the doctor's quality improvement activities.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::qualityImprovement()->updateField(
+    'appriaserComments',
+    'Dr Smith has demonstrated a strong commitment to quality improvement this year. '
+    . 'The diabetes audit is a well-designed clinical audit with a clear re-audit cycle '
+    . 'showing sustained improvement. The falls pathway project is an excellent example '
+    . 'of cross-organisational QI work with measurable patient benefit. I would encourage '
+    . 'Dr Smith to consider publishing the prescription workflow findings as a case study '
+    . 'for the wider primary care community.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Quality Improvement section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillQualityImprovement()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        $manager = app('xfa-pdf');
+        $xfaPdf = $manager->load($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Set quality improvement activity rows
+        // -----------------------------------------------
+        $xfaPdf = $manager->setRepeatableItems(
+            $xfaPdf,
+            'Section_8_QualityImprovement',
+            'improvementActivities',
+            'activity',
+            [
+                [
+                    'role'            => 'Lead',
+                    'description'     => 'Clinical audit of diabetes management '
+                                       . 'outcomes. Reviewed HbA1c targets, medication '
+                                       . 'adherence, and annual review rates for 840 '
+                                       . 'Type 2 diabetes patients over 12 months.',
+                    'outcome'         => 'Annual review rates improved from 78% to 94% '
+                                       . 'after implementing a structured recall system. '
+                                       . 'HbA1c control improved in 23% of patients. '
+                                       . 'Re-audit planned for Q2 2025.',
+                    'supportLocation' => 'Portfolio',
+                    'firstEntry'      => '2024-03-15',
+                    'amendData'       => '',
+                ],
+                [
+                    'role'            => 'Participant',
+                    'description'     => 'Review of emergency admission pathways for '
+                                       . 'elderly patients presenting with falls. '
+                                       . 'Multi-disciplinary project with A&E, '
+                                       . 'physiotherapy, and community nursing.',
+                    'outcome'         => 'Developed a community-based falls assessment '
+                                       . 'pathway. Reduced unnecessary hospital '
+                                       . 'admissions by 12% over 6 months. Findings '
+                                       . 'presented at the Regional QI Conference.',
+                    'supportLocation' => 'Portfolio',
+                    'firstEntry'      => '2024-07-01',
+                    'amendData'       => '',
+                ],
+                [
+                    'role'            => 'Lead',
+                    'description'     => 'Service improvement project: streamlining '
+                                       . 'repeat prescription requests. Audited '
+                                       . 'turnaround times and identified bottlenecks '
+                                       . 'in the administrative workflow.',
+                    'outcome'         => 'Reduced average processing time from 72 hours '
+                                       . 'to 24 hours. Patient complaints regarding '
+                                       . 'prescription delays decreased by 60%. Now '
+                                       . 'adopted as standard practice across the PCN.',
+                    'supportLocation' => 'Attached',
+                    'firstEntry'      => '2024-09-20',
+                    'amendData'       => '2024-11-05',
+                ],
+            ]
+        );
+
+        // -----------------------------------------------
+        // 2. Fill text fields
+        // -----------------------------------------------
+        XfaPdf::setFile($pdfPath);
+
+        XfaPdf::qualityImprovement()->update([
+            'evidenceOfParticipation' =>
+                'I have undertaken three quality improvement activities this '
+                . 'year, covering clinical audit, multi-disciplinary pathway '
+                . 'redesign, and service improvement. The diabetes audit '
+                . '(Domain 1: Knowledge) demonstrated my commitment to '
+                . 'evidence-based practice and resulted in measurable '
+                . 'improvements in patient outcomes. The falls pathway '
+                . 'project (Domain 2: Safety) involved working across '
+                . 'organisational boundaries to reduce avoidable hospital '
+                . 'admissions. The prescription workflow project (Domain 3: '
+                . 'Communication) improved patient experience and efficiency.',
+
+            'appriaserComments' =>
+                'Dr Smith has demonstrated a strong commitment to quality '
+                . 'improvement. The diabetes audit is well-designed with a '
+                . 'clear re-audit cycle. The falls pathway project is an '
+                . 'excellent example of cross-organisational QI work. I would '
+                . 'encourage publishing the prescription workflow findings '
+                . 'as a case study for the wider primary care community.',
+        ]);
+
+        // -----------------------------------------------
+        // 3. Save the PDF
+        // -----------------------------------------------
+        $manager->saveXfaPdf($xfaPdf);
+        // Or: XfaPdf::save();
+
+        return redirect()->back()->with('success', 'Quality Improvement saved.');
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::qualityImprovement()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::qualityImprovement()->readField('evidenceOfParticipation')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::qualityImprovement()->updateField('evidenceOfParticipation', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::qualityImprovement()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Get activity rows</td>
+                    <td><code>$manager->getRepeatableItems($xfaPdf, 'Section_8_QualityImprovement', 'improvementActivities')</code></td>
+                </tr>
+                <tr>
+                    <td>Add an activity row</td>
+                    <td><code>$manager->addRepeatableItem($xfaPdf, 'Section_8_QualityImprovement', 'improvementActivities', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Remove an activity row</td>
+                    <td><code>$manager->removeRepeatableItem($xfaPdf, 'Section_8_QualityImprovement', 'improvementActivities', $index)</code></td>
+                </tr>
+                <tr>
+                    <td>Replace all rows</td>
+                    <td><code>$manager->setRepeatableItems($xfaPdf, 'Section_8_QualityImprovement', 'improvementActivities', 'activity', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="cpd.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 7: CPD</span>
+        </a>
+        <a href="significant-events.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 9: Significant Events &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

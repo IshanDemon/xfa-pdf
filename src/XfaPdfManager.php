@@ -264,6 +264,20 @@ class XfaPdfManager
         return $templateXml ? $this->template->getNavigationSections($templateXml) : [];
     }
 
+    /**
+     * Get conditional visibility rules extracted from XFA template event scripts.
+     *
+     * @return array<string, array{targets: string[], visibleWhen: array<string, string[]>}>
+     */
+    public function conditionalRules(): array
+    {
+        $this->ensureLoaded();
+
+        $templateXml = $this->loaded->getTemplateXml();
+
+        return $templateXml ? $this->template->getConditionalRules($templateXml) : [];
+    }
+
     // =========================================================================
     // Section Accessors (fluent)
     // =========================================================================
@@ -664,6 +678,11 @@ class XfaPdfManager
 
         $fieldMeta = $this->getFieldMetadata($xfaPdf);
         $repeatables = $this->getRepeatableSubforms($xfaPdf);
+        $conditionalRules = [];
+        $templateXml = $xfaPdf->getTemplateXml();
+        if ($templateXml) {
+            $conditionalRules = $this->template->getConditionalRules($templateXml);
+        }
 
         if (empty($sectionLabels)) {
             foreach ($sections as $name) {
@@ -671,6 +690,6 @@ class XfaPdfManager
             }
         }
 
-        return $this->previewService->generate($allData, $fieldMeta, $repeatables, $sectionLabels);
+        return $this->previewService->generate($allData, $fieldMeta, $repeatables, $sectionLabels, $conditionalRules);
     }
 }

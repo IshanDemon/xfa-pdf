@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Configuration</h1>
+    <p class="text-gray-700 mb-4">After publishing, the config file is at <code>config/xfa-pdf.php</code>:</p>
+
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">&lt;?php
+
+return [
+    // URL prefix for all XFA PDF routes
+    'route_prefix' => 'xfa-pdf',
+
+    // Middleware applied to all routes
+    'middleware' => ['web'],
+
+    // Filesystem disk for storing uploaded PDFs
+    'disk' => 'local',
+
+    // Directory within the disk for uploads
+    'upload_path' => 'xfa-pdf',
+
+    // Maximum upload file size in MB
+    'max_upload_size' => 20,
+];</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Options Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead>
+                <tr><th>Key</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>route_prefix</code></td>
+                    <td><code>'xfa-pdf'</code></td>
+                    <td>URL prefix for all package routes (e.g. <code>/xfa-pdf</code>, <code>/xfa-pdf/upload</code>)</td>
+                </tr>
+                <tr>
+                    <td><code>middleware</code></td>
+                    <td><code>['web']</code></td>
+                    <td>Middleware stack applied to all routes. Add <code>'auth'</code> to require authentication.</td>
+                </tr>
+                <tr>
+                    <td><code>disk</code></td>
+                    <td><code>'local'</code></td>
+                    <td>Laravel filesystem disk for PDF file storage</td>
+                </tr>
+                <tr>
+                    <td><code>upload_path</code></td>
+                    <td><code>'xfa-pdf'</code></td>
+                    <td>Subdirectory within the disk where uploaded PDFs are stored</td>
+                </tr>
+                <tr>
+                    <td><code>max_upload_size</code></td>
+                    <td><code>20</code></td>
+                    <td>Maximum upload file size in megabytes</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Examples</h2>
+
+    <h3 class="font-semibold text-gray-900 mt-6 mb-2">Restrict routes to authenticated users</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">'middleware' => ['web', 'auth'],</code></pre>
+    </div>
+
+    <h3 class="font-semibold text-gray-900 mt-6 mb-2">Change the URL prefix</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">'route_prefix' => 'admin/forms',
+// Routes: /admin/forms, /admin/forms/upload, etc.</code></pre>
+    </div>
+
+    <h3 class="font-semibold text-gray-900 mt-6 mb-2">Use S3 storage</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">'disk' => 's3',
+'upload_path' => 'xfa-pdfs',</code></pre>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="installation.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Installation</span>
+        </a>
+        <a href="quick-start.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Quick Start &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="shared.js"></script>
+</body>
+</html>

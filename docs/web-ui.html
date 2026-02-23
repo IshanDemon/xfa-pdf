@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web UI Guide - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Web UI Guide</h1>
+    <p class="text-gray-600 mb-6">Full web interface for uploading, previewing, editing, and downloading XFA PDFs.</p>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Routes</h2>
+    <p class="text-gray-700 mb-3">All routes use the configured <code>route_prefix</code> (default: <code>/xfa-pdf</code>) and <code>middleware</code>.</p>
+    <div class="overflow-x-auto">
+        <table>
+            <thead>
+                <tr><th>Method</th><th>URI</th><th>Action</th><th>Name</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>GET</code></td><td><code>/xfa-pdf</code></td><td>List documents</td><td><code>xfa-pdf.index</code></td></tr>
+                <tr><td><code>GET</code></td><td><code>/xfa-pdf/upload</code></td><td>Upload form</td><td><code>xfa-pdf.create</code></td></tr>
+                <tr><td><code>POST</code></td><td><code>/xfa-pdf/upload</code></td><td>Store upload</td><td><code>xfa-pdf.store</code></td></tr>
+                <tr><td><code>GET</code></td><td><code>/xfa-pdf/{id}</code></td><td>Preview (read-only)</td><td><code>xfa-pdf.show</code></td></tr>
+                <tr><td><code>GET</code></td><td><code>/xfa-pdf/{id}/edit</code></td><td>Edit form</td><td><code>xfa-pdf.edit</code></td></tr>
+                <tr><td><code>PUT</code></td><td><code>/xfa-pdf/{id}</code></td><td>Save edits</td><td><code>xfa-pdf.update</code></td></tr>
+                <tr><td><code>DELETE</code></td><td><code>/xfa-pdf/{id}</code></td><td>Delete document</td><td><code>xfa-pdf.destroy</code></td></tr>
+                <tr><td><code>POST</code></td><td><code>/xfa-pdf/{id}/download</code></td><td>Download PDF</td><td><code>xfa-pdf.download</code></td></tr>
+                <tr><td><code>POST</code></td><td><code>/xfa-pdf/{id}/add-item</code></td><td>Add repeatable (AJAX)</td><td><code>xfa-pdf.add-item</code></td></tr>
+                <tr><td><code>POST</code></td><td><code>/xfa-pdf/{id}/remove-item</code></td><td>Remove repeatable (AJAX)</td><td><code>xfa-pdf.remove-item</code></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Upload Flow</h2>
+    <ol class="list-decimal list-inside text-gray-700 space-y-2">
+        <li>Navigate to <code>/xfa-pdf/upload</code></li>
+        <li>Select an XFA PDF file and optionally provide a document name</li>
+        <li>The file is stored on the configured disk and a database record is created</li>
+        <li>Redirected to the preview page</li>
+    </ol>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Preview Page</h2>
+    <p class="text-gray-700 mb-3">The <strong>show</strong> route renders a read-only HTML preview. All field types are rendered as HTML equivalents with current values. A sidebar lists all sections with human-readable labels from the template.</p>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Edit Page</h2>
+    <p class="text-gray-700 mb-3">The <strong>edit</strong> route renders an interactive form:</p>
+    <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+        <li>All field types rendered with correct HTML inputs</li>
+        <li>Sidebar section navigation with active highlighting</li>
+        <li>Add/remove repeatable items via AJAX</li>
+        <li><strong>Save Changes</strong> &mdash; writes edits back to the stored PDF</li>
+        <li><strong>Generate &amp; Download</strong> &mdash; applies edits and returns the PDF</li>
+    </ul>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Save vs Download</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>Action</th><th>What It Does</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Save Changes</strong></td>
+                    <td>Saves edits to the stored PDF via incremental update. Stays on page.</td>
+                </tr>
+                <tr>
+                    <td><strong>Generate &amp; Download</strong></td>
+                    <td>Applies current edits and returns the PDF as a download.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Repeatable Items in the UI</h2>
+    <p class="text-gray-700 mb-3">Repeatable sections display <strong>+</strong> and <strong>&minus;</strong> buttons. These send AJAX requests:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-javascript">// Add item
+fetch('/xfa-pdf/1/add-item', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token
+    },
+    body: JSON.stringify({
+        section: 'Section_7_CPD',
+        container: 'cpdList',
+        data: { activityType: '', description: '', hours: '' }
+    })
+});
+
+// Remove item
+fetch('/xfa-pdf/1/remove-item', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token
+    },
+    body: JSON.stringify({
+        section: 'Section_7_CPD',
+        container: 'cpdList',
+        index: 0
+    })
+});</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Customizing Views</h2>
+    <p class="text-gray-700 mb-3">Publish views to override the default templates:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-bash">php artisan vendor:publish --tag=xfa-pdf-views</code></pre>
+    </div>
+    <p class="text-gray-700 mt-2">Published to <code>resources/views/vendor/xfa-pdf/</code>. Views use the <code>xfa-pdf::</code> namespace.</p>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Database</h2>
+    <p class="text-gray-700 mb-3">The web UI uses an <code>xfa_documents</code> table:</p>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>bigIncrements</td><td>Primary key</td></tr>
+                <tr><td><code>name</code></td><td>string</td><td>Human-readable document name</td></tr>
+                <tr><td><code>original_filename</code></td><td>string</td><td>Original uploaded filename</td></tr>
+                <tr><td><code>file_path</code></td><td>string</td><td>Storage path to PDF file</td></tr>
+                <tr><td><code>metadata</code></td><td>json (nullable)</td><td>Extracted metadata</td></tr>
+                <tr><td><code>timestamps</code></td><td></td><td>created_at, updated_at</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="services.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Services</span>
+        </a>
+        <a href="cli.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">CLI Commands &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="shared.js"></script>
+</body>
+</html>

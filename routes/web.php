@@ -15,6 +15,8 @@ Route::group([
     Route::put('/{document}', [XfaPdfController::class, 'update'])->name('xfa-pdf.update');
     Route::delete('/{document}', [XfaPdfController::class, 'destroy'])->name('xfa-pdf.destroy');
 
+    Route::post('/{document}/download', [XfaPdfController::class, 'download'])->name('xfa-pdf.download');
+
     // AJAX endpoints for repeatable items
     Route::post('/{document}/add-item', [XfaPdfController::class, 'addItem'])->name('xfa-pdf.add-item');
     Route::post('/{document}/remove-item', [XfaPdfController::class, 'removeItem'])->name('xfa-pdf.remove-item');

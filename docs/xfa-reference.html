@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XFA Technical Reference - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">XFA Technical Reference</h1>
+    <p class="text-gray-600 mb-6">Background on the XFA format for developers working with this package.</p>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What is XFA?</h2>
+    <p class="text-gray-700 mb-4">XFA (XML Forms Architecture) is an Adobe XML-based PDF format where form structure (template) and data (datasets) are stored as separate XML packets inside a PDF container. Unlike standard AcroForms, XFA supports dynamic content reflow, growable fields, and repeating sections.</p>
+
+    <div class="info-box yellow">
+        <strong>Important:</strong> XFA is deprecated in PDF 2.0. Only Adobe Acrobat/Reader fully renders XFA forms. Browser PDF viewers do NOT support XFA.
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">PDF Structure</h2>
+    <p class="text-gray-700 mb-3">An XFA PDF is a standard PDF shell with XFA XML referenced from the AcroForm dictionary:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">PDF Catalog -> /AcroForm -> /XFA [
+    (preamble)  streamRef    // Opening &lt;xdp:xdp&gt; tag
+    (config)    streamRef    // Processing instructions
+    (template)  streamRef    // Form layout & field definitions
+    (datasets)  streamRef    // Form field data values
+    (postamble) streamRef    // Closing &lt;/xdp:xdp&gt; tag
+]</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">XDP Wrapper</h2>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xdp:xdp xmlns:xdp="http://ns.adobe.com/xdp/"&gt;
+    &lt;config xmlns="http://www.xfa.org/schema/xci/3.0/"&gt;...&lt;/config&gt;
+    &lt;template xmlns="http://www.xfa.org/schema/xfa-template/3.3/"&gt;...&lt;/template&gt;
+    &lt;xfa:datasets xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/"&gt;
+        &lt;xfa:data&gt;...&lt;/xfa:data&gt;
+    &lt;/xfa:datasets&gt;
+&lt;/xdp:xdp&gt;</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Key Namespaces</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>Packet</th><th>Namespace URI</th></tr></thead>
+            <tbody>
+                <tr><td>XDP Root</td><td><code>http://ns.adobe.com/xdp/</code></td></tr>
+                <tr><td>Template</td><td><code>http://www.xfa.org/schema/xfa-template/3.x/</code></td></tr>
+                <tr><td>Datasets</td><td><code>http://www.xfa.org/schema/xfa-data/1.0/</code></td></tr>
+                <tr><td>Config</td><td><code>http://www.xfa.org/schema/xci/3.0/</code></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Field Types</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>XFA UI Element</th><th>HTML Equivalent</th><th>Template XML</th></tr></thead>
+            <tbody>
+                <tr><td><code>textEdit</code></td><td><code>&lt;input type="text"&gt;</code></td><td><code>&lt;ui&gt;&lt;textEdit/&gt;&lt;/ui&gt;</code></td></tr>
+                <tr><td><code>textEdit multiLine="1"</code></td><td><code>&lt;textarea&gt;</code></td><td><code>&lt;ui&gt;&lt;textEdit multiLine="1"/&gt;&lt;/ui&gt;</code></td></tr>
+                <tr><td><code>checkButton</code></td><td><code>&lt;input type="checkbox"&gt;</code></td><td><code>&lt;ui&gt;&lt;checkButton/&gt;&lt;/ui&gt;</code></td></tr>
+                <tr><td><code>choiceList</code></td><td><code>&lt;select&gt;</code></td><td><code>&lt;ui&gt;&lt;choiceList/&gt;&lt;/ui&gt;</code></td></tr>
+                <tr><td><code>dateTimeEdit</code></td><td><code>&lt;input type="date"&gt;</code></td><td><code>&lt;ui&gt;&lt;dateTimeEdit/&gt;&lt;/ui&gt;</code></td></tr>
+                <tr><td><code>numericEdit</code></td><td><code>&lt;input type="number"&gt;</code></td><td><code>&lt;ui&gt;&lt;numericEdit/&gt;&lt;/ui&gt;</code></td></tr>
+                <tr><td><code>exclGroup</code></td><td><code>&lt;input type="radio"&gt;</code></td><td><code>&lt;exclGroup name="..."&gt;</code></td></tr>
+                <tr><td><code>signature</code></td><td>Signature pad</td><td><code>&lt;ui&gt;&lt;signature/&gt;&lt;/ui&gt;</code></td></tr>
+                <tr><td><code>button</code></td><td><code>&lt;button&gt;</code></td><td><code>&lt;ui&gt;&lt;button/&gt;&lt;/ui&gt;</code></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Data Binding</h2>
+    <p class="text-gray-700 mb-3">Fields bind to dataset nodes by name hierarchy. A field <code>firstName</code> in subform <code>page1</code> maps to:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-xml">&lt;xfa:datasets xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/"&gt;
+  &lt;xfa:data&gt;
+    &lt;form1&gt;
+      &lt;page1&gt;
+        &lt;firstName&gt;John&lt;/firstName&gt;
+      &lt;/page1&gt;
+    &lt;/form1&gt;
+  &lt;/xfa:data&gt;
+&lt;/xfa:datasets&gt;</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4">Binding modes:</p>
+    <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+        <li><code>match="dataRef"</code> &mdash; default, binds by name hierarchy</li>
+        <li><code>match="global"</code> &mdash; searches entire data tree</li>
+        <li><code>match="none"</code> &mdash; no data binding</li>
+    </ul>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Incremental PDF Updates</h2>
+    <p class="text-gray-700 mb-3">This package uses <strong>incremental updates</strong> to save changes, the same mechanism Adobe Reader uses:</p>
+    <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+        <li>New object versions are appended at the end of the file</li>
+        <li>A new xref (cross-reference) table points to the updated objects</li>
+        <li>Original PDF content is completely untouched</li>
+        <li>All interactive features (scripts, signatures) are preserved</li>
+        <li>Much faster than rewriting the entire file</li>
+    </ul>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Static vs Dynamic XFA</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>Aspect</th><th>Static XFA</th><th>Dynamic XFA</th></tr></thead>
+            <tbody>
+                <tr><td>Layout</td><td>Fixed positions</td><td>Reflows / repaginates</td></tr>
+                <tr><td>AcroForm fields</td><td>Yes (dual representation)</td><td>No (XFA only)</td></tr>
+                <tr><td>Non-Adobe viewers</td><td>AcroForm fallback</td><td>Blank pages</td></tr>
+                <tr><td>This package</td><td>Full support</td><td>Full support</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Subform Layouts</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>Layout</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>position</code></td><td>Absolute x/y positioning (static forms)</td></tr>
+                <tr><td><code>tb</code></td><td>Top-to-bottom flow (dynamic forms)</td></tr>
+                <tr><td><code>lr-tb</code></td><td>Left-to-right, then top-to-bottom</td></tr>
+                <tr><td><code>rl-tb</code></td><td>Right-to-left, then top-to-bottom</td></tr>
+                <tr><td><code>table</code></td><td>Table layout</td></tr>
+                <tr><td><code>row</code></td><td>Table row</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="exceptions.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Exceptions</span>
+        </a>
+        <a href="troubleshooting.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Troubleshooting &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="shared.js"></script>
+</body>
+</html>

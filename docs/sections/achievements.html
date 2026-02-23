@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 12: Achievements - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; Sections</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 12: Achievements, Challenges and Aspirations</h1>
+    <p class="text-gray-600 mb-8">A straightforward text-only section where the doctor records their achievements, aspirations, and items for discussion with the appraiser. There are no repeatable items or conditional fields &mdash; just four textarea fields capturing reflective narrative.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_12_AchievementsChallanges</code>
+        <span class="text-gray-500 text-sm">(note: the typo "Challanges" is in the actual XFA data)</span><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::achievements()</code><br>
+        <strong>Navigation label:</strong> Achievements, challenges and aspirations
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD OVERVIEW -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>achievements</code></td><td>Textarea</td><td>Notable achievements or challenges since last appraisal</td></tr>
+                <tr><td><code>aspirations</code></td><td>Textarea</td><td>Career aspirations and plans for the coming year</td></tr>
+                <tr><td><code>forDiscussion</code></td><td>Textarea</td><td>Anything additional to discuss with the appraiser</td></tr>
+                <tr><td><code>appraiserComments</code></td><td>Textarea</td><td>Appraiser comments (mirrors to Section 19)</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="text-sm text-gray-500 mb-8">This section has <strong>no repeatable items</strong> and <strong>no conditional fields</strong>. All four fields are standalone multiline text areas.</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Achievements, Challenges and Aspirations
+$data = XfaPdf::read('Section_12_AchievementsChallanges');
+
+// Or using the fluent accessor
+$data = XfaPdf::achievements()->read();
+
+// $data looks like:
+// [
+//     'achievements' => 'Completed Advanced Certificate in Diabetes Management...',
+//     'aspirations' => 'Planning to develop a community respiratory clinic...',
+//     'forDiscussion' => 'Would like to discuss options for sabbatical leave...',
+//     'appraiserComments' => 'Dr Smith has demonstrated strong clinical leadership...',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$achievements = XfaPdf::achievements()->readField('achievements');
+// 'Completed Advanced Certificate in Diabetes Management...'
+
+$aspirations = XfaPdf::achievements()->readField('aspirations');
+// 'Planning to develop a community respiratory clinic...'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+    <p class="text-gray-700 mb-4">All four fields in this section are multiline text areas intended for reflective narrative. Each can hold substantial text describing the doctor's professional journey over the appraisal period.</p>
+
+    <!-- achievements -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Achievements and challenges</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>achievements</code></p>
+    <p class="text-gray-700 mb-3">The doctor's notable achievements or challenges since their last appraisal. This is typically a reflective summary covering clinical work, leadership activities, educational accomplishments, and any significant obstacles encountered during the appraisal year.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::achievements()->updateField(
+    'achievements',
+    'Key achievements this year include:\n'
+    . '- Completed Advanced Certificate in Diabetes Management (University of Leicester)\n'
+    . '- Led the implementation of a new chronic disease review pathway across the practice, '
+    . 'reducing unplanned hospital admissions by 15%\n'
+    . '- Successfully supervised two GP registrars through their clinical placements\n'
+    . '- Published a case report in the British Journal of General Practice\n\n'
+    . 'Challenges:\n'
+    . '- Managing increased patient demand following the closure of a neighbouring practice\n'
+    . '- Balancing clinical workload with expanding PCN leadership responsibilities'
+);</code></pre>
+    </div>
+
+    <!-- aspirations -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Aspirations</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>aspirations</code></p>
+    <p class="text-gray-700 mb-3">The doctor's career aspirations and plans for the coming year. This covers professional development goals, changes in clinical focus, new roles under consideration, and longer-term career direction.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::achievements()->updateField(
+    'aspirations',
+    'In the coming year I plan to:\n'
+    . '- Develop a community-based respiratory clinic within the PCN, '
+    . 'offering spirometry and COPD management closer to patients\n'
+    . '- Complete the Diploma in Medical Education to formalise my teaching role\n'
+    . '- Explore opportunities for involvement in clinical research through '
+    . 'the NIHR Clinical Research Network\n'
+    . '- Continue to build leadership skills through the NHS Leadership Academy programme\n\n'
+    . 'Longer term, I am considering a portfolio career combining clinical practice '
+    . 'with medical education and health service management.'
+);</code></pre>
+    </div>
+
+    <!-- forDiscussion -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Items for discussion</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>forDiscussion</code></p>
+    <p class="text-gray-700 mb-3">Anything additional the doctor wishes to discuss with the appraiser during the appraisal meeting. This might include concerns about workload, requests for support, ideas for service development, or personal matters affecting their practice.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::achievements()->updateField(
+    'forDiscussion',
+    'I would like to discuss the following during our meeting:\n'
+    . '1. Options for a short sabbatical (3 months) to complete the Diploma '
+    . 'in Medical Education - timing and locum cover arrangements\n'
+    . '2. The impact of the neighbouring practice closure on our workload '
+    . 'and whether additional clinical sessions are sustainable\n'
+    . '3. Mentoring opportunities - I would value being paired with a senior '
+    . 'GP who has experience in health service management'
+);</code></pre>
+    </div>
+
+    <!-- appraiserComments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser comments</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserComments</code></p>
+    <p class="text-gray-700 mb-3">Written by the appraiser, summarising their view of the doctor's achievements and aspirations. This field mirrors content to Section 19 (Appraisal Summary), so anything written here may appear in the final summary output.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::achievements()->updateField(
+    'appraiserComments',
+    'Dr Smith has had an impressive year with clear achievements in both '
+    . 'clinical practice and education. The reduction in unplanned admissions '
+    . 'through the new chronic disease pathway is particularly noteworthy and '
+    . 'demonstrates strong clinical leadership.\n\n'
+    . 'The aspirations for the coming year are well-considered and realistic. '
+    . 'I support the plan to pursue the Diploma in Medical Education and will '
+    . 'help explore sabbatical options with the practice. The interest in '
+    . 'clinical research is commendable and aligns well with the PCN strategy.\n\n'
+    . 'We discussed the workload pressures from the neighbouring practice '
+    . 'closure and agreed to revisit this at the mid-year review.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Achievements section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillAchievements(Request $request)
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        // -----------------------------------------------
+        // Update all four fields at once
+        // -----------------------------------------------
+        XfaPdf::achievements()->update([
+            'achievements' =>
+                'Key achievements this year include:\n'
+                . '- Completed Advanced Certificate in Diabetes Management\n'
+                . '- Led implementation of chronic disease review pathway, '
+                . 'reducing unplanned admissions by 15%\n'
+                . '- Supervised two GP registrars through clinical placements\n'
+                . '- Published case report in BJGP\n\n'
+                . 'Challenges:\n'
+                . '- Managing increased demand after neighbouring practice closure\n'
+                . '- Balancing clinical workload with PCN leadership duties',
+
+            'aspirations' =>
+                'Plans for the coming year:\n'
+                . '- Develop community respiratory clinic within the PCN\n'
+                . '- Complete Diploma in Medical Education\n'
+                . '- Explore NIHR Clinical Research Network involvement\n'
+                . '- Continue NHS Leadership Academy programme',
+
+            'forDiscussion' =>
+                '1. Sabbatical options for Diploma in Medical Education\n'
+                . '2. Workload impact from neighbouring practice closure\n'
+                . '3. Mentoring opportunities in health service management',
+
+            'appraiserComments' =>
+                'Dr Smith has had an impressive year demonstrating strong '
+                . 'clinical leadership. The chronic disease pathway work is '
+                . 'particularly noteworthy. Aspirations are well-considered '
+                . 'and realistic. We will revisit workload pressures at the '
+                . 'mid-year review.',
+        ]);
+
+        // -----------------------------------------------
+        // Save the PDF
+        // -----------------------------------------------
+        XfaPdf::save();
+
+        return redirect()->back()->with(
+            'success',
+            'Achievements section saved.'
+        );
+    }
+
+    /**
+     * Read and display existing Achievements data.
+     */
+    public function showAchievements()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        XfaPdf::setFile($pdfPath);
+
+        $data = XfaPdf::achievements()->read();
+
+        return view('appraisal.achievements', [
+            'achievements'      => $data['achievements'] ?? '',
+            'aspirations'       => $data['aspirations'] ?? '',
+            'forDiscussion'     => $data['forDiscussion'] ?? '',
+            'appraiserComments' => $data['appraiserComments'] ?? '',
+        ]);
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::achievements()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::achievements()->readField('achievements')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::achievements()->updateField('achievements', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::achievements()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Read aspirations</td>
+                    <td><code>XfaPdf::achievements()->readField('aspirations')</code></td>
+                </tr>
+                <tr>
+                    <td>Read discussion items</td>
+                    <td><code>XfaPdf::achievements()->readField('forDiscussion')</code></td>
+                </tr>
+                <tr>
+                    <td>Read appraiser comments</td>
+                    <td><code>XfaPdf::achievements()->readField('appraiserComments')</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- PAGE NAVIGATION -->
+    <!-- ======================================== -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="complaints.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 11: Complaints</span>
+        </a>
+        <a href="probity.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 13: Probity &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

@@ -36,12 +36,14 @@ class PreviewService
      * @param array<string, array> $fieldMeta Field metadata from template
      * @param array<string, array> $repeatables Repeatable subform metadata
      * @param array<string, string> $sectionLabels Human-readable section labels
+     * @param array<string, array> $conditionalRules Conditional visibility rules
      */
     public function generate(
         array $sections,
         array $fieldMeta,
         array $repeatables,
-        array $sectionLabels
+        array $sectionLabels,
+        array $conditionalRules = []
     ): string {
         $sectionsHtml = '';
         $tocItems = '';
@@ -49,7 +51,7 @@ class PreviewService
         foreach ($sections as $sectionKey => $fields) {
             $label = $sectionLabels[$sectionKey] ?? self::humanize($sectionKey);
             $sectionId = 'section-' . $sectionKey;
-            $fieldsHtml = $this->renderFieldsHtml($fields, $sectionKey, $fieldMeta, $repeatables);
+            $fieldsHtml = $this->renderFieldsHtml($fields, $sectionKey, $fieldMeta, $repeatables, $conditionalRules);
             $isEmpty = empty($fields);
             $badge = $isEmpty ? '<span class="badge empty">Empty</span>' : '';
 
@@ -57,7 +59,7 @@ class PreviewService
             $sectionsHtml .= $this->renderSection($sectionKey, $label, $fieldsHtml, $isEmpty);
         }
 
-        return $this->wrapInLayout($sectionsHtml, $tocItems);
+        return $this->wrapInLayout($sectionsHtml, $tocItems, $conditionalRules);
     }
 
     /**
@@ -83,7 +85,7 @@ class PreviewService
      *
      * @param mixed $fields
      */
-    public function renderFieldsHtml($fields, string $parentPath, array $fieldMeta, array $repeatables): string
+    public function renderFieldsHtml($fields, string $parentPath, array $fieldMeta, array $repeatables, array $conditionalRules = []): string
     {
         if (is_string($fields)) {
             return '';
@@ -95,15 +97,28 @@ class PreviewService
 
         $html = '';
         foreach ($fields as $key => $value) {
-            $fieldLabel = self::humanize((string) $key);
             $dataPath = $parentPath ? $parentPath . '.' . $key : (string) $key;
             $inputName = str_replace('.', '/', $dataPath);
+            $meta = self::resolveFieldMeta($dataPath, (string) $key, $fieldMeta);
+            $fieldLabel = !empty($meta['caption']) ? $meta['caption'] : self::humanize((string) $key);
+
+            // Check if this field is a conditional target
+            $condTargetAttr = '';
+            foreach ($conditionalRules as $trigger => $rule) {
+                if (in_array((string) $key, $rule['targets'] ?? [])) {
+                    $condTargetAttr = ' data-cond-target="' . e((string) $key) . '"';
+                    break;
+                }
+            }
+
+            // Check if this field is a conditional trigger
+            $isTrigger = isset($conditionalRules[(string) $key]);
+            $triggerAttr = $isTrigger ? ' data-cond-trigger="' . e((string) $key) . '"' : '';
 
             if (is_string($value)) {
-                $meta = self::resolveFieldMeta($dataPath, (string) $key, $fieldMeta);
-                $html .= '<div class="field-row">';
+                $html .= '<div class="field-row" data-field-key="' . e((string) $key) . '"' . $condTargetAttr . '>';
                 $html .= '<div class="field-name">' . e($fieldLabel) . '</div>';
-                $html .= '<div class="field-control">';
+                $html .= '<div class="field-control"' . $triggerAttr . '>';
                 $html .= $this->renderControl($inputName, $value, $meta);
                 $html .= '</div></div>';
             } elseif (is_array($value)) {
@@ -112,7 +127,7 @@ class PreviewService
                 if (isset($value[0])) {
                     // Indexed array (multiple items)
                     $count = count($value);
-                    $html .= '<div class="nested-group' . ($isRepeatable ? ' repeatable-group' : '') . '">';
+                    $html .= '<div class="nested-group' . ($isRepeatable ? ' repeatable-group' : '') . '" data-field-key="' . e((string) $key) . '"' . $condTargetAttr . '>';
                     $html .= '<div class="group-title">' . e($fieldLabel);
                     $html .= ' <span class="badge list-count">' . $count . ' items</span>';
                     if ($isRepeatable) {
@@ -135,14 +150,14 @@ class PreviewService
                                 $html .= 'Item ' . ($i + 1);
                             }
                             $html .= '</div>';
-                            $html .= $this->renderFieldsHtml($item, $itemPath, $fieldMeta, $repeatables);
+                            $html .= $this->renderFieldsHtml($item, $itemPath, $fieldMeta, $repeatables, $conditionalRules);
                             $html .= '</div>';
                             if ($isRepeatable) {
                                 $html .= '</div>';
                             }
                         } else {
                             $itemMeta = self::resolveFieldMeta($dataPath, (string) $key, $fieldMeta);
-                            $html .= '<div class="field-row">';
+                            $html .= '<div class="field-row" data-field-key="' . e((string) $key) . '">';
                             $html .= '<div class="field-name">' . e($fieldLabel) . ' [' . ($i + 1) . ']</div>';
                             $html .= '<div class="field-control">';
                             $html .= $this->renderControl($inputName . '[' . $i . ']', (string) $item, $itemMeta);
@@ -153,7 +168,7 @@ class PreviewService
                 } else {
                     // Single associative array (nested group)
                     if ($isRepeatable) {
-                        $html .= '<div class="nested-group repeatable-group">';
+                        $html .= '<div class="nested-group repeatable-group" data-field-key="' . e((string) $key) . '"' . $condTargetAttr . '>';
                         $html .= '<div class="group-title">' . e($fieldLabel);
                         $html .= ' <span class="badge list-count">1 items</span>';
                         $html .= ' <button type="button" class="btn-add-item" onclick="addItem(this)">+ Add Item</button>';
@@ -163,14 +178,14 @@ class PreviewService
                         $html .= '<div class="group-title"><span class="item-label">Item 1</span>';
                         $html .= ' <button type="button" class="btn-remove-item" onclick="removeItem(this)">Remove</button>';
                         $html .= '</div>';
-                        $html .= $this->renderFieldsHtml($value, $dataPath . '[0]', $fieldMeta, $repeatables);
+                        $html .= $this->renderFieldsHtml($value, $dataPath . '[0]', $fieldMeta, $repeatables, $conditionalRules);
                         $html .= '</div>';
                         $html .= '</div>';
                         $html .= '</div>';
                     } else {
-                        $html .= '<div class="nested-group">';
+                        $html .= '<div class="nested-group" data-field-key="' . e((string) $key) . '"' . $condTargetAttr . '>';
                         $html .= '<div class="group-title">' . e($fieldLabel) . '</div>';
-                        $html .= $this->renderFieldsHtml($value, $dataPath, $fieldMeta, $repeatables);
+                        $html .= $this->renderFieldsHtml($value, $dataPath, $fieldMeta, $repeatables, $conditionalRules);
                         $html .= '</div>';
                     }
                 }
@@ -235,10 +250,11 @@ class PreviewService
     /**
      * Wrap sections HTML in a full page layout.
      */
-    private function wrapInLayout(string $sectionsHtml, string $tocItems): string
+    private function wrapInLayout(string $sectionsHtml, string $tocItems, array $conditionalRules = []): string
     {
         $css = $this->getStylesheet();
         $js = $this->getJavaScript();
+        $condRulesJson = json_encode($conditionalRules);
 
         return <<<HTML
 <!DOCTYPE html>
@@ -261,6 +277,17 @@ class PreviewService
   <div class="main">{$sectionsHtml}</div>
 </div>
 <script>{$js}</script>
+<script>
+var condRules = {$condRulesJson};
+function applyCondVis(k,v){var r=condRules[k];if(!r)return;var vis=r.visibleWhen[v]||r.visibleWhen['_default']||[];
+(r.targets||[]).forEach(function(t){var els=document.querySelectorAll('[data-cond-target="'+t+'"]');
+els.forEach(function(el){el.style.display=vis.indexOf(t)!==-1?'':'none';});});}
+document.querySelectorAll('[data-cond-trigger]').forEach(function(el){var k=el.getAttribute('data-cond-trigger');
+if(el.tagName==='SELECT'){el.addEventListener('change',function(){applyCondVis(k,this.value);});applyCondVis(k,el.value);}
+else{var radios=el.querySelectorAll('input[type="radio"]');
+radios.forEach(function(r){r.addEventListener('change',function(){applyCondVis(k,this.value);});});
+var c=el.querySelector('input[type="radio"]:checked');applyCondVis(k,c?c.value:'');}});
+</script>
 </body>
 </html>
 HTML;
@@ -313,6 +340,7 @@ body { font-family: Arial, Helvetica, sans-serif; background: #f0f2f5; color: #3
 .badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500; margin-left: 8px; vertical-align: middle; }
 .badge.empty { background: #f0f0f0; color: #999; }
 .badge.list-count { background: #e8f0fe; color: #003087; }
+[data-cond-target].cond-hidden { display: none; }
 .repeatable-group { border-left: 3px solid #003087; }
 .repeatable-item { position: relative; border-bottom: 2px solid #e8f0fe; padding-bottom: 4px; margin-bottom: 2px; }
 .repeatable-item:last-of-type { border-bottom: none; margin-bottom: 0; }

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 4: Scope of Work - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; Sections</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 4: Scope of Work</h1>
+    <p class="text-gray-600 mb-8">This section captures the doctor's current roles, where they work, and any upcoming changes. It includes a repeatable table where each row represents one job or role.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_4_ScopeOfWork</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::scopeOfWork()</code>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>role</code></td><td>Text</td><td>Job or role title (e.g. "GP Partner")</td></tr>
+                <tr><td><code>detail</code></td><td>Multiline text</td><td>Description of duties and responsibilities</td></tr>
+                <tr><td><code>commenced</code></td><td>Text</td><td>Year the role started (e.g. "2018")</td></tr>
+                <tr><td><code>organisation</code></td><td>Multiline text</td><td>Organisation name and contact details</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>changesToPractice</code></td><td>Multiline text</td><td>Relationship between various roles</td></tr>
+                <tr><td><code>changesToPracticeNextYear</code></td><td>Multiline text</td><td>Expected changes to scope next year</td></tr>
+                <tr><td><code>appraiserComments</code></td><td>Multiline text</td><td>Appraiser's comments on scope of work</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="text-sm text-gray-500 mb-8">The first four fields (<code>role</code>, <code>detail</code>, <code>commenced</code>, <code>organisation</code>) are <strong>repeatable</strong> &mdash; they live inside rows that can be added or removed. The last three are standalone text fields.</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Scope of Work
+$data = XfaPdf::read('Section_4_ScopeOfWork');
+
+// Or using the fluent accessor
+$data = XfaPdf::scopeOfWork()->read();
+
+// $data looks like:
+// [
+//     'scopeOfPracticeStatement' => [
+//         'workRpt' => [
+//             ['role' => 'GP Partner', 'detail' => '...', 'commenced' => '2018', 'organisation' => '...'],
+//             ['role' => 'Clinical Lead', 'detail' => '...', 'commenced' => '2020', 'organisation' => '...'],
+//         ],
+//     ],
+//     'changesToPractice' => 'I hold two roles which complement each other...',
+//     'changesToPracticeNextYear' => 'Planning to reduce clinical sessions...',
+//     'appraiserComments' => '',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$comments = XfaPdf::scopeOfWork()->readField('changesToPractice');
+// 'I hold two roles which complement each other...'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- WORK ROWS (REPEATABLE) -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Work Rows (Repeatable Table)</h2>
+    <p class="text-gray-700 mb-4">Each row in the scope of work table represents one job or role. You can add multiple rows, remove them, or replace all of them.</p>
+
+    <!-- ADD A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding a new work row</h3>
+    <p class="text-gray-700 mb-3">To add a new row with all four fields filled in:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Add a work row
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf,
+    'Section_4_ScopeOfWork',        // section name
+    'scopeOfPracticeStatement',      // container name
+    [
+        'role'         => 'GP Partner',
+        'detail'       => 'Providing primary care services including chronic disease management, minor surgery, and on-call duties.',
+        'commenced'    => '2018',
+        'organisation' => 'Riverside Medical Centre, 42 High Street, Manchester M1 2AB. Tel: 0161 123 4567',
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ADD MULTIPLE ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding multiple rows at once</h3>
+    <p class="text-gray-700 mb-3">If you need to add several roles, call <code>addRepeatableItem()</code> for each one:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Row 1: Main clinical role
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_4_ScopeOfWork', 'scopeOfPracticeStatement', [
+    'role'         => 'GP Partner',
+    'detail'       => 'Full-time partner. 8 clinical sessions per week. Lead for diabetes and respiratory medicine.',
+    'commenced'    => '2018',
+    'organisation' => 'Riverside Medical Centre, 42 High Street, Manchester M1 2AB',
+]);
+
+// Row 2: Secondary role
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_4_ScopeOfWork', 'scopeOfPracticeStatement', [
+    'role'         => 'Clinical Lead - PCN',
+    'detail'       => 'Leading the respiratory pathway across the Primary Care Network. 1 session per week.',
+    'commenced'    => '2021',
+    'organisation' => 'North Manchester PCN, c/o Riverside Medical Centre',
+]);
+
+// Row 3: Teaching role
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_4_ScopeOfWork', 'scopeOfPracticeStatement', [
+    'role'         => 'GP Trainer',
+    'detail'       => 'Supervising GP registrars. 1 session per week for training and tutorials.',
+    'commenced'    => '2020',
+    'organisation' => 'Health Education England, North West Deanery',
+]);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- REPLACE ALL ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Replacing all rows</h3>
+    <p class="text-gray-700 mb-3">If you want to clear existing rows and set new ones from scratch, use <code>setRepeatableItems()</code>:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf,
+    'Section_4_ScopeOfWork',        // section
+    'scopeOfPracticeStatement',      // container
+    'workRpt',                       // element name
+    [
+        [
+            'role'         => 'Salaried GP',
+            'detail'       => '6 clinical sessions. Special interest in dermatology.',
+            'commenced'    => '2019',
+            'organisation' => 'Park View Surgery, Leeds LS1 3AA',
+        ],
+        [
+            'role'         => 'Out of Hours GP',
+            'detail'       => 'Weekend and evening shifts. 2 sessions per month.',
+            'commenced'    => '2022',
+            'organisation' => 'Local Care Direct, Leeds',
+        ],
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- READ ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Reading existing rows</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$rows = $manager->getRepeatableItems(
+    $xfaPdf,
+    'Section_4_ScopeOfWork',
+    'scopeOfPracticeStatement'
+);
+
+foreach ($rows as $index => $row) {
+    echo "Row {$index}: {$row['role']} at {$row['organisation']}\n";
+}
+// Row 0: GP Partner at Riverside Medical Centre...
+// Row 1: Clinical Lead - PCN at North Manchester PCN...</code></pre>
+    </div>
+
+    <!-- REMOVE A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Removing a row</h3>
+    <p class="text-gray-700 mb-3">Remove a row by its index (0-based):</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Remove the second row (index 1)
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf,
+    'Section_4_ScopeOfWork',
+    'scopeOfPracticeStatement',
+    1
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+    <p class="text-gray-700 mb-4">Below the work table, there are three free-text fields. These are standalone (not repeatable).</p>
+
+    <!-- changesToPractice -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Relationship between roles</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>changesToPractice</code></p>
+    <p class="text-gray-700 mb-3">This is where the doctor describes how their various roles relate to each other. The form label reads: <em>"Please describe here anything significant regarding the relationship between your various roles."</em></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::scopeOfWork()->updateField(
+    'changesToPractice',
+    'My GP Partner role and PCN Clinical Lead role are closely related. '
+    . 'The PCN work allows me to develop respiratory pathways that directly '
+    . 'benefit patients at my practice. My GP Trainer role keeps me up to date '
+    . 'with current training standards and evidence-based practice.'
+);</code></pre>
+    </div>
+
+    <!-- changesToPracticeNextYear -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Changes to scope next year</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>changesToPracticeNextYear</code></p>
+    <p class="text-gray-700 mb-3">Describe any planned changes to the scope of work in the coming year. The form label reads: <em>"Please describe any changes to your scope of work that you envisage taking place in the next year."</em></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::scopeOfWork()->updateField(
+    'changesToPracticeNextYear',
+    'I plan to reduce my clinical sessions from 8 to 7 per week to allow '
+    . 'more time for the PCN Clinical Lead role. I am also considering taking '
+    . 'on a CCG advisory role for respiratory services starting April 2025.'
+);</code></pre>
+    </div>
+
+    <!-- appraiserComments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser's comments</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserComments</code></p>
+    <p class="text-gray-700 mb-3">Written by the appraiser, summarising their view of the doctor's scope of work.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::scopeOfWork()->updateField(
+    'appraiserComments',
+    'Dr Smith has a well-balanced portfolio of clinical and leadership roles. '
+    . 'The planned reduction in clinical sessions to accommodate the expanding '
+    . 'PCN role is a sensible adjustment. The training role demonstrates a '
+    . 'commitment to professional development and supporting the next generation.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Scope of Work section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillScopeOfWork()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        $manager = app('xfa-pdf');
+        $xfaPdf = $manager->load($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Add work rows (roles)
+        // -----------------------------------------------
+        $xfaPdf = $manager->setRepeatableItems(
+            $xfaPdf,
+            'Section_4_ScopeOfWork',
+            'scopeOfPracticeStatement',
+            'workRpt',
+            [
+                [
+                    'role'         => 'GP Partner',
+                    'detail'       => 'Full-time partner providing primary care. '
+                                    . '8 clinical sessions per week. Lead for '
+                                    . 'diabetes and respiratory medicine.',
+                    'commenced'    => '2018',
+                    'organisation' => 'Riverside Medical Centre, '
+                                    . '42 High Street, Manchester M1 2AB. '
+                                    . 'Tel: 0161 123 4567',
+                ],
+                [
+                    'role'         => 'Clinical Lead - PCN',
+                    'detail'       => 'Leading the respiratory pathway across '
+                                    . 'the Primary Care Network. 1 session/week.',
+                    'commenced'    => '2021',
+                    'organisation' => 'North Manchester PCN, '
+                                    . 'c/o Riverside Medical Centre',
+                ],
+                [
+                    'role'         => 'GP Trainer',
+                    'detail'       => 'Supervising GP registrars. 1 session/week '
+                                    . 'for training and tutorials.',
+                    'commenced'    => '2020',
+                    'organisation' => 'Health Education England, '
+                                    . 'North West Deanery',
+                ],
+            ]
+        );
+
+        // -----------------------------------------------
+        // 2. Fill text fields
+        // -----------------------------------------------
+        XfaPdf::setFile($pdfPath);
+
+        XfaPdf::scopeOfWork()->update([
+            'changesToPractice' =>
+                'My GP Partner role and PCN Clinical Lead role are closely '
+                . 'related. The PCN work allows me to develop respiratory '
+                . 'pathways that directly benefit my practice patients. '
+                . 'My GP Trainer role keeps me up to date with current '
+                . 'evidence-based practice.',
+
+            'changesToPracticeNextYear' =>
+                'Planning to reduce clinical sessions from 8 to 7 per week '
+                . 'to accommodate expanding PCN responsibilities. Considering '
+                . 'a CCG advisory role for respiratory services from April 2025.',
+
+            'appraiserComments' =>
+                'Dr Smith has a well-balanced portfolio. The planned session '
+                . 'reduction for PCN work is sensible. The training role shows '
+                . 'commitment to supporting the next generation of GPs.',
+        ]);
+
+        // -----------------------------------------------
+        // 3. Save the PDF
+        // -----------------------------------------------
+        $manager->saveXfaPdf($xfaPdf);
+        // Or: XfaPdf::save();
+
+        return redirect()->back()->with('success', 'Scope of Work saved.');
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::scopeOfWork()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::scopeOfWork()->readField('changesToPractice')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::scopeOfWork()->updateField('changesToPractice', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::scopeOfWork()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Get work rows</td>
+                    <td><code>$manager->getRepeatableItems($xfaPdf, 'Section_4_ScopeOfWork', 'scopeOfPracticeStatement')</code></td>
+                </tr>
+                <tr>
+                    <td>Add a work row</td>
+                    <td><code>$manager->addRepeatableItem($xfaPdf, 'Section_4_ScopeOfWork', 'scopeOfPracticeStatement', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Remove a work row</td>
+                    <td><code>$manager->removeRepeatableItem($xfaPdf, 'Section_4_ScopeOfWork', 'scopeOfPracticeStatement', $index)</code></td>
+                </tr>
+                <tr>
+                    <td>Replace all rows</td>
+                    <td><code>$manager->setRepeatableItems($xfaPdf, 'Section_4_ScopeOfWork', 'scopeOfPracticeStatement', 'workRpt', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="../web-ui.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Web UI Guide</span>
+        </a>
+        <a href="../cli.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">CLI Commands &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

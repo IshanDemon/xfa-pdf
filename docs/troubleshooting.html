@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troubleshooting - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Troubleshooting</h1>
+
+    <div class="space-y-6">
+
+        <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">"The file is damaged and could not be repaired"</h3>
+            <p class="text-gray-700 text-sm mb-2">This Adobe Reader error means the incremental update has a structural problem. Common causes:</p>
+            <ul class="list-disc list-inside text-gray-600 text-sm space-y-1 ml-4">
+                <li>Xref table offsets are incorrect &mdash; byte positions must be exact</li>
+                <li>New stream object has wrong <code>/Length</code> &mdash; must match exact byte length of new XML</li>
+                <li>Trailer <code>/Prev</code> doesn't point to previous xref offset</li>
+                <li>Object number doesn't match the datasets stream from the <code>/XFA</code> array</li>
+            </ul>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">PDF opens but shows blank pages in Chrome/Firefox/Safari</h3>
+            <p class="text-gray-700 text-sm">This is <strong>expected behavior</strong>. XFA PDFs are only rendered by Adobe Acrobat Reader. Browser PDF viewers do not support XFA. Static XFA forms may show an AcroForm fallback, but dynamic XFA forms will show blank pages. Always open XFA PDFs in Adobe Acrobat Reader.</p>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">Fields not saving / values disappearing after save</h3>
+            <p class="text-gray-700 text-sm mb-2">Check these:</p>
+            <ul class="list-disc list-inside text-gray-600 text-sm space-y-1 ml-4">
+                <li><strong>Field path is incorrect</strong> &mdash; use <code>XfaPdf::sections()</code> and <code>XfaPdf::read()</code> to verify exact names</li>
+                <li><strong>Namespace mismatch</strong> &mdash; verify <code>NamespaceService::detect()</code> finds the correct data namespace</li>
+                <li><strong>Template being modified</strong> &mdash; only datasets XML should be changed, never the template</li>
+                <li><strong>Wrong object number</strong> &mdash; the datasets stream object number must match the <code>/XFA</code> array reference</li>
+            </ul>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">NoXfaDataException: No datasets found</h3>
+            <p class="text-gray-700 text-sm mb-2">The PDF doesn't contain XFA data streams:</p>
+            <ul class="list-disc list-inside text-gray-600 text-sm space-y-1 ml-4">
+                <li>The PDF may be a standard AcroForm, not XFA &mdash; this package only handles XFA</li>
+                <li>Streams may use unsupported compression &mdash; the package supports Flate (zlib) only</li>
+                <li>The <code>/XFA</code> array reference may be missing from the AcroForm dictionary</li>
+            </ul>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">Namespace detection returning wrong prefix</h3>
+            <p class="text-gray-700 text-sm">The <code>NamespaceService</code> auto-detects namespaces from the XML root element. If detection seems wrong, inspect the XML with <code>XfaPdf::rawXml()</code>. The service uses <code>local-name()</code> in XPath for namespace-agnostic field matching, so most queries work regardless of prefix.</p>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">Upload fails with "file too large"</h3>
+            <p class="text-gray-700 text-sm mb-2">Two things to check:</p>
+            <ul class="list-disc list-inside text-gray-600 text-sm space-y-1 ml-4">
+                <li>Increase <code>max_upload_size</code> in <code>config/xfa-pdf.php</code> (default: 20 MB)</li>
+                <li>Check PHP settings: <code>upload_max_filesize</code> and <code>post_max_size</code> in <code>php.ini</code></li>
+            </ul>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">Preview shows wrong field types</h3>
+            <p class="text-gray-700 text-sm">The preview renders fields based on template metadata. If a field shows as a text input when it should be a dropdown, ensure the template XML is being extracted correctly. Check <code>XfaPdf::fieldMetadata()</code> to see what types are detected.</p>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">Repeatable items not appearing after add</h3>
+            <p class="text-gray-700 text-sm mb-2">Verify:</p>
+            <ul class="list-disc list-inside text-gray-600 text-sm space-y-1 ml-4">
+                <li>The section name and container name are correct</li>
+                <li>The container exists in the datasets XML (check with <code>XfaPdf::read()</code>)</li>
+                <li>The CSRF token is being sent with AJAX requests</li>
+                <li>Check <code>FieldNotFoundException::containerNotFound()</code> is not being thrown</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 flex justify-start">
+        <a href="xfa-reference.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; XFA Reference</span>
+        </a>
+    </div>
+
+    <footer class="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-400">
+        <p>xfa/pdf &mdash; Laravel package for XFA PDF manipulation</p>
+        <p class="mt-1">Built with pure PHP. No paid dependencies.</p>
+    </footer>
+
+</div>
+</div>
+
+<script src="shared.js"></script>
+</body>
+</html>

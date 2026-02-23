@@ -30,6 +30,7 @@
   .badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500; margin-left: 8px; vertical-align: middle; }
   .badge.empty { background: #f0f0f0; color: #999; }
   .badge.list-count { background: #e8f0fe; color: #003087; }
+  [data-cond-target].cond-hidden { display: none; }
 </style>
 @endsection
 
@@ -62,7 +63,7 @@
           @if($isEmpty)<span class="badge empty">Empty</span>@endif
         </div>
         <div class="section-body">
-          @include('xfa-pdf::partials.fields-readonly', ['fields' => $fields, 'parentPath' => $sectionKey])
+          @include('xfa-pdf::partials.fields-readonly', ['fields' => $fields, 'parentPath' => $sectionKey, 'fieldMeta' => $fieldMeta, 'conditionalRules' => $conditionalRules ?? []])
         </div>
       </div>
     @endforeach
@@ -82,6 +83,37 @@ function openSection(id) {
 // Open first non-empty section
 document.querySelectorAll('.section').forEach(function(s, i) {
   if (i < 2) s.classList.add('open');
+});
+
+// Conditional field visibility (read-only: apply initial state based on current values)
+var condRules = @json($conditionalRules ?? []);
+
+function applyConditionalVisibility(triggerKey, value) {
+  var rule = condRules[triggerKey];
+  if (!rule) return;
+  var targets = rule.targets || [];
+  var visibleKeys = rule.visibleWhen[value] || rule.visibleWhen['_default'] || [];
+  targets.forEach(function(targetKey) {
+    var els = document.querySelectorAll('[data-cond-target="' + targetKey + '"]');
+    els.forEach(function(el) {
+      if (visibleKeys.indexOf(targetKey) !== -1) {
+        el.classList.remove('cond-hidden');
+      } else {
+        el.classList.add('cond-hidden');
+      }
+    });
+  });
+}
+
+// Apply initial visibility from current field values
+Object.keys(condRules).forEach(function(triggerKey) {
+  var triggerEl = document.querySelector('[data-field-key="' + triggerKey + '"]');
+  if (triggerEl) {
+    var valueEl = triggerEl.querySelector('.field-value');
+    var value = valueEl ? valueEl.textContent.trim() : '';
+    if (value === '(empty)') value = '';
+    applyConditionalVisibility(triggerKey, value);
+  }
 });
 </script>
 @endsection

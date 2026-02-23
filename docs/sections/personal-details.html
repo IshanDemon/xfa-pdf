@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 3: Personal Details - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; Sections</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 3: Personal Details</h1>
+    <p class="text-gray-600 mb-8">This section captures the doctor's personal and contact information, GMC number, designated body, medical qualifications, appraisal year, and appraiser details.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_3_AppraisalDetails</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::personalDetails()</code>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>appraiseeName</code></td><td>Textarea</td><td>Full name of the doctor</td></tr>
+                <tr><td><code>GMCNumber</code></td><td>Textarea</td><td>Doctor's GMC registration number</td></tr>
+                <tr><td><code>contactAddress</code></td><td>Textarea</td><td>Contact address for correspondence</td></tr>
+                <tr><td><code>contactPhone</code></td><td>Textarea</td><td>Contact telephone number</td></tr>
+                <tr><td><code>contactEmail</code></td><td>Textarea</td><td>Contact email address</td></tr>
+                <tr><td><code>designatedBodyName</code></td><td>Text</td><td>Name of the designated body</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>medicalQualifications</code></td><td>Repeatable</td><td>Contains <code>qualification</code>, <code>awardingBody</code>, <code>year</code></td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>appraisalYear</code></td><td>Select (dropdown)</td><td>Year of this appraisal (2016/17 through 2036/37)</td></tr>
+                <tr><td><code>nextAppraisalDue</code></td><td>Date</td><td>Due date of next revalidation recommendation</td></tr>
+                <tr><td><code>appraiserName</code></td><td>Text</td><td>Name of the appraiser</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>requireSecondAppraiser</code></td><td>Radio (yes/no)</td><td>Whether a second appraiser is required (conditional trigger)</td></tr>
+                <tr><td><code>secondAppraiserName</code></td><td>Textarea</td><td>Name of second appraiser (visible when "yes")</td></tr>
+                <tr><td><code>secondAppraiserGMCNumber</code></td><td>Text</td><td>GMC number of second appraiser (visible when "yes")</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="info-box yellow mb-8">
+        <strong>Conditional fields:</strong> The <code>requireSecondAppraiser</code> radio is a conditional trigger. When set to <code>"yes"</code>, the fields <code>secondAppraiserName</code> and <code>secondAppraiserGMCNumber</code> become visible in the XFA form. Your code should still set these values regardless of visibility &mdash; the XFA rendering engine controls what the user sees.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Personal Details
+$data = XfaPdf::read('Section_3_AppraisalDetails');
+
+// Or using the fluent accessor
+$data = XfaPdf::personalDetails()->read();
+
+// $data looks like:
+// [
+//     'appraiseeName' => 'Dr Sarah Mitchell',
+//     'GMCNumber' => '1234567',
+//     'contactAddress' => '42 Riverside Drive, Manchester M1 2AB',
+//     'contactPhone' => '0161 234 5678',
+//     'contactEmail' => 'sarah.mitchell@riverside-mc.nhs.uk',
+//     'designatedBodyName' => 'NHS England (North West)',
+//     'medicalQualifications' => [
+//         'qualRpt' => [
+//             ['qualification' => 'MBBS', 'awardingBody' => 'University of Manchester', 'year' => '2005'],
+//             ['qualification' => 'MRCGP', 'awardingBody' => 'Royal College of GPs', 'year' => '2009'],
+//         ],
+//     ],
+//     'appraisalYear' => '2025/26',
+//     'nextAppraisalDue' => '2026-09-30',
+//     'appraiserName' => 'Dr James Henderson',
+//     'requireSecondAppraiser' => 'no',
+//     'secondAppraiserName' => '',
+//     'secondAppraiserGMCNumber' => '',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$name = XfaPdf::personalDetails()->readField('appraiseeName');
+// 'Dr Sarah Mitchell'
+
+$gmc = XfaPdf::personalDetails()->readField('GMCNumber');
+// '1234567'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- MEDICAL QUALIFICATIONS (REPEATABLE) -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Medical Qualifications (Repeatable Table)</h2>
+    <p class="text-gray-700 mb-4">The medical qualifications table is a repeatable section where each row represents one qualification. Each row contains three fields: <code>qualification</code> (the degree or certificate name), <code>awardingBody</code> (the institution), and <code>year</code> (when it was awarded).</p>
+
+    <!-- ADD A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding a new qualification</h3>
+    <p class="text-gray-700 mb-3">To add a new qualification row:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Add a qualification row
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf,
+    'Section_3_AppraisalDetails',     // section name
+    'medicalQualifications',          // container name
+    [
+        'qualification' => 'MBBS',
+        'awardingBody'  => 'University of Manchester',
+        'year'          => '2005',
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- REPLACE ALL ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Replacing all qualifications</h3>
+    <p class="text-gray-700 mb-3">If you want to clear existing qualifications and set new ones from scratch, use <code>setRepeatableItems()</code>:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf,
+    'Section_3_AppraisalDetails',     // section
+    'medicalQualifications',          // container
+    'qualRpt',                        // element name
+    [
+        [
+            'qualification' => 'MBBS',
+            'awardingBody'  => 'University of Manchester',
+            'year'          => '2005',
+        ],
+        [
+            'qualification' => 'MRCGP',
+            'awardingBody'  => 'Royal College of General Practitioners',
+            'year'          => '2009',
+        ],
+        [
+            'qualification' => 'DRCOG',
+            'awardingBody'  => 'Royal College of Obstetricians and Gynaecologists',
+            'year'          => '2007',
+        ],
+        [
+            'qualification' => 'DipDerm',
+            'awardingBody'  => 'Cardiff University',
+            'year'          => '2012',
+        ],
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- READ ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Reading existing qualifications</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$quals = $manager->getRepeatableItems(
+    $xfaPdf,
+    'Section_3_AppraisalDetails',
+    'medicalQualifications'
+);
+
+foreach ($quals as $index => $qual) {
+    echo "Row {$index}: {$qual['qualification']} — {$qual['awardingBody']} ({$qual['year']})\n";
+}
+// Row 0: MBBS — University of Manchester (2005)
+// Row 1: MRCGP — Royal College of General Practitioners (2009)
+// Row 2: DRCOG — Royal College of Obstetricians and Gynaecologists (2007)</code></pre>
+    </div>
+
+    <!-- REMOVE A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Removing a qualification</h3>
+    <p class="text-gray-700 mb-3">Remove a qualification by its index (0-based):</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Remove the third qualification (index 2)
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf,
+    'Section_3_AppraisalDetails',
+    'medicalQualifications',
+    2
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+    <p class="text-gray-700 mb-4">These are the main identity and contact fields for the doctor. Each is a standalone text or textarea field.</p>
+
+    <!-- appraiseeName -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Doctor's name</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiseeName</code></p>
+    <p class="text-gray-700 mb-3">The full name of the doctor being appraised. This typically includes title, first name, and surname.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::personalDetails()->updateField(
+    'appraiseeName',
+    'Dr Sarah Mitchell'
+);</code></pre>
+    </div>
+
+    <!-- GMCNumber -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">GMC number</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>GMCNumber</code></p>
+    <p class="text-gray-700 mb-3">The doctor's General Medical Council registration number. This is a 7-digit number.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::personalDetails()->updateField(
+    'GMCNumber',
+    '1234567'
+);</code></pre>
+    </div>
+
+    <!-- contactAddress -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Contact address</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>contactAddress</code></p>
+    <p class="text-gray-700 mb-3">The doctor's correspondence address. This is a multiline textarea so you can include the full postal address.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::personalDetails()->updateField(
+    'contactAddress',
+    "Riverside Medical Centre\n42 High Street\nManchester\nM1 2AB"
+);</code></pre>
+    </div>
+
+    <!-- contactPhone -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Contact telephone</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>contactPhone</code></p>
+    <p class="text-gray-700 mb-3">The doctor's contact telephone number.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::personalDetails()->updateField(
+    'contactPhone',
+    '0161 234 5678'
+);</code></pre>
+    </div>
+
+    <!-- contactEmail -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Contact email</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>contactEmail</code></p>
+    <p class="text-gray-700 mb-3">The doctor's email address for appraisal-related correspondence.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::personalDetails()->updateField(
+    'contactEmail',
+    'sarah.mitchell@riverside-mc.nhs.uk'
+);</code></pre>
+    </div>
+
+    <!-- designatedBodyName -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Designated body</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>designatedBodyName</code></p>
+    <p class="text-gray-700 mb-3">The name of the designated body (the organisation responsible for the doctor's revalidation).</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::personalDetails()->updateField(
+    'designatedBodyName',
+    'NHS England (North West)'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- SELECT / DATE FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Select &amp; Date Fields</h2>
+    <p class="text-gray-700 mb-4">These fields use dropdown selects and date pickers in the XFA form. When writing values programmatically, pass the value exactly as the dropdown option or date format expects.</p>
+
+    <!-- appraisalYear -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraisal year</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraisalYear</code></p>
+    <p class="text-gray-700 mb-3">A dropdown select field with options ranging from <code>2016/17</code> through <code>2036/37</code>. Pass the value as a string matching the dropdown option exactly.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::personalDetails()->updateField(
+    'appraisalYear',
+    '2025/26'
+);</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-6">
+        <strong>Note:</strong> The value must match one of the dropdown options exactly (e.g. <code>'2025/26'</code>, not <code>'2025-26'</code> or <code>'2025'</code>). An unrecognised value will still be written to the datasets XML but may not display correctly in Adobe Acrobat.
+    </div>
+
+    <!-- nextAppraisalDue -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Next revalidation due date</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>nextAppraisalDue</code></p>
+    <p class="text-gray-700 mb-3">A date field for when the next revalidation recommendation is due. Use <code>YYYY-MM-DD</code> format.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::personalDetails()->updateField(
+    'nextAppraisalDue',
+    '2026-09-30'
+);</code></pre>
+    </div>
+
+    <!-- appraiserName -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser's name</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserName</code></p>
+    <p class="text-gray-700 mb-3">The name of the person conducting the appraisal.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::personalDetails()->updateField(
+    'appraiserName',
+    'Dr James Henderson'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- RADIO / CONDITIONAL FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Radio &amp; Conditional Fields</h2>
+    <p class="text-gray-700 mb-4">The <code>requireSecondAppraiser</code> field is a yes/no radio group that acts as a conditional trigger. When set to <code>"yes"</code>, the XFA form reveals two additional fields for the second appraiser's details.</p>
+
+    <!-- requireSecondAppraiser -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Second appraiser required?</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>requireSecondAppraiser</code></p>
+    <p class="text-gray-700 mb-3">A radio button group with values <code>"yes"</code> or <code>"no"</code>. Setting this to <code>"yes"</code> makes the second appraiser fields visible in the rendered XFA form.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// No second appraiser needed
+XfaPdf::personalDetails()->updateField(
+    'requireSecondAppraiser',
+    'no'
+);</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">When a second appraiser is required, set the radio to <code>"yes"</code> and fill in the conditional fields:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Second appraiser is required
+XfaPdf::personalDetails()->updateField(
+    'requireSecondAppraiser',
+    'yes'
+);
+
+// Fill in the conditional fields
+XfaPdf::personalDetails()->updateField(
+    'secondAppraiserName',
+    'Dr Patricia Clarke'
+);
+
+XfaPdf::personalDetails()->updateField(
+    'secondAppraiserGMCNumber',
+    '7654321'
+);</code></pre>
+    </div>
+
+    <div class="info-box green mb-6">
+        <strong>Tip:</strong> Even when <code>requireSecondAppraiser</code> is set to <code>"no"</code>, you can still write values to <code>secondAppraiserName</code> and <code>secondAppraiserGMCNumber</code>. The data will be stored in the datasets XML but the fields will remain hidden in the rendered form until the radio is changed to <code>"yes"</code>.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Personal Details section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillPersonalDetails()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        $manager = app('xfa-pdf');
+        $xfaPdf = $manager->load($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Set medical qualifications (repeatable rows)
+        // -----------------------------------------------
+        $xfaPdf = $manager->setRepeatableItems(
+            $xfaPdf,
+            'Section_3_AppraisalDetails',
+            'medicalQualifications',
+            'qualRpt',
+            [
+                [
+                    'qualification' => 'MBBS',
+                    'awardingBody'  => 'University of Manchester',
+                    'year'          => '2005',
+                ],
+                [
+                    'qualification' => 'MRCGP',
+                    'awardingBody'  => 'Royal College of General Practitioners',
+                    'year'          => '2009',
+                ],
+                [
+                    'qualification' => 'DRCOG',
+                    'awardingBody'  => 'Royal College of Obstetricians and Gynaecologists',
+                    'year'          => '2007',
+                ],
+            ]
+        );
+
+        // -----------------------------------------------
+        // 2. Fill all text, select, date, and radio fields
+        // -----------------------------------------------
+        XfaPdf::setFile($pdfPath);
+
+        XfaPdf::personalDetails()->update([
+            // Identity
+            'appraiseeName'      => 'Dr Sarah Mitchell',
+            'GMCNumber'          => '1234567',
+
+            // Contact details
+            'contactAddress'     => "Riverside Medical Centre\n42 High Street\nManchester\nM1 2AB",
+            'contactPhone'       => '0161 234 5678',
+            'contactEmail'       => 'sarah.mitchell@riverside-mc.nhs.uk',
+
+            // Designated body
+            'designatedBodyName' => 'NHS England (North West)',
+
+            // Appraisal details
+            'appraisalYear'      => '2025/26',
+            'nextAppraisalDue'   => '2026-09-30',
+            'appraiserName'      => 'Dr James Henderson',
+
+            // Second appraiser (conditional)
+            'requireSecondAppraiser'  => 'no',
+            'secondAppraiserName'     => '',
+            'secondAppraiserGMCNumber' => '',
+        ]);
+
+        // -----------------------------------------------
+        // 3. Save the PDF
+        // -----------------------------------------------
+        $manager->saveXfaPdf($xfaPdf);
+        // Or: XfaPdf::save();
+
+        return redirect()->back()->with('success', 'Personal Details saved.');
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::personalDetails()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::personalDetails()->readField('appraiseeName')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::personalDetails()->updateField('GMCNumber', '1234567')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::personalDetails()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Get qualifications</td>
+                    <td><code>$manager->getRepeatableItems($xfaPdf, 'Section_3_AppraisalDetails', 'medicalQualifications')</code></td>
+                </tr>
+                <tr>
+                    <td>Add a qualification</td>
+                    <td><code>$manager->addRepeatableItem($xfaPdf, 'Section_3_AppraisalDetails', 'medicalQualifications', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Remove a qualification</td>
+                    <td><code>$manager->removeRepeatableItem($xfaPdf, 'Section_3_AppraisalDetails', 'medicalQualifications', $index)</code></td>
+                </tr>
+                <tr>
+                    <td>Replace all qualifications</td>
+                    <td><code>$manager->setRepeatableItems($xfaPdf, 'Section_3_AppraisalDetails', 'medicalQualifications', 'qualRpt', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Set appraisal year</td>
+                    <td><code>XfaPdf::personalDetails()->updateField('appraisalYear', '2025/26')</code></td>
+                </tr>
+                <tr>
+                    <td>Set conditional radio</td>
+                    <td><code>XfaPdf::personalDetails()->updateField('requireSecondAppraiser', 'yes')</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="../web-ui.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Web UI Guide</span>
+        </a>
+        <a href="scope-of-work.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 4: Scope of Work &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 10: Feedback - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; Sections</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 10: Colleague and Patient Feedback</h1>
+    <p class="text-gray-600 mb-8">This section records colleague and patient feedback. It has two halves: colleague feedback and patient feedback, each with its own conditional radio, date, comments, and repeatable table of feedback items.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_10_Feedback</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::feedback()</code>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">Colleague Feedback</h3>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>colleagueFeedbackAvailable</code></td><td>Radio (yes/no)</td><td>Whether colleague feedback is available (conditional trigger)</td></tr>
+                <tr><td><code>lastColleagueFeedbackDate</code></td><td>Multiline text</td><td>Date of last colleague feedback (shown when "no")</td></tr>
+                <tr><td><code>colleagueFeedbackComment</code></td><td>Multiline text</td><td>Comment about colleague feedback (shown when "no")</td></tr>
+                <tr><td><code>colleague</code> &gt; <code>feedbackRow</code></td><td>Repeatable</td><td>Colleague feedback rows (shown when "yes" or "no")</td></tr>
+                <tr><td><code>whyNoColleagueFeedback</code></td><td>Text</td><td>Why no colleague feedback is available</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">Patient Feedback</h3>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>patientFeedbackAvailable</code></td><td>Radio (yes/no)</td><td>Whether patient feedback is available (conditional trigger)</td></tr>
+                <tr><td><code>lastPatientFeedbackDate</code></td><td>Multiline text</td><td>Date of last patient feedback (shown when "no")</td></tr>
+                <tr><td><code>patientFeedbackComment</code></td><td>Multiline text</td><td>Comment about patient feedback (shown when "no")</td></tr>
+                <tr><td><code>patient</code> &gt; <code>feedbackRow</code></td><td>Repeatable</td><td>Patient feedback rows (shown when "yes" or "no")</td></tr>
+                <tr><td><code>whyNoPatient</code></td><td>Text</td><td>Why no patient feedback is available</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">Shared Fields</h3>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>actionsTaken</code></td><td>Multiline text</td><td>Commentary on feedback and actions taken (shown when "yes")</td></tr>
+                <tr><td><code>appraiserComments</code></td><td>Multiline text</td><td>Appraiser comments (mirrors to Section 19)</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-sm text-gray-500 mb-4">Each <code>feedbackRow</code> contains: <code>role</code> (select), <code>activity</code> (textarea &mdash; date and description), <code>outcome</code> (textarea), <code>supportLocation</code> (select), <code>firstEntry</code> (text), <code>amendData</code> (text).</p>
+
+    <!-- ======================================== -->
+    <!-- CONDITIONAL NOTE -->
+    <!-- ======================================== -->
+    <div class="info-box yellow mb-8">
+        <strong>Conditional fields:</strong> This section has two independent triggers that control which fields are visible.<br><br>
+        <strong>1. <code>colleagueFeedbackAvailable</code></strong><br>
+        &bull; <strong>"yes"</strong>: shows colleague <code>feedbackRow</code> table and <code>actionsTaken</code><br>
+        &bull; <strong>"no"</strong>: shows colleague <code>feedbackRow</code> table, <code>lastColleagueFeedbackDate</code>, and <code>colleagueFeedbackComment</code><br><br>
+        <strong>2. <code>patientFeedbackAvailable</code></strong><br>
+        &bull; <strong>"yes"</strong>: shows patient <code>feedbackRow</code> table and <code>actionsTaken</code><br>
+        &bull; <strong>"no"</strong>: shows patient <code>feedbackRow</code> table, <code>lastPatientFeedbackDate</code>, and <code>patientFeedbackComment</code>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Feedback
+$data = XfaPdf::read('Section_10_Feedback');
+
+// Or using the fluent accessor
+$data = XfaPdf::feedback()->read();
+
+// $data looks like:
+// [
+//     'colleagueFeedbackAvailable' => 'yes',
+//     'lastColleagueFeedbackDate' => '',
+//     'colleagueFeedbackComment' => '',
+//     'colleague' => [
+//         'feedbackRow' => [
+//             [
+//                 'role' => 'Consultant',
+//                 'activity' => 'March 2024 - GMC colleague questionnaire...',
+//                 'outcome' => 'Overall positive. Suggested improving...',
+//                 'supportLocation' => 'Yes',
+//                 'firstEntry' => '',
+//                 'amendData' => '',
+//             ],
+//         ],
+//     ],
+//     'whyNoColleagueFeedback' => '',
+//     'patientFeedbackAvailable' => 'yes',
+//     'lastPatientFeedbackDate' => '',
+//     'patientFeedbackComment' => '',
+//     'patient' => [
+//         'feedbackRow' => [
+//             [
+//                 'role' => 'Patient',
+//                 'activity' => 'April 2024 - GMC patient questionnaire...',
+//                 'outcome' => 'Very high satisfaction scores...',
+//                 'supportLocation' => 'Yes',
+//                 'firstEntry' => '',
+//                 'amendData' => '',
+//             ],
+//         ],
+//     ],
+//     'whyNoPatient' => '',
+//     'actionsTaken' => 'Reviewed colleague and patient feedback with...',
+//     'appraiserComments' => '',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$available = XfaPdf::feedback()->readField('colleagueFeedbackAvailable');
+// 'yes'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COLLEAGUE FEEDBACK -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Colleague Feedback</h2>
+    <p class="text-gray-700 mb-4">The colleague feedback half of this section starts with a yes/no radio that controls which fields are visible. When feedback is available, the repeatable table and actions commentary appear. When it is not, the date and comment fields appear instead.</p>
+
+    <!-- RADIO -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Setting the colleague feedback radio</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>colleagueFeedbackAvailable</code> (radio &mdash; conditional trigger)</p>
+    <p class="text-gray-700 mb-3">Set whether colleague feedback is available. This controls which fields are visible in the XFA form.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Colleague feedback IS available
+XfaPdf::feedback()->updateField('colleagueFeedbackAvailable', 'yes');
+
+// Colleague feedback is NOT available
+XfaPdf::feedback()->updateField('colleagueFeedbackAvailable', 'no');</code></pre>
+    </div>
+
+    <!-- CONDITIONAL FIELDS (NO) -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Conditional fields (when "no")</h3>
+    <p class="text-gray-700 mb-3">When colleague feedback is not available, fill in the date and comment fields:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::feedback()->updateField('colleagueFeedbackAvailable', 'no');
+
+XfaPdf::feedback()->updateField(
+    'lastColleagueFeedbackDate',
+    'Last colleague feedback was collected in March 2022 as part of '
+    . 'the previous appraisal cycle.'
+);
+
+XfaPdf::feedback()->updateField(
+    'colleagueFeedbackComment',
+    'Colleague feedback was due in March 2024 but was delayed due to '
+    . 'practice restructuring. New questionnaires have been distributed '
+    . 'and results are expected by June 2024.'
+);</code></pre>
+    </div>
+
+    <!-- COLLEAGUE REPEATABLE TABLE -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Colleague feedback rows (repeatable)</h3>
+    <p class="text-gray-700 mb-4">Each row represents one colleague who provided feedback. The table appears regardless of the radio selection. Fields per row: <code>role</code> (select), <code>activity</code> (textarea), <code>outcome</code> (textarea), <code>supportLocation</code> (select), <code>firstEntry</code> (text), <code>amendData</code> (text).</p>
+
+    <!-- ADD A ROW -->
+    <h4 class="text-base font-semibold text-gray-800 mt-6 mb-2">Adding a colleague feedback row</h4>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Add a colleague feedback row
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf,
+    'Section_10_Feedback',     // section name
+    'colleague',               // container name
+    [
+        'role'            => 'Consultant',
+        'activity'        => 'March 2024 - GMC colleague questionnaire distributed '
+                           . 'to 20 colleagues across primary and secondary care. '
+                           . '18 responses received (90% response rate).',
+        'outcome'         => 'Overall very positive feedback. Mean score 4.6/5 across '
+                           . 'all domains. Colleagues highlighted strong communication '
+                           . 'skills and clinical leadership. Two suggestions to improve '
+                           . 'timeliness of referral letters.',
+        'supportLocation' => 'Yes',
+        'firstEntry'      => '',
+        'amendData'       => '',
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ADD MULTIPLE ROWS -->
+    <h4 class="text-base font-semibold text-gray-800 mt-6 mb-2">Adding multiple colleague feedback rows</h4>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Row 1: GMC colleague questionnaire
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_10_Feedback', 'colleague', [
+    'role'            => 'Consultant',
+    'activity'        => 'March 2024 - GMC colleague questionnaire. 18/20 responses '
+                       . 'received from multidisciplinary colleagues.',
+    'outcome'         => 'Mean score 4.6/5. Strong communication and leadership noted. '
+                       . 'Suggestion to improve referral letter turnaround time.',
+    'supportLocation' => 'Yes',
+    'firstEntry'      => '',
+    'amendData'       => '',
+]);
+
+// Row 2: 360-degree appraisal
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_10_Feedback', 'colleague', [
+    'role'            => 'GP Partner',
+    'activity'        => 'January 2024 - Practice-based 360 feedback exercise. '
+                       . '6 partners and 4 practice nurses participated.',
+    'outcome'         => 'Recognised as approachable and supportive. Partners noted '
+                       . 'effective chairing of clinical meetings. Nurses valued '
+                       . 'mentoring support provided during prescribing training.',
+    'supportLocation' => 'Yes',
+    'firstEntry'      => '',
+    'amendData'       => '',
+]);
+
+// Row 3: Secondary care feedback
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_10_Feedback', 'colleague', [
+    'role'            => 'Registrar',
+    'activity'        => 'February 2024 - Feedback from GP registrar supervised '
+                       . 'during ST3 training placement.',
+    'outcome'         => 'Registrar described training as "outstanding" and felt '
+                       . 'well supported. Highlighted regular tutorials and timely '
+                       . 'constructive feedback on case write-ups.',
+    'supportLocation' => 'Yes',
+    'firstEntry'      => '',
+    'amendData'       => '',
+]);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- REPLACE ALL ROWS -->
+    <h4 class="text-base font-semibold text-gray-800 mt-6 mb-2">Replacing all colleague feedback rows</h4>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf,
+    'Section_10_Feedback',       // section
+    'colleague',                 // container
+    'feedbackRow',               // element name
+    [
+        [
+            'role'            => 'Consultant',
+            'activity'        => 'March 2024 - GMC colleague questionnaire. '
+                               . '18/20 responses received.',
+            'outcome'         => 'Mean score 4.6/5. Strong communication noted.',
+            'supportLocation' => 'Yes',
+            'firstEntry'      => '',
+            'amendData'       => '',
+        ],
+        [
+            'role'            => 'GP Partner',
+            'activity'        => 'January 2024 - Practice 360 feedback.',
+            'outcome'         => 'Approachable and supportive. Effective meeting chair.',
+            'supportLocation' => 'Yes',
+            'firstEntry'      => '',
+            'amendData'       => '',
+        ],
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- READ ROWS -->
+    <h4 class="text-base font-semibold text-gray-800 mt-6 mb-2">Reading colleague feedback rows</h4>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$rows = $manager->getRepeatableItems(
+    $xfaPdf,
+    'Section_10_Feedback',
+    'colleague'
+);
+
+foreach ($rows as $index => $row) {
+    echo "Row {$index}: {$row['role']} - {$row['outcome']}\n";
+}
+// Row 0: Consultant - Mean score 4.6/5. Strong communication noted.
+// Row 1: GP Partner - Approachable and supportive. Effective meeting chair.</code></pre>
+    </div>
+
+    <!-- REMOVE A ROW -->
+    <h4 class="text-base font-semibold text-gray-800 mt-6 mb-2">Removing a colleague feedback row</h4>
+    <p class="text-gray-700 mb-3">Remove a row by its index (0-based):</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Remove the second colleague feedback row (index 1)
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf,
+    'Section_10_Feedback',
+    'colleague',
+    1
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- PATIENT FEEDBACK -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Patient Feedback</h2>
+    <p class="text-gray-700 mb-4">The patient feedback half mirrors the colleague feedback structure. It has its own independent radio trigger, conditional fields, and a separate repeatable table of patient feedback rows.</p>
+
+    <!-- RADIO -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Setting the patient feedback radio</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>patientFeedbackAvailable</code> (radio &mdash; conditional trigger)</p>
+    <p class="text-gray-700 mb-3">Set whether patient feedback is available. This controls which patient-related fields are visible.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Patient feedback IS available
+XfaPdf::feedback()->updateField('patientFeedbackAvailable', 'yes');
+
+// Patient feedback is NOT available
+XfaPdf::feedback()->updateField('patientFeedbackAvailable', 'no');</code></pre>
+    </div>
+
+    <!-- CONDITIONAL FIELDS (NO) -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Conditional fields (when "no")</h3>
+    <p class="text-gray-700 mb-3">When patient feedback is not available, fill in the date and comment fields:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::feedback()->updateField('patientFeedbackAvailable', 'no');
+
+XfaPdf::feedback()->updateField(
+    'lastPatientFeedbackDate',
+    'Last patient feedback was collected in November 2022 using '
+    . 'the national GMC patient questionnaire.'
+);
+
+XfaPdf::feedback()->updateField(
+    'patientFeedbackComment',
+    'Patient feedback collection was scheduled for October 2024 but '
+    . 'postponed due to a change in survey provider. The new GMC patient '
+    . 'questionnaire will be distributed in January 2025.'
+);</code></pre>
+    </div>
+
+    <!-- PATIENT REPEATABLE TABLE -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Patient feedback rows (repeatable)</h3>
+    <p class="text-gray-700 mb-4">Each row represents one patient feedback exercise or survey. The table appears regardless of the radio selection. Fields per row match the colleague table: <code>role</code>, <code>activity</code>, <code>outcome</code>, <code>supportLocation</code>, <code>firstEntry</code>, <code>amendData</code>.</p>
+
+    <!-- ADD A ROW -->
+    <h4 class="text-base font-semibold text-gray-800 mt-6 mb-2">Adding a patient feedback row</h4>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Add a patient feedback row
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf,
+    'Section_10_Feedback',     // section name
+    'patient',                 // container name
+    [
+        'role'            => 'Patient',
+        'activity'        => 'April 2024 - GMC patient questionnaire distributed to '
+                           . '50 consecutive patients over two weeks. 42 responses '
+                           . 'received (84% response rate).',
+        'outcome'         => 'Very high satisfaction scores. Mean 4.8/5 for listening '
+                           . 'and explanation. Mean 4.7/5 for involving patient in '
+                           . 'decisions. Two patients commented they would appreciate '
+                           . 'longer appointment times for complex problems.',
+        'supportLocation' => 'Yes',
+        'firstEntry'      => '',
+        'amendData'       => '',
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ADD MULTIPLE ROWS -->
+    <h4 class="text-base font-semibold text-gray-800 mt-6 mb-2">Adding multiple patient feedback rows</h4>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Row 1: GMC patient questionnaire
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_10_Feedback', 'patient', [
+    'role'            => 'Patient',
+    'activity'        => 'April 2024 - GMC patient questionnaire. 42/50 responses '
+                       . 'from consecutive patients across general and chronic '
+                       . 'disease clinics.',
+    'outcome'         => 'Mean 4.8/5 for listening and explanation. Mean 4.7/5 for '
+                       . 'involving patient in decisions. Two patients requested '
+                       . 'longer appointments for complex consultations.',
+    'supportLocation' => 'Yes',
+    'firstEntry'      => '',
+    'amendData'       => '',
+]);
+
+// Row 2: Friends and Family Test
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_10_Feedback', 'patient', [
+    'role'            => 'Patient',
+    'activity'        => 'Ongoing 2023-2024 - Friends and Family Test results '
+                       . 'for named GP consultations. 156 responses over 12 months.',
+    'outcome'         => '97% would recommend to friends and family. Positive '
+                       . 'comments about thoroughness and empathy. Negative comments '
+                       . 'related to waiting times (practice-level issue, not individual).',
+    'supportLocation' => 'Yes',
+    'firstEntry'      => '',
+    'amendData'       => '',
+]);
+
+// Row 3: Diabetes clinic survey
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_10_Feedback', 'patient', [
+    'role'            => 'Patient',
+    'activity'        => 'June 2024 - Targeted survey of diabetes clinic patients. '
+                       . '25 responses from patients seen in last 6 months.',
+    'outcome'         => 'Patients valued structured annual reviews and clear '
+                       . 'explanations of HbA1c targets. Several appreciated the '
+                       . 'written care plan provided after each review.',
+    'supportLocation' => 'Yes',
+    'firstEntry'      => '',
+    'amendData'       => '',
+]);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- REPLACE ALL ROWS -->
+    <h4 class="text-base font-semibold text-gray-800 mt-6 mb-2">Replacing all patient feedback rows</h4>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf,
+    'Section_10_Feedback',       // section
+    'patient',                   // container
+    'feedbackRow',               // element name
+    [
+        [
+            'role'            => 'Patient',
+            'activity'        => 'April 2024 - GMC patient questionnaire. '
+                               . '42/50 responses received.',
+            'outcome'         => 'Mean 4.8/5 for listening. Mean 4.7/5 for '
+                               . 'shared decision-making.',
+            'supportLocation' => 'Yes',
+            'firstEntry'      => '',
+            'amendData'       => '',
+        ],
+        [
+            'role'            => 'Patient',
+            'activity'        => 'Ongoing 2023-2024 - Friends and Family Test. '
+                               . '156 responses over 12 months.',
+            'outcome'         => '97% recommendation rate. Positive feedback on '
+                               . 'thoroughness and empathy.',
+            'supportLocation' => 'Yes',
+            'firstEntry'      => '',
+            'amendData'       => '',
+        ],
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- READ ROWS -->
+    <h4 class="text-base font-semibold text-gray-800 mt-6 mb-2">Reading patient feedback rows</h4>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$rows = $manager->getRepeatableItems(
+    $xfaPdf,
+    'Section_10_Feedback',
+    'patient'
+);
+
+foreach ($rows as $index => $row) {
+    echo "Row {$index}: {$row['activity']}\n";
+}
+// Row 0: April 2024 - GMC patient questionnaire. 42/50 responses received.
+// Row 1: Ongoing 2023-2024 - Friends and Family Test. 156 responses over 12 months.</code></pre>
+    </div>
+
+    <!-- REMOVE A ROW -->
+    <h4 class="text-base font-semibold text-gray-800 mt-6 mb-2">Removing a patient feedback row</h4>
+    <p class="text-gray-700 mb-3">Remove a row by its index (0-based):</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Remove the third patient feedback row (index 2)
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf,
+    'Section_10_Feedback',
+    'patient',
+    2
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+    <p class="text-gray-700 mb-4">These standalone text fields sit below both feedback tables.</p>
+
+    <!-- actionsTaken -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Commentary on feedback and actions taken</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>actionsTaken</code></p>
+    <p class="text-gray-700 mb-3">This field is visible when either colleague or patient feedback is available ("yes"). The doctor describes what they learned from the feedback and what actions they have taken or plan to take as a result.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::feedback()->updateField(
+    'actionsTaken',
+    'I reviewed colleague and patient feedback with my appraiser. Key themes: '
+    . "\n\n"
+    . 'Colleague feedback: Overall very positive (4.6/5). Two colleagues '
+    . 'suggested I could improve the timeliness of referral letters. I have '
+    . 'since implemented a same-day dictation policy and referral letters '
+    . 'are now sent within 48 hours of consultation.'
+    . "\n\n"
+    . 'Patient feedback: Very high satisfaction (4.8/5). Two patients requested '
+    . 'longer appointment times for complex problems. I have introduced '
+    . 'double-length appointments for annual chronic disease reviews and new '
+    . 'patient registrations.'
+    . "\n\n"
+    . 'Overall, I am pleased with the feedback and will continue to seek '
+    . 'opportunities to improve communication and access.'
+);</code></pre>
+    </div>
+
+    <!-- appraiserComments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser's comments</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserComments</code></p>
+    <p class="text-gray-700 mb-3">Written by the appraiser, summarising their view of the feedback and the doctor's response to it. This field mirrors to Section 19 (Appraisal Summary).</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::feedback()->updateField(
+    'appraiserComments',
+    'Dr Smith has collected comprehensive colleague and patient feedback '
+    . 'this year with excellent response rates. The feedback is overwhelmingly '
+    . 'positive across all domains. She has reflected thoughtfully on the '
+    . 'constructive suggestions and has already implemented practical changes '
+    . '(same-day dictation policy, double-length appointments). This demonstrates '
+    . 'a genuine commitment to continuous improvement in patient care.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Feedback section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillFeedback()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        $manager = app('xfa-pdf');
+        $xfaPdf = $manager->load($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Colleague feedback: available
+        // -----------------------------------------------
+        XfaPdf::setFile($pdfPath);
+        XfaPdf::feedback()->updateField('colleagueFeedbackAvailable', 'yes');
+
+        // Add colleague feedback rows
+        $xfaPdf = $manager->setRepeatableItems(
+            $xfaPdf,
+            'Section_10_Feedback',
+            'colleague',
+            'feedbackRow',
+            [
+                [
+                    'role'            => 'Consultant',
+                    'activity'        => 'March 2024 - GMC colleague questionnaire. '
+                                       . '18/20 responses from multidisciplinary team.',
+                    'outcome'         => 'Mean score 4.6/5. Strong communication and '
+                                       . 'leadership. Suggestion to improve referral '
+                                       . 'letter turnaround time.',
+                    'supportLocation' => 'Yes',
+                    'firstEntry'      => '',
+                    'amendData'       => '',
+                ],
+                [
+                    'role'            => 'GP Partner',
+                    'activity'        => 'January 2024 - Practice 360 feedback. '
+                                       . '6 partners and 4 nurses participated.',
+                    'outcome'         => 'Approachable and supportive colleague. '
+                                       . 'Effective clinical meeting chair. Valued '
+                                       . 'mentoring of nurse prescribers.',
+                    'supportLocation' => 'Yes',
+                    'firstEntry'      => '',
+                    'amendData'       => '',
+                ],
+                [
+                    'role'            => 'Registrar',
+                    'activity'        => 'February 2024 - Feedback from GP registrar '
+                                       . 'during ST3 training placement.',
+                    'outcome'         => 'Training described as "outstanding". Regular '
+                                       . 'tutorials and timely feedback on case write-ups.',
+                    'supportLocation' => 'Yes',
+                    'firstEntry'      => '',
+                    'amendData'       => '',
+                ],
+            ]
+        );
+
+        // -----------------------------------------------
+        // 2. Patient feedback: available
+        // -----------------------------------------------
+        XfaPdf::feedback()->updateField('patientFeedbackAvailable', 'yes');
+
+        // Add patient feedback rows
+        $xfaPdf = $manager->setRepeatableItems(
+            $xfaPdf,
+            'Section_10_Feedback',
+            'patient',
+            'feedbackRow',
+            [
+                [
+                    'role'            => 'Patient',
+                    'activity'        => 'April 2024 - GMC patient questionnaire. '
+                                       . '42/50 responses from consecutive patients.',
+                    'outcome'         => 'Mean 4.8/5 for listening and explanation. '
+                                       . 'Mean 4.7/5 for shared decision-making. '
+                                       . 'Request for longer complex appointments.',
+                    'supportLocation' => 'Yes',
+                    'firstEntry'      => '',
+                    'amendData'       => '',
+                ],
+                [
+                    'role'            => 'Patient',
+                    'activity'        => 'Ongoing 2023-2024 - Friends and Family Test. '
+                                       . '156 responses over 12 months.',
+                    'outcome'         => '97% recommendation rate. Praised thoroughness '
+                                       . 'and empathy. Waiting time comments related '
+                                       . 'to practice-level issue.',
+                    'supportLocation' => 'Yes',
+                    'firstEntry'      => '',
+                    'amendData'       => '',
+                ],
+                [
+                    'role'            => 'Patient',
+                    'activity'        => 'June 2024 - Targeted diabetes clinic survey. '
+                                       . '25 responses from last 6 months.',
+                    'outcome'         => 'Valued structured annual reviews and clear '
+                                       . 'HbA1c explanations. Written care plans '
+                                       . 'appreciated by several patients.',
+                    'supportLocation' => 'Yes',
+                    'firstEntry'      => '',
+                    'amendData'       => '',
+                ],
+            ]
+        );
+
+        // -----------------------------------------------
+        // 3. Text fields
+        // -----------------------------------------------
+        XfaPdf::feedback()->update([
+            'actionsTaken' =>
+                'Reviewed colleague and patient feedback with appraiser. '
+                . 'Key actions taken:'
+                . "\n\n"
+                . '1. Implemented same-day dictation policy for referral '
+                . 'letters (now sent within 48 hours)'
+                . "\n"
+                . '2. Introduced double-length appointments for annual '
+                . 'chronic disease reviews and new registrations'
+                . "\n"
+                . '3. Started monthly peer review of consultation skills '
+                . 'with practice partner'
+                . "\n\n"
+                . 'Overall very pleased with feedback. Will continue '
+                . 'seeking opportunities to improve.',
+
+            'appraiserComments' =>
+                'Dr Smith has collected comprehensive feedback with '
+                . 'excellent response rates. Feedback is overwhelmingly '
+                . 'positive. She has reflected thoughtfully on constructive '
+                . 'suggestions and implemented practical changes. This '
+                . 'demonstrates genuine commitment to continuous '
+                . 'improvement in patient care.',
+        ]);
+
+        // -----------------------------------------------
+        // 4. Save the PDF
+        // -----------------------------------------------
+        $manager->saveXfaPdf($xfaPdf);
+        // Or: XfaPdf::save();
+
+        return redirect()->back()->with('success', 'Feedback section saved.');
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::feedback()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::feedback()->readField('colleagueFeedbackAvailable')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::feedback()->updateField('actionsTaken', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::feedback()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Set colleague radio</td>
+                    <td><code>XfaPdf::feedback()->updateField('colleagueFeedbackAvailable', 'yes')</code></td>
+                </tr>
+                <tr>
+                    <td>Set patient radio</td>
+                    <td><code>XfaPdf::feedback()->updateField('patientFeedbackAvailable', 'yes')</code></td>
+                </tr>
+                <tr>
+                    <td>Get colleague rows</td>
+                    <td><code>$manager->getRepeatableItems($xfaPdf, 'Section_10_Feedback', 'colleague')</code></td>
+                </tr>
+                <tr>
+                    <td>Add a colleague row</td>
+                    <td><code>$manager->addRepeatableItem($xfaPdf, 'Section_10_Feedback', 'colleague', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Remove a colleague row</td>
+                    <td><code>$manager->removeRepeatableItem($xfaPdf, 'Section_10_Feedback', 'colleague', $index)</code></td>
+                </tr>
+                <tr>
+                    <td>Replace all colleague rows</td>
+                    <td><code>$manager->setRepeatableItems($xfaPdf, 'Section_10_Feedback', 'colleague', 'feedbackRow', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Get patient rows</td>
+                    <td><code>$manager->getRepeatableItems($xfaPdf, 'Section_10_Feedback', 'patient')</code></td>
+                </tr>
+                <tr>
+                    <td>Add a patient row</td>
+                    <td><code>$manager->addRepeatableItem($xfaPdf, 'Section_10_Feedback', 'patient', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Remove a patient row</td>
+                    <td><code>$manager->removeRepeatableItem($xfaPdf, 'Section_10_Feedback', 'patient', $index)</code></td>
+                </tr>
+                <tr>
+                    <td>Replace all patient rows</td>
+                    <td><code>$manager->setRepeatableItems($xfaPdf, 'Section_10_Feedback', 'patient', 'feedbackRow', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="significant-events.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 9: Significant Events</span>
+        </a>
+        <a href="complaints.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 11: Complaints &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

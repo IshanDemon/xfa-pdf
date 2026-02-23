@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facade API - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Facade API</h1>
+    <p class="text-gray-600 mb-6">The <code>XfaPdf</code> facade provides a stateful API. Call <code>setFile()</code> first, then chain operations.</p>
+
+    <div class="code-block mb-8">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;</code></pre>
+    </div>
+
+    <!-- Loading -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Loading</h2>
+    <div class="p-4 bg-gray-50 rounded-lg mb-3">
+        <p class="method-sig"><span class="name">setFile</span>(<span class="type">string</span> <span class="param">$filePath</span>): <span class="type">self</span></p>
+        <p class="text-sm text-gray-600 mt-1">Load an XFA PDF file. Must be called before any other method.</p>
+    </div>
+
+    <!-- Reading -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Reading Data</h2>
+    <div class="space-y-3">
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="name">sections</span>(): <span class="type">array</span></p>
+            <p class="text-sm text-gray-600 mt-1">Get all section names. Returns <code>string[]</code>.</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="name">read</span>(<span class="type">string</span> <span class="param">$sectionName</span>): <span class="type">array</span></p>
+            <p class="text-sm text-gray-600 mt-1">Read all fields in a section.</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="name">readField</span>(<span class="type">string</span> <span class="param">$sectionName</span>, <span class="type">string</span> <span class="param">$fieldName</span>): <span class="type">?string</span></p>
+            <p class="text-sm text-gray-600 mt-1">Read a single field value.</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="name">rawXml</span>(): <span class="type">string</span></p>
+            <p class="text-sm text-gray-600 mt-1">Get the raw XFA datasets XML string.</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="name">toArray</span>(): <span class="type">array</span></p>
+            <p class="text-sm text-gray-600 mt-1">Convert entire datasets to a nested PHP array.</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="name">fieldMetadata</span>(): <span class="type">array</span></p>
+            <p class="text-sm text-gray-600 mt-1">Get field metadata (type, options, caption) from the template.</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="name">repeatableSubforms</span>(): <span class="type">array</span></p>
+            <p class="text-sm text-gray-600 mt-1">Get repeatable subform definitions.</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="name">navigationSections</span>(): <span class="type">array</span></p>
+            <p class="text-sm text-gray-600 mt-1">Get section labels from template MenuBar tooltips. Returns <code>array&lt;int, string&gt;</code>.</p>
+        </div>
+    </div>
+
+    <!-- Writing -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Writing Data</h2>
+    <div class="space-y-3">
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="name">update</span>(<span class="type">string</span> <span class="param">$sectionName</span>, <span class="type">array</span> <span class="param">$fields</span>): <span class="type">self</span></p>
+            <p class="text-sm text-gray-600 mt-1">Update multiple fields. <code>$fields</code> is <code>['fieldName' =&gt; 'value', ...]</code>.</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="name">updateField</span>(<span class="type">string</span> <span class="param">$sectionName</span>, <span class="type">string</span> <span class="param">$fieldName</span>, <span class="type">string</span> <span class="param">$value</span>): <span class="type">self</span></p>
+            <p class="text-sm text-gray-600 mt-1">Update a single field.</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <p class="method-sig"><span class="name">save</span>(<span class="type">?string</span> <span class="param">$outputPath</span> = null): <span class="type">bool</span></p>
+            <p class="text-sm text-gray-600 mt-1">Save changes via incremental update. <code>null</code> overwrites the original file.</p>
+        </div>
+    </div>
+
+    <!-- Preview -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Preview</h2>
+    <div class="p-4 bg-gray-50 rounded-lg">
+        <p class="method-sig"><span class="name">preview</span>(): <span class="type">string</span></p>
+        <p class="text-sm text-gray-600 mt-1">Generate a complete HTML preview with all field types as HTML form controls.</p>
+    </div>
+
+    <!-- Section Accessors -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Section Accessors</h2>
+    <p class="text-gray-700 mb-3">Named accessors return a <a href="#section-proxy" class="text-blue-600 hover:underline">Section</a> proxy scoped to that section:</p>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>Method</th><th>Section</th></tr></thead>
+            <tbody>
+                <tr><td><code>personalDetails()</code></td><td>Section 3: Personal Details</td></tr>
+                <tr><td><code>scopeOfWork()</code></td><td>Section 4: Scope of Work</td></tr>
+                <tr><td><code>previousAppraisals()</code></td><td>Section 5: Previous Appraisals</td></tr>
+                <tr><td><code>lastYearsPdp()</code></td><td>Section 6: Last Year's PDP</td></tr>
+                <tr><td><code>cpd()</code></td><td>Section 7: CPD</td></tr>
+                <tr><td><code>qualityImprovement()</code></td><td>Section 8: Quality Improvement</td></tr>
+                <tr><td><code>significantEvents()</code></td><td>Section 9: Significant Events</td></tr>
+                <tr><td><code>feedback()</code></td><td>Section 10: Feedback</td></tr>
+                <tr><td><code>complaints()</code></td><td>Section 11: Complaints</td></tr>
+                <tr><td><code>achievements()</code></td><td>Section 12: Achievements</td></tr>
+                <tr><td><code>probity()</code></td><td>Section 13: Probity</td></tr>
+                <tr><td><code>additionalInfo()</code></td><td>Section 14: Additional Info</td></tr>
+                <tr><td><code>supportingInformation()</code></td><td>Section 15: Supporting Info</td></tr>
+                <tr><td><code>preAppraisalPrep()</code></td><td>Section 16: Pre-Appraisal Prep</td></tr>
+                <tr><td><code>checklist()</code></td><td>Section 17: Checklist</td></tr>
+                <tr><td><code>agreedPdp()</code></td><td>Section 18: Agreed PDP</td></tr>
+                <tr><td><code>appraisalSummary()</code></td><td>Section 19: Appraisal Summary</td></tr>
+                <tr><td><code>appraisalOutputs()</code></td><td>Section 20: Appraisal Outputs</td></tr>
+                <tr><td><code>commonSections()</code></td><td>Common Sections</td></tr>
+                <tr><td><code>formControls()</code></td><td>Form Controls</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="text-gray-600 text-sm mt-2">Use <code>section(string $name)</code> to access any section dynamically.</p>
+
+    <!-- Service Accessors -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Service Accessors</h2>
+    <p class="text-gray-700 mb-3">Access underlying services for advanced use:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+
+$manager->pdf();         // PdfBinaryService
+$manager->datasets();    // DatasetService
+$manager->templates();   // TemplateService
+$manager->repeatables(); // RepeatableService
+$manager->previews();    // PreviewService
+$manager->namespaces();  // NamespaceService</code></pre>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SECTION PROXY -->
+    <!-- ============================================ -->
+    <div id="section-proxy" class="mt-12 pt-8 border-t border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Section Proxy</h2>
+        <p class="text-gray-600 mb-4">The <code>Section</code> class provides a fluent interface scoped to a single section.</p>
+
+        <div class="space-y-3">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">read</span>(): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Read all fields in this section.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">readField</span>(<span class="type">string</span> <span class="param">$fieldName</span>): <span class="type">?string</span></p>
+                <p class="text-sm text-gray-600 mt-1">Read a single field.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">update</span>(<span class="type">array</span> <span class="param">$fields</span>): <span class="type">self</span></p>
+                <p class="text-sm text-gray-600 mt-1">Update multiple fields. Chainable.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">updateField</span>(<span class="type">string</span> <span class="param">$fieldName</span>, <span class="type">string</span> <span class="param">$value</span>): <span class="type">self</span></p>
+                <p class="text-sm text-gray-600 mt-1">Update a single field. Chainable.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getName</span>(): <span class="type">string</span></p>
+                <p class="text-sm text-gray-600 mt-1">Get the XFA section name (e.g. <code>Section_3_AppraisalDetails</code>).</p>
+            </div>
+        </div>
+
+        <div class="code-block mt-4">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre class="language-php"><code class="language-php">$section = XfaPdf::personalDetails();
+
+$data = $section->read();
+echo $data['appraisalYear']; // '2024'
+
+$section->updateField('appraisalYear', '2025')
+        ->updateField('contactEmail', 'new@example.com');
+
+XfaPdf::save();</code></pre>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MANAGER INTERNAL API -->
+    <!-- ============================================ -->
+    <div id="manager-internal" class="mt-12 pt-8 border-t border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Manager Internal API</h2>
+        <p class="text-gray-600 mb-4">These methods accept an <code>XfaPdf</code> value object directly, used by the controller and CLI.</p>
+
+        <div class="space-y-3">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">load</span>(<span class="type">string</span> <span class="param">$filePath</span>): <span class="type">XfaPdf</span></p>
+                <p class="text-sm text-gray-600 mt-1">Load a PDF and return the value object.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getSections</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>): <span class="type">array</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getFields</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>, <span class="type">string</span> <span class="param">$sectionName</span>): <span class="type">array</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getFieldValue</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>, <span class="type">string</span> <span class="param">$fieldPath</span>): <span class="type">?string</span></p>
+                <p class="text-sm text-gray-600 mt-1">Path format: <code>"SectionName/fieldName"</code>.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">setFieldValue</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>, <span class="type">string</span> <span class="param">$fieldPath</span>, <span class="type">string</span> <span class="param">$value</span>): <span class="type">XfaPdf</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">setFieldValues</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>, <span class="type">array</span> <span class="param">$fields</span>): <span class="type">XfaPdf</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getRepeatableItems</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>, <span class="type">string</span> <span class="param">$section</span>, <span class="type">string</span> <span class="param">$container</span>): <span class="type">array</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">addRepeatableItem</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>, <span class="type">string</span> <span class="param">$section</span>, <span class="type">string</span> <span class="param">$container</span>, <span class="type">array</span> <span class="param">$data</span>): <span class="type">XfaPdf</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">removeRepeatableItem</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>, <span class="type">string</span> <span class="param">$section</span>, <span class="type">string</span> <span class="param">$container</span>, <span class="type">int</span> <span class="param">$index</span>): <span class="type">XfaPdf</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">setRepeatableItems</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>, <span class="type">string</span> <span class="param">$section</span>, <span class="type">string</span> <span class="param">$container</span>, <span class="type">string</span> <span class="param">$element</span>, <span class="type">array</span> <span class="param">$items</span>): <span class="type">XfaPdf</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">generatePreview</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>, <span class="type">array</span> <span class="param">$sectionLabels</span> = []): <span class="type">string</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">saveXfaPdf</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>, <span class="type">?string</span> <span class="param">$outputPath</span> = null): <span class="type">bool</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getRawXml</span>(<span class="type">XfaPdf</span> <span class="param">$xfaPdf</span>): <span class="type">string</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getLoaded</span>(): <span class="type">?XfaPdf</span></p>
+                <p class="text-sm text-gray-600 mt-1">Get the internally loaded value object (set by <code>setFile()</code>).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- VALUE OBJECT -->
+    <!-- ============================================ -->
+    <div id="value-object" class="mt-12 pt-8 border-t border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">XfaPdf Value Object</h2>
+        <p class="text-gray-600 mb-4">Immutable container holding loaded PDF state, passed between services.</p>
+
+        <h3 class="font-semibold text-gray-900 mt-4 mb-2">Properties</h3>
+        <div class="overflow-x-auto">
+            <table>
+                <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>$pdf</code></td><td><code>PdfBinaryService</code></td><td>Loaded PDF binary service</td></tr>
+                    <tr><td><code>$datasetsDom</code></td><td><code>?DOMDocument</code></td><td>Parsed datasets XML DOM</td></tr>
+                    <tr><td><code>$templateXml</code></td><td><code>?string</code></td><td>Raw template XML string</td></tr>
+                    <tr><td><code>$filePath</code></td><td><code>string</code></td><td>Source PDF file path</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="font-semibold text-gray-900 mt-6 mb-2">Methods</h3>
+        <div class="space-y-3">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getPdf</span>(): <span class="type">PdfBinaryService</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getDatasetsDom</span>(): <span class="type">?DOMDocument</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">setDatasetsDom</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>): <span class="type">self</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getTemplateXml</span>(): <span class="type">?string</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">setTemplateXml</span>(<span class="type">string</span> <span class="param">$xml</span>): <span class="type">self</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getFilePath</span>(): <span class="type">string</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="quick-start.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Quick Start</span>
+        </a>
+        <a href="services.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Services &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="shared.js"></script>
+</body>
+</html>

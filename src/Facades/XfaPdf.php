@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array fieldMetadata()
  * @method static array repeatableSubforms()
  * @method static array navigationSections()
+ * @method static array conditionalRules()
  * @method static \Xfa\Pdf\Section section(string $sectionName)
  * @method static \Xfa\Pdf\Section personalDetails()
  * @method static \Xfa\Pdf\Section scopeOfWork()

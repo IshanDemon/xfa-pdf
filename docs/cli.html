@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLI Commands - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">CLI Commands</h1>
+    <p class="text-gray-600 mb-6">Artisan command for reading, writing, and previewing XFA PDFs from the terminal.</p>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">xfa-pdf:manage</h2>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-bash">php artisan xfa-pdf:manage {filename} [options]</code></pre>
+    </div>
+
+    <h3 class="font-semibold text-gray-900 mt-6 mb-2">Arguments</h3>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>Argument</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>filename</code></td><td>Path to the XFA PDF file (required)</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="font-semibold text-gray-900 mt-6 mb-2">Options</h3>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>Option</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>--read</code></td><td>Read and display all XFA datasets</td></tr>
+                <tr><td><code>--raw</code></td><td>Output raw XML (combine with <code>--read</code>)</td></tr>
+                <tr><td><code>--sections</code></td><td>List all section names</td></tr>
+                <tr><td><code>--section=NAME</code></td><td>Display fields for a specific section</td></tr>
+                <tr><td><code>--get=PATH</code></td><td>Get a field value by slash-separated path</td></tr>
+                <tr><td><code>--set=PATH=VALUE</code></td><td>Set a field value</td></tr>
+                <tr><td><code>--output=FILE</code></td><td>Output file path (default: overwrites original)</td></tr>
+                <tr><td><code>--preview</code></td><td>Generate HTML preview and open in browser</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Examples</h2>
+
+    <h3 class="font-semibold text-gray-900 mt-6 mb-2">List sections</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-bash">php artisan xfa-pdf:manage form.pdf --sections</code></pre>
+    </div>
+
+    <h3 class="font-semibold text-gray-900 mt-6 mb-2">Read all data</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-bash"># Formatted output
+php artisan xfa-pdf:manage form.pdf --read
+
+# Raw XML
+php artisan xfa-pdf:manage form.pdf --read --raw</code></pre>
+    </div>
+
+    <h3 class="font-semibold text-gray-900 mt-6 mb-2">View a specific section</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-bash">php artisan xfa-pdf:manage form.pdf --section=Section_3_AppraisalDetails</code></pre>
+    </div>
+
+    <h3 class="font-semibold text-gray-900 mt-6 mb-2">Get a single field</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-bash">php artisan xfa-pdf:manage form.pdf \
+    --get="Section_3_AppraisalDetails/appraisalYear"</code></pre>
+    </div>
+
+    <h3 class="font-semibold text-gray-900 mt-6 mb-2">Set a field value</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-bash"># Set and overwrite original
+php artisan xfa-pdf:manage form.pdf \
+    --set="Section_3_AppraisalDetails/appraisalYear=2025"
+
+# Set and save to a new file
+php artisan xfa-pdf:manage form.pdf \
+    --set="Section_3_AppraisalDetails/appraisalYear=2025" \
+    --output=output.pdf</code></pre>
+    </div>
+
+    <h3 class="font-semibold text-gray-900 mt-6 mb-2">Generate preview</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-bash">php artisan xfa-pdf:manage form.pdf --preview</code></pre>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="web-ui.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Web UI Guide</span>
+        </a>
+        <a href="repeatables.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Repeatable Items &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="shared.js"></script>
+</body>
+</html>

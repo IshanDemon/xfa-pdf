@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repeatable Items - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Repeatable Items</h1>
+    <p class="text-gray-600 mb-6">XFA forms support repeatable subforms &mdash; rows that can be dynamically added or removed.</p>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">How XFA Repeatables Work</h2>
+    <p class="text-gray-700 mb-3">In the original XFA PDF, repeatable subforms are defined with <code>&lt;occur max="-1"&gt;</code> in the template. JavaScript calls <code>instanceManager.addInstance()</code> / <code>removeInstance()</code> to manage rows. This package replicates that behavior in PHP.</p>
+
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-xml">&lt;!-- Template defines the repeatable structure --&gt;
+&lt;subform name="cpd" layout="lr-tb"&gt;
+  &lt;occur min="0" max="-1" initial="1"/&gt;
+  &lt;field name="activityType"&gt;&lt;ui&gt;&lt;choiceList/&gt;&lt;/ui&gt;&lt;/field&gt;
+  &lt;field name="description"&gt;&lt;ui&gt;&lt;textEdit/&gt;&lt;/ui&gt;&lt;/field&gt;
+  &lt;field name="hours"&gt;&lt;ui&gt;&lt;numericEdit/&gt;&lt;/ui&gt;&lt;/field&gt;
+&lt;/subform&gt;</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">The datasets hold the actual data instances:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-xml">&lt;cpdList&gt;
+  &lt;cpd&gt;
+    &lt;activityType&gt;Course&lt;/activityType&gt;
+    &lt;description&gt;Advanced PHP&lt;/description&gt;
+    &lt;hours&gt;16&lt;/hours&gt;
+  &lt;/cpd&gt;
+  &lt;cpd&gt;
+    &lt;activityType&gt;Conference&lt;/activityType&gt;
+    &lt;description&gt;PHPConf 2024&lt;/description&gt;
+    &lt;hours&gt;8&lt;/hours&gt;
+  &lt;/cpd&gt;
+&lt;/cpdList&gt;</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">PHP API</h2>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load('form.pdf');
+
+// Get all CPD items
+$items = $manager->getRepeatableItems(
+    $xfaPdf, 'Section_7_CPD', 'cpdList'
+);
+// [
+//   ['activityType' => 'Course', 'description' => 'Advanced PHP', 'hours' => '16'],
+//   ['activityType' => 'Conference', 'description' => 'PHPConf', 'hours' => '8'],
+// ]
+
+// Add a new item
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf, 'Section_7_CPD', 'cpdList',
+    ['activityType' => 'Workshop', 'description' => 'Testing', 'hours' => '4']
+);
+
+// Remove item at index 0
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf, 'Section_7_CPD', 'cpdList', 0
+);
+
+// Replace all items at once
+$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf, 'Section_7_CPD', 'cpdList', 'cpd',
+    [
+        ['activityType' => 'Course', 'description' => 'New', 'hours' => '20'],
+        ['activityType' => 'Seminar', 'description' => 'Other', 'hours' => '8'],
+    ]
+);
+
+// Save changes
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Available Repeatables (MAG42)</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>Section</th><th>Container</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td>Section 3</td><td><code>qualRpt</code></td><td>Medical qualifications</td></tr>
+                <tr><td>Section 6</td><td><code>activRpt</code></td><td>PDP activities</td></tr>
+                <tr><td>Section 7</td><td><code>cpdList</code></td><td>CPD activity rows</td></tr>
+                <tr><td>Section 8</td><td><code>activity</code></td><td>Quality improvement activities</td></tr>
+                <tr><td>Section 9</td><td><code>event</code></td><td>Significant events</td></tr>
+                <tr><td>Section 10</td><td><code>colleagueFeedbackRow</code></td><td>Colleague feedback</td></tr>
+                <tr><td>Section 10</td><td><code>patientFeedbackRow</code></td><td>Patient feedback</td></tr>
+                <tr><td>Section 11</td><td><code>event</code></td><td>Complaints/compliments</td></tr>
+                <tr><td>Section 14</td><td><code>addInfo</code></td><td>Additional attachments</td></tr>
+                <tr><td>Section 15</td><td><code>evidence</code></td><td>Supporting information</td></tr>
+                <tr><td>Section 18</td><td><code>goal</code></td><td>PDP goals</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">Web UI</h2>
+    <p class="text-gray-700 mb-3">In the edit page, repeatable sections show <strong>+</strong> (add) and <strong>&minus;</strong> (remove) buttons. These send AJAX requests to <code>/xfa-pdf/{id}/add-item</code> and <code>/xfa-pdf/{id}/remove-item</code>. See <a href="web-ui.html" class="text-blue-600 hover:underline">Web UI Guide</a> for details.</p>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="cli.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; CLI Commands</span>
+        </a>
+        <a href="exceptions.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Exceptions &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="shared.js"></script>
+</body>
+</html>

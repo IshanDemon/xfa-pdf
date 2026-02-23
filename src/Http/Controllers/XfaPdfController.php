@@ -102,6 +102,7 @@ class XfaPdfController extends Controller
         $fieldMeta = $this->xfa->fieldMetadata();
         $repeatables = $this->xfa->repeatableSubforms();
         $navSections = $this->xfa->navigationSections();
+        $conditionalRules = $this->xfa->conditionalRules();
 
         $sectionLabels = $this->buildSectionLabels($sections, $navSections);
 
@@ -112,6 +113,7 @@ class XfaPdfController extends Controller
             'fieldMeta',
             'repeatables',
             'sectionLabels',
+            'conditionalRules',
         ));
     }
 
@@ -133,6 +135,7 @@ class XfaPdfController extends Controller
         $fieldMeta = $this->xfa->fieldMetadata();
         $repeatables = $this->xfa->repeatableSubforms();
         $navSections = $this->xfa->navigationSections();
+        $conditionalRules = $this->xfa->conditionalRules();
 
         $sectionLabels = $this->buildSectionLabels($sections, $navSections);
 
@@ -143,6 +146,7 @@ class XfaPdfController extends Controller
             'fieldMeta',
             'repeatables',
             'sectionLabels',
+            'conditionalRules',
         ));
     }
 
@@ -185,6 +189,51 @@ class XfaPdfController extends Controller
 
         return redirect()->route('xfa-pdf.show', $document->id)
             ->with('success', 'Document updated successfully.');
+    }
+
+    /**
+     * Generate and download the PDF with current form edits applied.
+     */
+    public function download(Request $request, $id)
+    {
+        $document = XfaDocument::findOrFail($id);
+        $fullPath = $this->getFullPath($document);
+        $xfaPdf = $this->xfa->load($fullPath);
+
+        $fields = $request->input('fields', []);
+        $flatFields = $this->flattenFields($fields);
+
+        if (!empty($flatFields)) {
+            $this->xfa->setFieldValues($xfaPdf, $flatFields);
+        }
+
+        $repeatableData = $request->input('repeatables', []);
+        foreach ($repeatableData as $sectionName => $containers) {
+            foreach ($containers as $containerName => $containerData) {
+                $elementName = $containerData['element'] ?? 'item';
+                $items = $containerData['items'] ?? [];
+
+                $this->xfa->setRepeatableItems(
+                    $xfaPdf,
+                    $sectionName,
+                    $containerName,
+                    $elementName,
+                    $items,
+                );
+            }
+        }
+
+        $tempDir = public_path('xfa/temp');
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $tempPath = $tempDir . '/xfa_download_' . uniqid() . '.pdf';
+        $this->xfa->saveXfaPdf($xfaPdf, $tempPath);
+
+        $filename = pathinfo($document->original_filename, PATHINFO_FILENAME) . '_edited.pdf';
+
+        return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
     }
 
     /**
@@ -294,20 +343,8 @@ class XfaPdfController extends Controller
             $path = $prefix ? $prefix . '/' . $key : $key;
 
             if (is_array($value)) {
-                // Skip indexed arrays (repeatable items)
-                $keys = array_keys($value);
-                $hasNumericKey = false;
-                foreach ($keys as $k) {
-                    if (is_int($k) || strpos((string) $k, '[') !== false) {
-                        $hasNumericKey = true;
-                        break;
-                    }
-                }
-                if ($hasNumericKey) {
-                    continue;
-                }
                 $flat = array_merge($flat, $this->flattenFields($value, $path));
-            } else {
+            } elseif ($value !== null) {
                 $flat[$path] = (string) $value;
             }
         }

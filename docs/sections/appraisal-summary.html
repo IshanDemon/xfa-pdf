@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 19: Appraisal Summary - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; <a href="../index.html" class="hover:text-blue-600">Sections</a> &rarr; Section 19</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 19: Appraisal Summary</h1>
+    <p class="text-gray-600 mb-8">Written by the appraiser, this section summarises the appraisal discussion across the four GMC Good Medical Practice domains plus a general summary.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_19_AppraisalSummary</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::appraisalSummary()</code><br>
+        <strong>Navigation label:</strong> Summary of the appraisal discussion
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD OVERVIEW -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>general</code></td><td>Textarea</td><td>General summary of the appraisal discussion</td></tr>
+                <tr><td><code>knowledge</code></td><td>Textarea</td><td>Summary of knowledge, skills and performance</td></tr>
+                <tr><td><code>safety</code></td><td>Textarea</td><td>Summary of safety and quality</td></tr>
+                <tr><td><code>communication</code></td><td>Textarea</td><td>Summary of communication, partnership and teamwork</td></tr>
+                <tr><td><code>trust</code></td><td>Textarea</td><td>Summary of maintaining trust</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="text-sm text-gray-500 mb-8">All five fields are multiline textareas. There are no repeatable items or conditional fields in this section. The four domain fields (<code>knowledge</code>, <code>safety</code>, <code>communication</code>, <code>trust</code>) correspond to the four domains of the GMC's Good Medical Practice framework.</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Appraisal Summary
+$data = XfaPdf::read('Section_19_AppraisalSummary');
+
+// Or using the fluent accessor
+$data = XfaPdf::appraisalSummary()->read();
+
+// $data looks like:
+// [
+//     'general' => 'This was a thorough and reflective appraisal discussion...',
+//     'knowledge' => 'Dr Mitchell demonstrated strong clinical knowledge...',
+//     'safety' => 'Dr Mitchell has shown a clear commitment to patient safety...',
+//     'communication' => 'Feedback from colleagues and patients consistently highlights...',
+//     'trust' => 'Dr Mitchell maintains high standards of probity and professional behaviour...',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$general = XfaPdf::appraisalSummary()->readField('general');
+// 'This was a thorough and reflective appraisal discussion...'
+
+$knowledge = XfaPdf::appraisalSummary()->readField('knowledge');
+// 'Dr Mitchell demonstrated strong clinical knowledge...'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Summary Fields</h2>
+    <p class="text-gray-700 mb-4">Each field is a standalone multiline textarea written by the appraiser. The fields map to the GMC Good Medical Practice domains, with an additional general summary at the top.</p>
+
+    <!-- general -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">General summary</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>general</code></p>
+    <p class="text-gray-700 mb-3">An overall summary of the appraisal discussion, covering the key themes and any overarching observations by the appraiser.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalSummary()->updateField(
+    'general',
+    'This was a thorough and reflective appraisal discussion. Dr Mitchell '
+    . 'presented a well-organised portfolio with clear evidence across all '
+    . 'four domains of Good Medical Practice. She has made excellent progress '
+    . 'against last year\'s PDP and has identified appropriate new objectives '
+    . 'for the coming year. Her commitment to quality improvement is '
+    . 'particularly noteworthy, with three completed projects demonstrating '
+    . 'measurable patient benefit. There are no concerns to escalate.'
+);</code></pre>
+    </div>
+
+    <!-- knowledge -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Knowledge, skills and performance</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>knowledge</code></p>
+    <p class="text-gray-700 mb-3">Summary of evidence relating to Domain 1 of Good Medical Practice: maintaining and developing knowledge, skills, and performance.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalSummary()->updateField(
+    'knowledge',
+    'Dr Mitchell demonstrated strong clinical knowledge with 52 hours of '
+    . 'CPD activity, well above the minimum requirement. Her completion of '
+    . 'the Advanced Life Support recertification and the RCGP diabetes '
+    . 'management course show a commitment to maintaining core clinical '
+    . 'skills. The diabetes audit demonstrated the application of new '
+    . 'knowledge to practice, resulting in improved HbA1c outcomes for her '
+    . 'patient cohort. Her plan to develop musculoskeletal medicine skills '
+    . 'through supervised clinics is an appropriate stretch goal.'
+);</code></pre>
+    </div>
+
+    <!-- safety -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Safety and quality</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>safety</code></p>
+    <p class="text-gray-700 mb-3">Summary of evidence relating to Domain 2: maintaining patient safety and improving the quality of care.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalSummary()->updateField(
+    'safety',
+    'Dr Mitchell has shown a clear commitment to patient safety through '
+    . 'her quality improvement activities. The falls pathway project '
+    . 'reduced unnecessary hospital admissions by 12% and the repeat '
+    . 'prescription workflow improvement reduced processing delays from '
+    . '72 hours to 24 hours. She was involved in one significant event '
+    . 'during the year, which was handled appropriately with a thorough '
+    . 'reflection demonstrating learning and changes to practice. No '
+    . 'patient safety concerns were identified.'
+);</code></pre>
+    </div>
+
+    <!-- communication -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Communication, partnership and teamwork</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>communication</code></p>
+    <p class="text-gray-700 mb-3">Summary of evidence relating to Domain 3: communicating effectively, working collaboratively, and maintaining partnerships.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalSummary()->updateField(
+    'communication',
+    'Feedback from colleagues and patients consistently highlights '
+    . 'Dr Mitchell\'s excellent communication skills. Her colleague '
+    . 'feedback scores were above the national mean in all categories, '
+    . 'with particular strengths noted in team leadership and '
+    . 'approachability. Patient feedback was overwhelmingly positive, '
+    . 'with high satisfaction scores for consultation manner and '
+    . 'explanation of conditions. The falls pathway project demonstrated '
+    . 'effective multi-disciplinary working across organisational '
+    . 'boundaries with A&E, physiotherapy, and community nursing teams.'
+);</code></pre>
+    </div>
+
+    <!-- trust -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Maintaining trust</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>trust</code></p>
+    <p class="text-gray-700 mb-3">Summary of evidence relating to Domain 4: maintaining trust through probity, professional behaviour, and health declarations.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::appraisalSummary()->updateField(
+    'trust',
+    'Dr Mitchell maintains high standards of probity and professional '
+    . 'behaviour. She confirmed compliance with all probity requirements '
+    . 'and had no complaints or fitness to practise concerns during the '
+    . 'appraisal period. She declared no health issues affecting her '
+    . 'ability to practise safely. She has appropriate indemnity cover '
+    . 'and her GMC registration is up to date. There are no concerns '
+    . 'regarding maintaining trust.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Appraisal Summary section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillAppraisalSummary()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+
+        // -----------------------------------------------
+        // 1. Fill all summary fields
+        // -----------------------------------------------
+        XfaPdf::setFile($pdfPath);
+
+        XfaPdf::appraisalSummary()->update([
+            'general' =>
+                'This was a thorough and reflective appraisal discussion. '
+                . 'Dr Mitchell presented a well-organised portfolio with '
+                . 'clear evidence across all four domains of Good Medical '
+                . 'Practice. She has made excellent progress against last '
+                . 'year\'s PDP and has identified appropriate new objectives '
+                . 'for the coming year. Her commitment to quality improvement '
+                . 'is particularly noteworthy. There are no concerns to '
+                . 'escalate.',
+
+            'knowledge' =>
+                'Dr Mitchell demonstrated strong clinical knowledge with '
+                . '52 hours of CPD activity, well above the minimum '
+                . 'requirement. Her completion of ALS recertification and '
+                . 'the RCGP diabetes management course show a commitment to '
+                . 'maintaining core clinical skills. The diabetes audit '
+                . 'demonstrated application of new knowledge to practice, '
+                . 'resulting in improved patient outcomes.',
+
+            'safety' =>
+                'Dr Mitchell has shown a clear commitment to patient safety '
+                . 'through her quality improvement activities. The falls '
+                . 'pathway project reduced unnecessary hospital admissions '
+                . 'by 12%. She was involved in one significant event which '
+                . 'was handled appropriately with thorough reflection. No '
+                . 'patient safety concerns were identified.',
+
+            'communication' =>
+                'Feedback from colleagues and patients consistently '
+                . 'highlights Dr Mitchell\'s excellent communication skills. '
+                . 'Colleague feedback scores were above the national mean '
+                . 'in all categories. Patient feedback was overwhelmingly '
+                . 'positive. The falls pathway project demonstrated '
+                . 'effective multi-disciplinary working across organisational '
+                . 'boundaries.',
+
+            'trust' =>
+                'Dr Mitchell maintains high standards of probity and '
+                . 'professional behaviour. She confirmed compliance with all '
+                . 'probity requirements and had no complaints or fitness to '
+                . 'practise concerns. She declared no health issues affecting '
+                . 'her ability to practise. Appropriate indemnity cover is '
+                . 'in place and GMC registration is up to date.',
+        ]);
+
+        // -----------------------------------------------
+        // 2. Save the PDF
+        // -----------------------------------------------
+        XfaPdf::save();
+
+        return redirect()->back()->with('success', 'Appraisal Summary saved.');
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::appraisalSummary()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::appraisalSummary()->readField('general')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::appraisalSummary()->updateField('knowledge', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::appraisalSummary()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Set general summary</td>
+                    <td><code>XfaPdf::appraisalSummary()->updateField('general', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Set knowledge summary</td>
+                    <td><code>XfaPdf::appraisalSummary()->updateField('knowledge', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Set safety summary</td>
+                    <td><code>XfaPdf::appraisalSummary()->updateField('safety', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Set communication summary</td>
+                    <td><code>XfaPdf::appraisalSummary()->updateField('communication', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Set trust summary</td>
+                    <td><code>XfaPdf::appraisalSummary()->updateField('trust', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="agreed-pdp.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 18: The Agreed PDP</span>
+        </a>
+        <a href="appraisal-outputs.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 20: Appraisal Outputs &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

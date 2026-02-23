@@ -83,32 +83,41 @@ class PdfBinaryService
         foreach ($streamStarts as $ss) {
             $from = $ss['content_from'];
 
-            $endPos = strpos($binary, $endMarker, $from);
-            if ($endPos === false) {
-                continue;
-            }
-
-            $raw = substr($binary, $from, $endPos - $from);
-
-            // Find the object number from context before stream
+            // Find the object number and declared length from the header.
+            // Use the LAST "N 0 obj" match (closest to the stream marker)
+            // to avoid picking up a preceding object's number.
             $contextStart = $ss['header_context_start'];
             $context = substr($binary, $contextStart, $ss['marker_start'] - $contextStart);
             $objHeaderStart = 0;
 
-            if (preg_match('/(\d+) 0 obj/s', $context, $objMatch, PREG_OFFSET_CAPTURE)) {
-                $objHeaderStart = $contextStart + $objMatch[0][1];
+            if (preg_match_all('/(\d+) 0 obj/s', $context, $objMatches, PREG_OFFSET_CAPTURE)) {
+                $lastMatch = end($objMatches[0]);
+                $objHeaderStart = $contextStart + $lastMatch[1];
+            }
+
+            $headerContext = substr($binary, $objHeaderStart, $from - $objHeaderStart);
+            preg_match('/(\d+) 0 obj/', $headerContext, $numMatch);
+            $objNum = isset($numMatch[1]) ? intval($numMatch[1]) : 0;
+
+            preg_match('/\/Length\s+(\d+)/', $headerContext, $lenMatch);
+            $declaredLength = isset($lenMatch[1]) ? intval($lenMatch[1]) : 0;
+
+            // Use declared length when available to extract exact stream bytes.
+            // Fallback to endstream marker search if no length declared.
+            if ($declaredLength > 0) {
+                $raw = substr($binary, $from, $declaredLength);
+                $endPos = $from + $declaredLength;
+            } else {
+                $endPos = strpos($binary, $endMarker, $from);
+                if ($endPos === false) {
+                    continue;
+                }
+                $raw = substr($binary, $from, $endPos - $from);
             }
 
             $decompressed = $this->decompressStream($raw);
 
             if ($decompressed && strpos($decompressed, '<xfa:datasets') !== false) {
-                $headerContext = substr($binary, $objHeaderStart, $from - $objHeaderStart);
-                preg_match('/(\d+) 0 obj/', $headerContext, $numMatch);
-                $objNum = isset($numMatch[1]) ? intval($numMatch[1]) : 0;
-
-                preg_match('/\/Length\s+(\d+)/', $headerContext, $lenMatch);
-                $declaredLength = isset($lenMatch[1]) ? intval($lenMatch[1]) : 0;
-
                 $allStreams[] = [
                     'obj_num' => $objNum,
                     'obj_header_start' => $objHeaderStart,

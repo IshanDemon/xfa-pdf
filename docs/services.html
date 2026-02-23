@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Services</h1>
+    <p class="text-gray-600 mb-8">The package uses a microservice architecture. Each service handles one aspect of XFA PDF processing.</p>
+
+    <!-- ============================== -->
+    <!-- PdfBinaryService -->
+    <!-- ============================== -->
+    <div id="pdf-binary-service" class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2 pb-2 border-b border-gray-200">PdfBinaryService</h2>
+        <p class="text-gray-600 mb-4">Raw PDF binary parsing, stream discovery, decompression, and incremental writes.</p>
+
+        <div class="space-y-3">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">load</span>(<span class="type">string</span> <span class="param">$filePath</span>): <span class="type">self</span></p>
+                <p class="text-sm text-gray-600 mt-1">Load a PDF file from disk.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">loadBinary</span>(<span class="type">string</span> <span class="param">$binary</span>): <span class="type">self</span></p>
+                <p class="text-sm text-gray-600 mt-1">Load a PDF from a raw binary string.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">discoverStreams</span>(): <span class="type">void</span></p>
+                <p class="text-sm text-gray-600 mt-1">Discover all XFA dataset streams. Finds <code>stream...endstream</code> blocks, decompresses via Flate, identifies those containing <code>&lt;xfa:datasets&gt;</code>. Uses declared <code>/Length</code> for extraction. Deduplicates by object number, keeping last occurrence.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">decompressStream</span>(<span class="type">string</span> <span class="param">$raw</span>): <span class="type">?string</span></p>
+                <p class="text-sm text-gray-600 mt-1">Decompress a raw PDF stream. Tries <code>gzuncompress()</code> first, then <code>zlib_decode()</code> with byte stripping.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">extractTrailerInfo</span>(): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Extract trailer info for incremental updates. Returns <code>{prev_xref_offset, root, info, size, id}</code>.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">groupConsecutiveKeys</span>(<span class="type">array</span> <span class="param">$map</span>): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Group consecutive object numbers for xref table generation.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">writeIncrementalUpdate</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>, <span class="type">?string</span> <span class="param">$outputPath</span> = null): <span class="type">bool</span></p>
+                <p class="text-sm text-gray-600 mt-1">Write modified datasets XML back via incremental update. Appends new objects + xref at end of file.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getDatasetStreams</span>(): <span class="type">array</span> &nbsp;|&nbsp; <span class="name">getBinary</span>(): <span class="type">string</span> &nbsp;|&nbsp; <span class="name">getFilePath</span>(): <span class="type">string</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- DatasetService -->
+    <!-- ============================== -->
+    <div id="dataset-service" class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2 pb-2 border-b border-gray-200">DatasetService</h2>
+        <p class="text-gray-600 mb-4">Reads and writes XFA datasets XML. Uses <code>NamespaceService</code> for namespace-agnostic XPath queries.</p>
+
+        <div class="space-y-3">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">extract</span>(<span class="type">PdfBinaryService</span> <span class="param">$pdf</span>): <span class="type">DOMDocument</span></p>
+                <p class="text-sm text-gray-600 mt-1">Extract and parse datasets XML into a DOMDocument.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">extractRaw</span>(<span class="type">PdfBinaryService</span> <span class="param">$pdf</span>): <span class="type">string</span></p>
+                <p class="text-sm text-gray-600 mt-1">Extract raw XML string without parsing.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getSections</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Get all top-level section names.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getFields</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>, <span class="type">string</span> <span class="param">$sectionName</span>): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Get all fields in a section as a nested array.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getFieldValue</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>, <span class="type">string</span> <span class="param">$fieldPath</span>): <span class="type">?string</span></p>
+                <p class="text-sm text-gray-600 mt-1">Get a field value by slash-separated path: <code>"Section_3/appraisalYear"</code>.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">setFieldValue</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>, <span class="type">string</span> <span class="param">$fieldPath</span>, <span class="type">string</span> <span class="param">$value</span>): <span class="type">DOMDocument</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">setFieldValues</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>, <span class="type">array</span> <span class="param">$fields</span>): <span class="type">DOMDocument</span></p>
+                <p class="text-sm text-gray-600 mt-1">Set multiple values. <code>$fields</code> is <code>['path' =&gt; 'value', ...]</code>.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">toArray</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>): <span class="type">array</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="type">static</span> <span class="name">nodeToArray</span>(<span class="type">DOMNode</span> <span class="param">$node</span>): <span class="type">mixed</span></p>
+                <p class="text-sm text-gray-600 mt-1">Recursively convert a DOM node to array/string.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- TemplateService -->
+    <!-- ============================== -->
+    <div id="template-service" class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2 pb-2 border-b border-gray-200">TemplateService</h2>
+        <p class="text-gray-600 mb-4">Parses XFA template XML for field metadata, repeatable definitions, and navigation. The template is <strong>never modified</strong>.</p>
+
+        <div class="space-y-3">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">extract</span>(<span class="type">PdfBinaryService</span> <span class="param">$pdf</span>): <span class="type">?string</span></p>
+                <p class="text-sm text-gray-600 mt-1">Extract template XML from the PDF binary.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getFieldMetadata</span>(<span class="type">string</span> <span class="param">$templateXml</span>): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Extract field metadata. Returns <code>array&lt;string, {type, options, caption}&gt;</code>.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getRepeatableSubforms</span>(<span class="type">string</span> <span class="param">$templateXml</span>): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Identify repeatable subforms (<code>&lt;occur max="-1"&gt;</code>). Returns <code>array&lt;string, {fields, min, max}&gt;</code>.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getFieldType</span>(<span class="type">string</span> <span class="param">$templateXml</span>, <span class="type">string</span> <span class="param">$fieldName</span>): <span class="type">?string</span></p>
+                <p class="text-sm text-gray-600 mt-1">Get UI type of a field (e.g. <code>textEdit</code>, <code>checkButton</code>, <code>choiceList</code>).</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getNavigationSections</span>(<span class="type">string</span> <span class="param">$templateXml</span>): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Extract navigation labels from MenuBar button tooltips. Returns <code>array&lt;int, string&gt;</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- RepeatableService -->
+    <!-- ============================== -->
+    <div id="repeatable-service" class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2 pb-2 border-b border-gray-200">RepeatableService</h2>
+        <p class="text-gray-600 mb-4">Manages repeatable subform items. Mirrors XFA's <code>instanceManager.addInstance()</code> / <code>removeInstance()</code>.</p>
+
+        <div class="space-y-3">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getItems</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>, <span class="type">string</span> <span class="param">$sectionName</span>, <span class="type">string</span> <span class="param">$container</span>): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Get all items from a repeatable container. Returns <code>array&lt;int, array&lt;string, string&gt;&gt;</code>.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">addItem</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>, <span class="type">string</span> <span class="param">$section</span>, <span class="type">string</span> <span class="param">$container</span>, <span class="type">array</span> <span class="param">$data</span>): <span class="type">DOMDocument</span></p>
+                <p class="text-sm text-gray-600 mt-1">Add a new item. <code>$data</code> is <code>['fieldName' =&gt; 'value', ...]</code>.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">removeItem</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>, <span class="type">string</span> <span class="param">$section</span>, <span class="type">string</span> <span class="param">$container</span>, <span class="type">int</span> <span class="param">$index</span>): <span class="type">DOMDocument</span></p>
+                <p class="text-sm text-gray-600 mt-1">Remove item at index.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">updateItem</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>, <span class="type">string</span> <span class="param">$section</span>, <span class="type">string</span> <span class="param">$container</span>, <span class="type">int</span> <span class="param">$index</span>, <span class="type">array</span> <span class="param">$data</span>): <span class="type">DOMDocument</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">setItems</span>(<span class="type">DOMDocument</span> <span class="param">$dom</span>, <span class="type">string</span> <span class="param">$section</span>, <span class="type">string</span> <span class="param">$container</span>, <span class="type">string</span> <span class="param">$element</span>, <span class="type">array</span> <span class="param">$items</span>): <span class="type">DOMDocument</span></p>
+                <p class="text-sm text-gray-600 mt-1">Replace all items in a container.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getRowTemplate</span>(<span class="type">string</span> <span class="param">$templateXml</span>, <span class="type">string</span> <span class="param">$container</span>): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Get field names/types for a new empty row from template.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- PreviewService -->
+    <!-- ============================== -->
+    <div id="preview-service" class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2 pb-2 border-b border-gray-200">PreviewService</h2>
+        <p class="text-gray-600 mb-4">Generates interactive HTML previews, rendering each XFA field type as its HTML equivalent.</p>
+
+        <div class="space-y-3">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">generate</span>(<span class="type">array</span> <span class="param">$sections</span>, <span class="type">array</span> <span class="param">$fieldMeta</span>, <span class="type">array</span> <span class="param">$repeatables</span>, <span class="type">array</span> <span class="param">$sectionLabels</span>): <span class="type">string</span></p>
+                <p class="text-sm text-gray-600 mt-1">Generate a full HTML preview page.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">renderSection</span>(<span class="type">string</span> <span class="param">$key</span>, <span class="type">string</span> <span class="param">$label</span>, <span class="type">string</span> <span class="param">$fieldsHtml</span>, <span class="type">bool</span> <span class="param">$isEmpty</span> = false): <span class="type">string</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">renderFieldsHtml</span>(<span class="param">$fields</span>, <span class="type">string</span> <span class="param">$parentPath</span>, <span class="type">array</span> <span class="param">$fieldMeta</span>, <span class="type">array</span> <span class="param">$repeatables</span>): <span class="type">string</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="type">static</span> <span class="name">humanize</span>(<span class="type">string</span> <span class="param">$key</span>): <span class="type">string</span></p>
+                <p class="text-sm text-gray-600 mt-1">Convert <code>camelCase</code> / <code>snake_case</code> to readable label.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="type">static</span> <span class="name">resolveFieldMeta</span>(<span class="type">string</span> <span class="param">$dataPath</span>, <span class="type">string</span> <span class="param">$fieldName</span>, <span class="type">array</span> <span class="param">$fieldMeta</span>): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Resolve metadata with fallback chain. Returns <code>{type, options, caption}</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- NamespaceService -->
+    <!-- ============================== -->
+    <div id="namespace-service" class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2 pb-2 border-b border-gray-200">NamespaceService</h2>
+        <p class="text-gray-600 mb-4">Auto-detects XML namespaces, enabling the package to work with any XFA form regardless of vendor.</p>
+
+        <div class="space-y-3">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">detect</span>(<span class="type">string</span> <span class="param">$xml</span>): <span class="type">self</span></p>
+                <p class="text-sm text-gray-600 mt-1">Auto-detect all namespaces from an XML string.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">registerOnXPath</span>(<span class="type">DOMXPath</span> <span class="param">$xpath</span>): <span class="type">void</span></p>
+                <p class="text-sm text-gray-600 mt-1">Register all detected namespaces on a DOMXPath instance.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getDataNamespace</span>(): <span class="type">?string</span></p>
+                <p class="text-sm text-gray-600 mt-1">Get the data root namespace (varies per form vendor).</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getDataPrefix</span>(): <span class="type">string</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getXfaNamespace</span>(): <span class="type">string</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getTemplateNamespace</span>(): <span class="type">string</span></p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="method-sig"><span class="name">getAll</span>(): <span class="type">array</span></p>
+                <p class="text-sm text-gray-600 mt-1">Get all detected namespaces as <code>prefix =&gt; URI</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="facade-api.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Facade API</span>
+        </a>
+        <a href="web-ui.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Web UI Guide &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="shared.js"></script>
+</body>
+</html>

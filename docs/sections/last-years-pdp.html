@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 6: Last Year's PDP - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; <a href="../index.html" class="hover:text-blue-600">Sections</a> &rarr; Section 6</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 6: Last Year's PDP</h1>
+    <p class="text-gray-600 mb-8">This section reviews the doctor's progress against their previous year's Personal Development Plan. It includes a repeatable table of PDP activities with progress notes, plus general comments and appraiser comments.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_6_LastYearsPDP</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::lastYearsPdp()</code><br>
+        <strong>Navigation label:</strong> Personal development plans and their review
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD OVERVIEW -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>role</code></td><td>Select</td><td>Role or area of practice the PDP activity relates to (repeatable)</td></tr>
+                <tr><td><code>detail</code></td><td>Multiline text</td><td>Description of the PDP activity or goal (repeatable)</td></tr>
+                <tr><td><code>progress</code></td><td>Multiline text</td><td>Progress notes and reflections on the activity (repeatable)</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>attachmentID</code></td><td>Text</td><td>Internal attachment reference</td></tr>
+                <tr><td><code>fileName</code></td><td>Text</td><td>Attachment filename</td></tr>
+                <tr><td><code>generalComments</code></td><td>Multiline text</td><td>General comments about last year's progress</td></tr>
+                <tr><td><code>appraiserComments</code></td><td>Multiline text</td><td>Appraiser's comments (mirrors to Section 19)</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="text-sm text-gray-500 mb-8">The first three fields (<code>role</code>, <code>detail</code>, <code>progress</code>) are <strong>repeatable</strong> &mdash; they live inside <code>activRpt</code> rows within the <code>reflections</code> container. Each row represents one PDP activity from the previous year. The remaining fields are standalone.</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Last Year's PDP
+$data = XfaPdf::read('Section_6_LastYearsPDP');
+
+// Or using the fluent accessor
+$data = XfaPdf::lastYearsPdp()->read();
+
+// $data looks like:
+// [
+//     'reflections' => [
+//         'activRpt' => [
+//             ['role' => 'Clinical', 'detail' => 'Complete ALS certification', 'progress' => 'Completed in March...'],
+//             ['role' => 'Educational', 'detail' => 'Attend diabetes course', 'progress' => 'Attended 2-day course...'],
+//         ],
+//     ],
+//     'generalComments' => 'Good progress made against all PDP objectives...',
+//     'appraiserComments' => '',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$comments = XfaPdf::lastYearsPdp()->readField('generalComments');
+// 'Good progress made against all PDP objectives...'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- PDP ACTIVITIES (REPEATABLE) -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">PDP Activities (Repeatable Table)</h2>
+    <p class="text-gray-700 mb-4">Each row in the PDP table represents one activity or goal from the previous year's development plan. Rows are stored as <code>activRpt</code> elements inside the <code>reflections</code> container. Each row has three fields: <code>role</code> (select), <code>detail</code> (textarea), and <code>progress</code> (textarea).</p>
+
+    <!-- ADD A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding a new PDP activity</h3>
+    <p class="text-gray-700 mb-3">To add a new row with all three fields filled in:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Add a PDP activity row
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf,
+    'Section_6_LastYearsPDP',        // section name
+    'reflections',                    // container name
+    [
+        'role'     => 'Clinical',
+        'detail'   => 'Complete Advanced Life Support (ALS) certification to improve emergency response skills in primary care.',
+        'progress' => 'Completed ALS provider course in March at Manchester Royal Infirmary. Passed assessment first attempt. Now ALS certified until 2028.',
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ADD MULTIPLE ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding multiple activities at once</h3>
+    <p class="text-gray-700 mb-3">If you need to add several PDP activities, call <code>addRepeatableItem()</code> for each one:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Activity 1: Clinical skills
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_6_LastYearsPDP', 'reflections', [
+    'role'     => 'Clinical',
+    'detail'   => 'Complete Advanced Life Support (ALS) certification.',
+    'progress' => 'Completed ALS provider course in March. Passed assessment first attempt. Now certified until 2028.',
+]);
+
+// Activity 2: Educational development
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_6_LastYearsPDP', 'reflections', [
+    'role'     => 'Educational',
+    'detail'   => 'Attend the RCGP diabetes management update course to improve management of Type 2 diabetes patients.',
+    'progress' => 'Attended 2-day residential course in June. Implemented new insulin titration protocol at the practice. HbA1c outcomes improved for 12 patients.',
+]);
+
+// Activity 3: Leadership
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_6_LastYearsPDP', 'reflections', [
+    'role'     => 'Leadership',
+    'detail'   => 'Complete NHS Leadership Academy Edward Jenner programme.',
+    'progress' => 'Completed all 8 modules by September. Applied learning to restructure the practice clinical meetings schedule.',
+]);
+
+// Activity 4: Research and audit
+$xfaPdf = $manager->addRepeatableItem($xfaPdf, 'Section_6_LastYearsPDP', 'reflections', [
+    'role'     => 'Clinical',
+    'detail'   => 'Conduct audit of antibiotic prescribing rates in the practice.',
+    'progress' => 'Audit completed in November. Presented findings at practice meeting. Prescribing rates reduced by 15% against baseline.',
+]);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- REPLACE ALL ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Replacing all activities</h3>
+    <p class="text-gray-700 mb-3">If you want to clear existing activities and set new ones from scratch, use <code>setRepeatableItems()</code>:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf,
+    'Section_6_LastYearsPDP',        // section
+    'reflections',                    // container
+    'activRpt',                       // element name
+    [
+        [
+            'role'     => 'Clinical',
+            'detail'   => 'Achieve diploma in musculoskeletal medicine.',
+            'progress' => 'Enrolled on the 12-month programme. Completed 6 of 8 modules. Expected completion by April next year.',
+        ],
+        [
+            'role'     => 'Educational',
+            'detail'   => 'Become a GP trainer by completing the Trainer Approval process.',
+            'progress' => 'Submitted portfolio in July. Training practice visit completed in October. Approval confirmed in December.',
+        ],
+        [
+            'role'     => 'Clinical',
+            'detail'   => 'Improve palliative care skills through Gold Standards Framework training.',
+            'progress' => 'Attended all 6 GSF sessions. Practice now has GSF accreditation. Established monthly palliative care MDT meetings.',
+        ],
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- READ ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Reading existing activities</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$rows = $manager->getRepeatableItems(
+    $xfaPdf,
+    'Section_6_LastYearsPDP',
+    'reflections'
+);
+
+foreach ($rows as $index => $row) {
+    echo "Activity {$index}: [{$row['role']}] {$row['detail']}\n";
+    echo "  Progress: {$row['progress']}\n\n";
+}
+// Activity 0: [Clinical] Complete Advanced Life Support (ALS) certification.
+//   Progress: Completed ALS provider course in March...
+//
+// Activity 1: [Educational] Attend the RCGP diabetes management update course...
+//   Progress: Attended 2-day residential course in June...</code></pre>
+    </div>
+
+    <!-- REMOVE A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Removing an activity</h3>
+    <p class="text-gray-700 mb-3">Remove an activity by its index (0-based):</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Remove the second activity (index 1)
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf,
+    'Section_6_LastYearsPDP',
+    'reflections',
+    1
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+    <p class="text-gray-700 mb-4">Below the PDP activities table, there are two free-text fields. These are standalone (not repeatable).</p>
+
+    <!-- generalComments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">General comments</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>generalComments</code></p>
+    <p class="text-gray-700 mb-3">This is where the doctor reflects on their overall progress against last year's PDP. The form label reads: <em>"Please provide a summary of your progress against last year's PDP."</em></p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::lastYearsPdp()->updateField(
+    'generalComments',
+    'Good progress has been made against all PDP objectives set at last year\'s '
+    . 'appraisal. The ALS certification and diabetes course were completed on '
+    . 'schedule and have already improved my clinical practice. The antibiotic '
+    . 'prescribing audit has led to measurable changes at practice level. '
+    . 'The musculoskeletal diploma is ongoing but on track for completion. '
+    . 'I feel the objectives were appropriately challenging and relevant to '
+    . 'my current roles.'
+);</code></pre>
+    </div>
+
+    <!-- appraiserComments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser's comments</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserComments</code></p>
+    <p class="text-gray-700 mb-3">Written by the appraiser, summarising their assessment of the doctor's progress against last year's PDP. This field mirrors to Section 19 (Appraisal Summary).</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::lastYearsPdp()->updateField(
+    'appraiserComments',
+    'Dr Smith has demonstrated excellent engagement with their PDP. All four '
+    . 'objectives have been addressed with clear evidence of completion or '
+    . 'significant progress. The antibiotic prescribing audit is particularly '
+    . 'impressive, showing a measurable 15% reduction in unnecessary prescribing. '
+    . 'The ALS certification and diabetes course directly enhance patient safety. '
+    . 'I am satisfied that appropriate progress has been made.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Last Year's PDP section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillLastYearsPdp()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        $manager = app('xfa-pdf');
+        $xfaPdf = $manager->load($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Set PDP activity rows
+        // -----------------------------------------------
+        $xfaPdf = $manager->setRepeatableItems(
+            $xfaPdf,
+            'Section_6_LastYearsPDP',
+            'reflections',
+            'activRpt',
+            [
+                [
+                    'role'     => 'Clinical',
+                    'detail'   => 'Complete Advanced Life Support (ALS) '
+                                . 'certification to improve emergency '
+                                . 'response skills in primary care.',
+                    'progress' => 'Completed ALS provider course in March '
+                                . 'at Manchester Royal Infirmary. Passed '
+                                . 'assessment first attempt. Now ALS '
+                                . 'certified until 2028.',
+                ],
+                [
+                    'role'     => 'Educational',
+                    'detail'   => 'Attend the RCGP diabetes management '
+                                . 'update course to improve management '
+                                . 'of Type 2 diabetes patients.',
+                    'progress' => 'Attended 2-day residential course in '
+                                . 'June. Implemented new insulin titration '
+                                . 'protocol. HbA1c outcomes improved for '
+                                . '12 patients in my care.',
+                ],
+                [
+                    'role'     => 'Leadership',
+                    'detail'   => 'Complete NHS Leadership Academy Edward '
+                                . 'Jenner programme to develop leadership '
+                                . 'skills for PCN Clinical Lead role.',
+                    'progress' => 'Completed all 8 modules by September. '
+                                . 'Applied learning to restructure the '
+                                . 'practice clinical meetings schedule. '
+                                . 'Positive feedback from partners.',
+                ],
+                [
+                    'role'     => 'Clinical',
+                    'detail'   => 'Conduct audit of antibiotic prescribing '
+                                . 'rates in the practice against NICE '
+                                . 'guidelines.',
+                    'progress' => 'Audit completed in November. Presented '
+                                . 'findings at practice meeting. Prescribing '
+                                . 'rates reduced by 15% against baseline. '
+                                . 'Re-audit planned for next year.',
+                ],
+            ]
+        );
+
+        // -----------------------------------------------
+        // 2. Fill text fields
+        // -----------------------------------------------
+        XfaPdf::setFile($pdfPath);
+
+        XfaPdf::lastYearsPdp()->update([
+            'generalComments' =>
+                'Good progress has been made against all PDP objectives '
+                . 'set at last year\'s appraisal. The ALS certification '
+                . 'and diabetes course were completed on schedule and '
+                . 'have already improved my clinical practice. The '
+                . 'antibiotic prescribing audit led to measurable '
+                . 'changes at practice level. I feel the objectives were '
+                . 'appropriately challenging and relevant to my roles.',
+
+            'appraiserComments' =>
+                'Dr Smith has demonstrated excellent engagement with '
+                . 'their PDP. All four objectives have been addressed '
+                . 'with clear evidence of completion or significant '
+                . 'progress. The antibiotic prescribing audit is '
+                . 'particularly impressive, showing a measurable 15% '
+                . 'reduction. I am satisfied that appropriate progress '
+                . 'has been made against the agreed PDP.',
+        ]);
+
+        // -----------------------------------------------
+        // 3. Save the PDF
+        // -----------------------------------------------
+        $manager->saveXfaPdf($xfaPdf);
+        // Or: XfaPdf::save();
+
+        return redirect()->back()->with('success', 'Last Year\'s PDP saved.');
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::lastYearsPdp()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::lastYearsPdp()->readField('generalComments')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::lastYearsPdp()->updateField('generalComments', 'text...')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::lastYearsPdp()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Get PDP activities</td>
+                    <td><code>$manager->getRepeatableItems($xfaPdf, 'Section_6_LastYearsPDP', 'reflections')</code></td>
+                </tr>
+                <tr>
+                    <td>Add a PDP activity</td>
+                    <td><code>$manager->addRepeatableItem($xfaPdf, 'Section_6_LastYearsPDP', 'reflections', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Remove a PDP activity</td>
+                    <td><code>$manager->removeRepeatableItem($xfaPdf, 'Section_6_LastYearsPDP', 'reflections', $index)</code></td>
+                </tr>
+                <tr>
+                    <td>Replace all activities</td>
+                    <td><code>$manager->setRepeatableItems($xfaPdf, 'Section_6_LastYearsPDP', 'reflections', 'activRpt', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="previous-appraisals.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 5: Previous Appraisals</span>
+        </a>
+        <a href="cpd.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 7: CPD &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

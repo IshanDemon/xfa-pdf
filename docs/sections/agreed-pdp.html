@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 18: The Agreed PDP - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; <a href="../index.html" class="hover:text-blue-600">Sections</a> &rarr; Section 18</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 18: The Agreed PDP</h1>
+    <p class="text-gray-600 mb-8">This section captures the agreed Personal Development Plan goals set during the appraisal meeting. Each goal is a repeatable item with a role and details.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_18_TheAgreedPDP</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::agreedPdp()</code><br>
+        <strong>Navigation label:</strong> The agreed personal development plan
+    </div>
+
+    <!-- ======================================== -->
+    <!-- FIELD OVERVIEW -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>pdpGoals</code> &gt; <code>goal</code></td><td>Repeatable</td><td>PDP goal rows, each with a role and details</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="text-sm text-gray-500 mb-8">Each <code>goal</code> row inside <code>pdpGoals</code> contains: <code>role</code> (select &mdash; the relevant area of practice), <code>details</code> (textarea &mdash; detail of the PDP goal including what will be done, how, and by when).</p>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in The Agreed PDP
+$data = XfaPdf::read('Section_18_TheAgreedPDP');
+
+// Or using the fluent accessor
+$data = XfaPdf::agreedPdp()->read();
+
+// $data looks like:
+// [
+//     'pdpGoals' => [
+//         'goal' => [
+//             [
+//                 'role' => 'Clinical',
+//                 'details' => 'Complete Advanced Life Support recertification by March 2025...',
+//             ],
+//             [
+//                 'role' => 'Educational',
+//                 'details' => 'Develop skills in musculoskeletal medicine through supervised clinics...',
+//             ],
+//         ],
+//     ],
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$goals = XfaPdf::agreedPdp()->readField('pdpGoals');
+// Returns the nested array of goal rows</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- PDP GOALS (REPEATABLE) -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">PDP Goals (Repeatable Table)</h2>
+    <p class="text-gray-700 mb-4">Each row in the PDP goals table represents one development goal agreed during the appraisal meeting. Rows are stored as <code>goal</code> elements inside the <code>pdpGoals</code> container. Each row has two fields:</p>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Row field</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>role</code></td><td>Select</td><td>The area of practice or role the goal relates to (e.g. Clinical, Educational, Leadership)</td></tr>
+                <tr><td><code>details</code></td><td>Textarea</td><td>Full description of the PDP goal, including what will be done, how, and target completion date</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ADD A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding a new PDP goal</h3>
+    <p class="text-gray-700 mb-3">To add a new goal row:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Add a PDP goal
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf,
+    'Section_18_TheAgreedPDP',        // section name
+    'pdpGoals',                        // container name
+    [
+        'role'    => 'Clinical',
+        'details' => 'Complete Advanced Life Support recertification by March 2025. '
+                   . 'Attend the two-day ALS provider course at Manchester Royal '
+                   . 'Infirmary. This will maintain emergency response competence '
+                   . 'and is a requirement for my out-of-hours clinical role.',
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- REPLACE ALL ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Replacing all PDP goals</h3>
+    <p class="text-gray-700 mb-3">If you want to clear existing goals and set new ones from scratch, use <code>setRepeatableItems()</code>:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf,
+    'Section_18_TheAgreedPDP',        // section
+    'pdpGoals',                        // container
+    'goal',                            // element name
+    [
+        [
+            'role'    => 'Clinical',
+            'details' => 'Complete Advanced Life Support recertification by March 2025. '
+                       . 'Attend the two-day ALS provider course at Manchester Royal '
+                       . 'Infirmary. This will maintain emergency response competence '
+                       . 'and is a requirement for my out-of-hours clinical role.',
+        ],
+        [
+            'role'    => 'Clinical',
+            'details' => 'Develop skills in musculoskeletal medicine through supervised '
+                       . 'clinics. Attend 10 supervised MSK clinics at Trafford General '
+                       . 'Hospital with Dr Patel (consultant rheumatologist) between '
+                       . 'April and September 2025. Complete the online PGCert module '
+                       . 'in MSK Ultrasound by December 2025.',
+        ],
+        [
+            'role'    => 'Educational',
+            'details' => 'Obtain GP Trainer accreditation by completing the Trainer '
+                       . 'Approval process. Submit portfolio by June 2025, host training '
+                       . 'practice visit in autumn 2025. This supports the practice\'s '
+                       . 'commitment to medical education and workforce development.',
+        ],
+        [
+            'role'    => 'Leadership',
+            'details' => 'Lead the practice-wide implementation of structured medication '
+                       . 'reviews for patients on 10 or more repeat medications. Develop '
+                       . 'a protocol by May 2025, train all prescribers by July 2025, '
+                       . 'and audit outcomes at 6 months. Aligns with PCN prescribing '
+                       . 'safety priorities.',
+        ],
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- READ ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Reading existing PDP goals</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$goals = $manager->getRepeatableItems(
+    $xfaPdf,
+    'Section_18_TheAgreedPDP',
+    'pdpGoals'
+);
+
+foreach ($goals as $index => $goal) {
+    echo "Goal {$index}: [{$goal['role']}] {$goal['details']}\n\n";
+}
+// Goal 0: [Clinical] Complete Advanced Life Support recertification by March 2025...
+// Goal 1: [Clinical] Develop skills in musculoskeletal medicine through supervised clinics...
+// Goal 2: [Educational] Obtain GP Trainer accreditation by completing the Trainer Approval process...
+// Goal 3: [Leadership] Lead the practice-wide implementation of structured medication reviews...</code></pre>
+    </div>
+
+    <!-- REMOVE A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Removing a PDP goal</h3>
+    <p class="text-gray-700 mb-3">Remove a goal by its index (0-based):</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Remove the third goal (index 2)
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf,
+    'Section_18_TheAgreedPDP',
+    'pdpGoals',
+    2
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Agreed PDP section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillAgreedPdp()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        $manager = app('xfa-pdf');
+        $xfaPdf = $manager->load($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Set PDP goal rows (this section is entirely
+        //    made up of repeatable goal rows)
+        // -----------------------------------------------
+        $xfaPdf = $manager->setRepeatableItems(
+            $xfaPdf,
+            'Section_18_TheAgreedPDP',
+            'pdpGoals',
+            'goal',
+            [
+                [
+                    'role'    => 'Clinical',
+                    'details' => 'Complete Advanced Life Support '
+                               . 'recertification by March 2025. Attend '
+                               . 'the two-day ALS provider course at '
+                               . 'Manchester Royal Infirmary. This will '
+                               . 'maintain emergency response competence '
+                               . 'and is a requirement for the out-of-hours '
+                               . 'clinical role.',
+                ],
+                [
+                    'role'    => 'Clinical',
+                    'details' => 'Develop skills in musculoskeletal '
+                               . 'medicine through supervised clinics. '
+                               . 'Attend 10 supervised MSK clinics at '
+                               . 'Trafford General Hospital with Dr Patel '
+                               . '(consultant rheumatologist) between April '
+                               . 'and September 2025. Complete the online '
+                               . 'PGCert module in MSK Ultrasound by '
+                               . 'December 2025.',
+                ],
+                [
+                    'role'    => 'Educational',
+                    'details' => 'Obtain GP Trainer accreditation by '
+                               . 'completing the Trainer Approval process. '
+                               . 'Submit portfolio by June 2025, host '
+                               . 'training practice visit in autumn 2025. '
+                               . 'This supports the practice\'s commitment '
+                               . 'to medical education and workforce '
+                               . 'development.',
+                ],
+                [
+                    'role'    => 'Leadership',
+                    'details' => 'Lead the practice-wide implementation '
+                               . 'of structured medication reviews for '
+                               . 'patients on 10 or more repeat medications. '
+                               . 'Develop a protocol by May 2025, train all '
+                               . 'prescribers by July 2025, and audit '
+                               . 'outcomes at 6 months. Aligns with PCN '
+                               . 'prescribing safety priorities.',
+                ],
+            ]
+        );
+
+        // -----------------------------------------------
+        // 2. Save the PDF
+        // -----------------------------------------------
+        $manager->saveXfaPdf($xfaPdf);
+        // Or: XfaPdf::save();
+
+        return redirect()->back()->with('success', 'Agreed PDP saved.');
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::agreedPdp()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::agreedPdp()->readField('pdpGoals')</code></td>
+                </tr>
+                <tr>
+                    <td>Get PDP goals</td>
+                    <td><code>$manager->getRepeatableItems($xfaPdf, 'Section_18_TheAgreedPDP', 'pdpGoals')</code></td>
+                </tr>
+                <tr>
+                    <td>Add a PDP goal</td>
+                    <td><code>$manager->addRepeatableItem($xfaPdf, 'Section_18_TheAgreedPDP', 'pdpGoals', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Remove a PDP goal</td>
+                    <td><code>$manager->removeRepeatableItem($xfaPdf, 'Section_18_TheAgreedPDP', 'pdpGoals', $index)</code></td>
+                </tr>
+                <tr>
+                    <td>Replace all goals</td>
+                    <td><code>$manager->setRepeatableItems($xfaPdf, 'Section_18_TheAgreedPDP', 'pdpGoals', 'goal', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="checklist.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 17: Checklist</span>
+        </a>
+        <a href="appraisal-summary.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 19: Appraisal Summary &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

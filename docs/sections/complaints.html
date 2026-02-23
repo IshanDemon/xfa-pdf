@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 11: Complaints - XFA-PDF Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-800 antialiased">
+<div class="page-content">
+<div class="max-w-3xl mx-auto px-6 py-10">
+
+    <p class="text-sm text-gray-400 mb-1"><a href="../index.html" class="hover:text-blue-600">Docs</a> &rarr; <a href="../index.html" class="hover:text-blue-600">Sections</a> &rarr; Complaints</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Section 11: Review of Complaints and Compliments</h1>
+    <p class="text-gray-600 mb-8">This section records whether the doctor has been named in any complaints, the learning from those complaints, and any compliments received.</p>
+
+    <!-- ======================================== -->
+    <!-- OVERVIEW -->
+    <!-- ======================================== -->
+    <div class="info-box blue mb-8">
+        <strong>Section name:</strong> <code>Section_11_Complaints</code><br>
+        <strong>Fluent accessor:</strong> <code>XfaPdf::complaints()</code>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-3">What's in this section?</h2>
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>haveBeenNamed</code></td><td>Radio (not/have)</td><td>Has the doctor been named in any complaints?</td></tr>
+                <tr><td><code>complaintLearning</code></td><td>Multiline text</td><td>Learning arising from complaints (conditional &mdash; shown when "have")</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>ComplimentEvents</code> &gt; <code>complimentDetals</code></td><td>Repeatable</td><td>Complaint/compliment event rows (each with role, description, outcome, etc.)</td></tr>
+                <tr class="border-t-2 border-gray-300"><td><code>compliments</code></td><td>Multiline text</td><td>Compliments received from patients, colleagues, or organisations</td></tr>
+                <tr><td><code>appraiserComments</code></td><td>Multiline text</td><td>Appraiser's comments on complaints and compliments (mirrors to Section 19)</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="info-box yellow mb-8">
+        <strong>Conditional field:</strong> The <code>haveBeenNamed</code> radio field uses values <code>"not"</code> and <code>"have"</code> (not true/false). When set to <code>"have"</code>, the <code>complaintLearning</code> textarea becomes visible. When set to <code>"not"</code>, it is hidden.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- SETUP -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Setup</h2>
+    <p class="text-gray-700 mb-3">Before filling any fields, load the PDF in your controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+// Load the PDF file
+XfaPdf::setFile(storage_path('app/xfa-pdf/appraisal.pdf'));</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- READING DATA -->
+    <!-- ======================================== -->
+    <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-3">Reading existing data</h2>
+    <p class="text-gray-700 mb-3">Read all fields in this section at once:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Read everything in Complaints
+$data = XfaPdf::read('Section_11_Complaints');
+
+// Or using the fluent accessor
+$data = XfaPdf::complaints()->read();
+
+// $data looks like:
+// [
+//     'haveBeenNamed' => 'have',
+//     'complaintLearning' => 'The complaint highlighted the importance of...',
+//     'ComplimentEvents' => [
+//         'complimentDetals' => [
+//             [
+//                 'role' => 'GP',
+//                 'description' => 'Patient complaint regarding...',
+//                 'outcome' => 'Resolved through mediation...',
+//                 'supportLocation' => 'Practice',
+//                 'firstEntry' => '2024-03-15',
+//                 'amendData' => '',
+//             ],
+//         ],
+//     ],
+//     'compliments' => 'Received thank-you card from patient...',
+//     'appraiserComments' => '',
+// ]</code></pre>
+    </div>
+
+    <p class="text-gray-700 mt-4 mb-3">Read a single field:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$named = XfaPdf::complaints()->readField('haveBeenNamed');
+// 'have' or 'not'</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- RADIO / CONDITIONAL FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Radio / Conditional Fields</h2>
+    <p class="text-gray-700 mb-4">The <code>haveBeenNamed</code> field is a radio group that controls whether the <code>complaintLearning</code> textarea is displayed. Set it to <code>"have"</code> or <code>"not"</code>.</p>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Setting the radio value</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>haveBeenNamed</code></p>
+    <p class="text-gray-700 mb-3">When the doctor has been named in a complaint, set this to <code>"have"</code>. This will cause Adobe Acrobat to show the <code>complaintLearning</code> field.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Doctor HAS been named in a complaint
+XfaPdf::complaints()->updateField('haveBeenNamed', 'have');
+
+// Doctor has NOT been named in a complaint
+XfaPdf::complaints()->updateField('haveBeenNamed', 'not');</code></pre>
+    </div>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Complaint learning</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>complaintLearning</code></p>
+    <p class="text-gray-700 mb-3">This textarea is only visible in the rendered PDF when <code>haveBeenNamed</code> is set to <code>"have"</code>. It captures the doctor's reflection on what they learned from the complaint(s).</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::complaints()->updateField(
+    'complaintLearning',
+    'The complaint related to a delay in referral for a patient with '
+    . 'worsening symptoms. On reflection, I have updated my practice '
+    . 'to include a safety-netting protocol for patients presenting '
+    . 'with persistent or escalating symptoms. I now use a structured '
+    . 'follow-up checklist and have discussed the case with my '
+    . 'appraisal group. The complaint was resolved through the '
+    . 'practice complaints procedure and the patient was satisfied '
+    . 'with the outcome.'
+);</code></pre>
+    </div>
+
+    <div class="info-box yellow mb-8">
+        <strong>Important:</strong> Always set <code>haveBeenNamed</code> to <code>"have"</code> before or alongside populating <code>complaintLearning</code>. The data will be saved either way, but Adobe Acrobat will only display the learning field when the radio is set to <code>"have"</code>.
+    </div>
+
+    <!-- ======================================== -->
+    <!-- REPEATABLE: COMPLAINT/COMPLIMENT EVENTS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complaint/Compliment Events (Repeatable Table)</h2>
+    <p class="text-gray-700 mb-4">Each row in the <code>complimentDetals</code> table represents one complaint or compliment event. The rows live inside the <code>ComplimentEvents</code> container. Each row has these fields:</p>
+
+    <div class="overflow-x-auto mb-6">
+        <table>
+            <thead><tr><th>Row field</th><th>Type</th><th>What it is</th></tr></thead>
+            <tbody>
+                <tr><td><code>role</code></td><td>Select</td><td>The doctor's role at the time of the event</td></tr>
+                <tr><td><code>description</code></td><td>Multiline text</td><td>Description of the complaint or compliment</td></tr>
+                <tr><td><code>outcome</code></td><td>Multiline text</td><td>Outcome and any actions taken</td></tr>
+                <tr><td><code>supportLocation</code></td><td>Select</td><td>Where support was accessed (e.g. Practice, Trust, NHS England)</td></tr>
+                <tr><td><code>firstEntry</code></td><td>Text</td><td>Date or note when the event was first recorded</td></tr>
+                <tr><td><code>amendData</code></td><td>Text</td><td>Date or note of any amendments to the record</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ADD A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Adding a complaint/compliment event</h3>
+    <p class="text-gray-700 mb-3">To add a new event row:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$manager = app('xfa-pdf');
+$xfaPdf = $manager->load(storage_path('app/xfa-pdf/appraisal.pdf'));
+
+// Add a complaint event
+$xfaPdf = $manager->addRepeatableItem(
+    $xfaPdf,
+    'Section_11_Complaints',      // section name
+    'ComplimentEvents',            // container name
+    [
+        'role'            => 'GP Partner',
+        'description'     => 'Formal complaint received regarding a delay in onward '
+                           . 'referral for a patient with progressive knee pain. The '
+                           . 'patient felt their symptoms were not taken seriously at '
+                           . 'the initial consultation.',
+        'outcome'         => 'The complaint was investigated under the practice complaints '
+                           . 'procedure. I reviewed the consultation notes and acknowledged '
+                           . 'that an earlier referral would have been appropriate. The '
+                           . 'patient received an apology and was referred to orthopaedics. '
+                           . 'No further action was taken.',
+        'supportLocation' => 'Practice',
+        'firstEntry'      => '2024-06-12',
+        'amendData'       => '',
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- REPLACE ALL ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Replacing all event rows</h3>
+    <p class="text-gray-700 mb-3">If you want to clear existing rows and set new ones from scratch, use <code>setRepeatableItems()</code>:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$xfaPdf = $manager->setRepeatableItems(
+    $xfaPdf,
+    'Section_11_Complaints',      // section
+    'ComplimentEvents',            // container
+    'complimentDetals',            // element name
+    [
+        [
+            'role'            => 'GP Partner',
+            'description'     => 'Complaint regarding delay in referral for progressive '
+                               . 'knee pain. Patient felt symptoms were not taken seriously.',
+            'outcome'         => 'Investigated under practice complaints procedure. '
+                               . 'Acknowledged earlier referral was appropriate. Patient '
+                               . 'received apology and orthopaedic referral.',
+            'supportLocation' => 'Practice',
+            'firstEntry'      => '2024-06-12',
+            'amendData'       => '',
+        ],
+        [
+            'role'            => 'GP Partner',
+            'description'     => 'Compliment received from patient with chronic COPD. '
+                               . 'Patient praised the continuity of care and the '
+                               . 'comprehensive review of their inhaler technique.',
+            'outcome'         => 'Positive feedback shared with the practice team. '
+                               . 'Used as an example in the practice newsletter.',
+            'supportLocation' => 'Practice',
+            'firstEntry'      => '2024-09-03',
+            'amendData'       => '',
+        ],
+    ]
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- READ ROWS -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Reading existing event rows</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">$rows = $manager->getRepeatableItems(
+    $xfaPdf,
+    'Section_11_Complaints',
+    'ComplimentEvents'
+);
+
+foreach ($rows as $index => $row) {
+    echo "Event {$index}: {$row['role']} - {$row['description']}\n";
+}
+// Event 0: GP Partner - Complaint regarding delay in referral...
+// Event 1: GP Partner - Compliment received from patient with chronic COPD...</code></pre>
+    </div>
+
+    <!-- REMOVE A ROW -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">Removing an event row</h3>
+    <p class="text-gray-700 mb-3">Remove a row by its index (0-based):</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">// Remove the first event row (index 0)
+$xfaPdf = $manager->removeRepeatableItem(
+    $xfaPdf,
+    'Section_11_Complaints',
+    'ComplimentEvents',
+    0
+);
+
+$manager->saveXfaPdf($xfaPdf);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- TEXT FIELDS -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Text Fields</h2>
+    <p class="text-gray-700 mb-4">Below the event table, there are two standalone text fields for compliments and appraiser comments.</p>
+
+    <!-- compliments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Compliments received</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>compliments</code></p>
+    <p class="text-gray-700 mb-3">A free-text area for recording compliments from patients, colleagues, or organisations.</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::complaints()->updateField(
+    'compliments',
+    'Received a thank-you card from a patient with newly diagnosed diabetes '
+    . 'who appreciated the time taken to explain their condition and treatment '
+    . 'options. Also received positive feedback from the district nursing team '
+    . 'regarding the quality of discharge summaries and communication around '
+    . 'shared patients. A colleague commended my contribution to the practice '
+    . 'significant event audit meeting in September 2024.'
+);</code></pre>
+    </div>
+
+    <!-- appraiserComments -->
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-2">Appraiser's comments</h3>
+    <p class="text-gray-500 text-sm mb-1">Field: <code>appraiserComments</code></p>
+    <p class="text-gray-700 mb-3">Written by the appraiser, summarising their view of the doctor's complaints and compliments. This field mirrors into Section 19 (Appraisal Summary).</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">XfaPdf::complaints()->updateField(
+    'appraiserComments',
+    'Dr Smith has been open and reflective about the complaint received '
+    . 'this year. The learning identified is appropriate and the changes '
+    . 'to practice (safety-netting protocol and structured follow-up) are '
+    . 'proportionate and well-considered. The compliments demonstrate good '
+    . 'patient rapport and effective communication with the wider team. '
+    . 'I am satisfied that complaints are being used as a learning opportunity.'
+);</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- COMPLETE EXAMPLE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Complete Controller Example</h2>
+    <p class="text-gray-700 mb-3">Here's a full example filling the entire Complaints section in a Laravel controller:</p>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre class="language-php"><code class="language-php">use Xfa\Pdf\Facades\XfaPdf;
+
+class AppraisalController extends Controller
+{
+    public function fillComplaints()
+    {
+        $pdfPath = storage_path('app/xfa-pdf/appraisal.pdf');
+        $manager = app('xfa-pdf');
+        $xfaPdf = $manager->load($pdfPath);
+
+        // -----------------------------------------------
+        // 1. Set the radio: has the doctor been named?
+        // -----------------------------------------------
+        XfaPdf::setFile($pdfPath);
+        XfaPdf::complaints()->updateField('haveBeenNamed', 'have');
+
+        // -----------------------------------------------
+        // 2. Fill complaint learning (shown because radio = "have")
+        // -----------------------------------------------
+        XfaPdf::complaints()->updateField(
+            'complaintLearning',
+            'The complaint related to a delay in referral for a patient '
+            . 'with worsening knee pain. I have reflected on this and '
+            . 'introduced a safety-netting protocol for patients with '
+            . 'persistent or escalating symptoms. I now use a structured '
+            . 'follow-up checklist and have discussed the case at our '
+            . 'practice significant event meeting.'
+        );
+
+        // -----------------------------------------------
+        // 3. Add complaint/compliment event rows
+        // -----------------------------------------------
+        $xfaPdf = $manager->setRepeatableItems(
+            $xfaPdf,
+            'Section_11_Complaints',
+            'ComplimentEvents',
+            'complimentDetals',
+            [
+                [
+                    'role'            => 'GP Partner',
+                    'description'     => 'Formal complaint from patient regarding '
+                                       . 'delay in orthopaedic referral for '
+                                       . 'progressive knee pain.',
+                    'outcome'         => 'Investigated under practice complaints '
+                                       . 'procedure. Earlier referral acknowledged '
+                                       . 'as appropriate. Patient received apology '
+                                       . 'and was referred to orthopaedics.',
+                    'supportLocation' => 'Practice',
+                    'firstEntry'      => '2024-06-12',
+                    'amendData'       => '',
+                ],
+                [
+                    'role'            => 'GP Partner',
+                    'description'     => 'Compliment from patient with chronic COPD '
+                                       . 'praising continuity of care and thorough '
+                                       . 'inhaler technique review.',
+                    'outcome'         => 'Positive feedback shared with practice '
+                                       . 'team and included in the practice '
+                                       . 'newsletter.',
+                    'supportLocation' => 'Practice',
+                    'firstEntry'      => '2024-09-03',
+                    'amendData'       => '',
+                ],
+                [
+                    'role'            => 'Clinical Lead - PCN',
+                    'description'     => 'Letter of thanks from North Manchester '
+                                       . 'PCN board recognising leadership of the '
+                                       . 'respiratory pathway redesign project.',
+                    'outcome'         => 'Shared with appraiser as supporting '
+                                       . 'information for this appraisal.',
+                    'supportLocation' => 'Practice',
+                    'firstEntry'      => '2024-11-20',
+                    'amendData'       => '',
+                ],
+            ]
+        );
+
+        // -----------------------------------------------
+        // 4. Fill compliments text
+        // -----------------------------------------------
+        XfaPdf::complaints()->updateField(
+            'compliments',
+            'Received a thank-you card from a newly diagnosed diabetes '
+            . 'patient. Positive feedback from the district nursing team '
+            . 'on discharge summaries. Letter of thanks from PCN board '
+            . 'for respiratory pathway work.'
+        );
+
+        // -----------------------------------------------
+        // 5. Appraiser's comments
+        // -----------------------------------------------
+        XfaPdf::complaints()->updateField(
+            'appraiserComments',
+            'Dr Smith has been open and reflective about the complaint '
+            . 'received this year. The learning identified is appropriate '
+            . 'and changes to practice are proportionate. Compliments '
+            . 'demonstrate good patient rapport and team communication. '
+            . 'I am satisfied that complaints are used as learning '
+            . 'opportunities.'
+        );
+
+        // -----------------------------------------------
+        // 6. Save the PDF
+        // -----------------------------------------------
+        $manager->saveXfaPdf($xfaPdf);
+        // Or: XfaPdf::save();
+
+        return redirect()->back()->with('success', 'Complaints section saved.');
+    }
+}</code></pre>
+    </div>
+
+    <!-- ======================================== -->
+    <!-- QUICK REFERENCE -->
+    <!-- ======================================== -->
+    <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4 pb-2 border-b border-gray-200">Quick Reference</h2>
+    <div class="overflow-x-auto">
+        <table>
+            <thead><tr><th>What you want to do</th><th>Code</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Read all data</td>
+                    <td><code>XfaPdf::complaints()->read()</code></td>
+                </tr>
+                <tr>
+                    <td>Read one field</td>
+                    <td><code>XfaPdf::complaints()->readField('haveBeenNamed')</code></td>
+                </tr>
+                <tr>
+                    <td>Update one field</td>
+                    <td><code>XfaPdf::complaints()->updateField('haveBeenNamed', 'have')</code></td>
+                </tr>
+                <tr>
+                    <td>Update multiple fields</td>
+                    <td><code>XfaPdf::complaints()->update(['field' => 'value', ...])</code></td>
+                </tr>
+                <tr>
+                    <td>Get event rows</td>
+                    <td><code>$manager->getRepeatableItems($xfaPdf, 'Section_11_Complaints', 'ComplimentEvents')</code></td>
+                </tr>
+                <tr>
+                    <td>Add an event row</td>
+                    <td><code>$manager->addRepeatableItem($xfaPdf, 'Section_11_Complaints', 'ComplimentEvents', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Remove an event row</td>
+                    <td><code>$manager->removeRepeatableItem($xfaPdf, 'Section_11_Complaints', 'ComplimentEvents', $index)</code></td>
+                </tr>
+                <tr>
+                    <td>Replace all rows</td>
+                    <td><code>$manager->setRepeatableItems($xfaPdf, 'Section_11_Complaints', 'ComplimentEvents', 'complimentDetals', [...])</code></td>
+                </tr>
+                <tr>
+                    <td>Save changes</td>
+                    <td><code>XfaPdf::save()</code> or <code>$manager->saveXfaPdf($xfaPdf)</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav mt-12 grid grid-cols-2 gap-4">
+        <a href="feedback.html">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">&larr; Section 10: Colleague and Patient Feedback</span>
+        </a>
+        <a href="achievements.html" class="text-right">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">Section 12: Achievements, Challenges and Aspirations &rarr;</span>
+        </a>
+    </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="../shared.js"></script>
+</body>
+</html>

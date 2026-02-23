@@ -1,0 +1,48 @@
+{
+    "name": "xfa/pdf",
+    "description": "Laravel package for creating, editing, and previewing XFA (XML Forms Architecture) PDFs",
+    "keywords": ["laravel", "xfa", "pdf", "xml", "forms"],
+    "license": "MIT",
+    "type": "library",
+    "homepage": "https://github.com/IshanDemon/xfa-pdf",
+    "support": {
+        "issues": "https://github.com/IshanDemon/xfa-pdf/issues",
+        "source": "https://github.com/IshanDemon/xfa-pdf"
+    },
+    "require": {
+        "php": "^7.4",
+        "illuminate/support": "^6.0",
+        "illuminate/contracts": "^6.0",
+        "ext-dom": "*",
+        "ext-zlib": "*"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^4.0",
+        "phpunit/phpunit": "^8.0|^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Xfa\\Pdf\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Xfa\\Pdf\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Xfa\\Pdf\\XfaPdfServiceProvider"
+            ],
+            "aliases": {
+                "XfaPdf": "Xfa\\Pdf\\Facades\\XfaPdf"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

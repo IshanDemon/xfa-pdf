@@ -8,15 +8,16 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
 use Xfa\Pdf\Models\XfaDocument;
+use Xfa\Pdf\Services\PreviewService;
 use Xfa\Pdf\XfaPdfManager;
 
 class XfaPdfController extends Controller
 {
-    private XfaPdfManager $manager;
+    private XfaPdfManager $xfa;
 
-    public function __construct(XfaPdfManager $manager)
+    public function __construct(XfaPdfManager $xfa)
     {
-        $this->manager = $manager;
+        $this->xfa = $xfa;
     }
 
     /**
@@ -55,12 +56,11 @@ class XfaPdfController extends Controller
         $uploadPath = config('xfa-pdf.upload_path', 'xfa-pdf');
         $storedPath = $file->store($uploadPath, $disk);
 
-        // Verify it contains XFA data
         $fullPath = Storage::disk($disk)->path($storedPath);
 
         try {
-            $xfaPdf = $this->manager->load($fullPath);
-            $sections = $this->manager->getSections($xfaPdf);
+            $this->xfa->setFile($fullPath);
+            $sections = $this->xfa->sections();
 
             $metadata = [
                 'sections' => $sections,
@@ -91,17 +91,17 @@ class XfaPdfController extends Controller
     {
         $document = XfaDocument::findOrFail($id);
         $fullPath = $this->getFullPath($document);
-        $xfaPdf = $this->manager->load($fullPath);
+        $this->xfa->setFile($fullPath);
 
-        $sections = $this->manager->getSections($xfaPdf);
+        $sections = $this->xfa->sections();
         $allData = [];
         foreach ($sections as $name) {
-            $allData[$name] = $this->manager->getFields($xfaPdf, $name);
+            $allData[$name] = $this->xfa->read($name);
         }
 
-        $fieldMeta = $this->manager->getFieldMetadata($xfaPdf);
-        $repeatables = $this->manager->getRepeatableSubforms($xfaPdf);
-        $navSections = $this->manager->getNavigationSections($xfaPdf);
+        $fieldMeta = $this->xfa->fieldMetadata();
+        $repeatables = $this->xfa->repeatableSubforms();
+        $navSections = $this->xfa->navigationSections();
 
         $sectionLabels = $this->buildSectionLabels($sections, $navSections);
 
@@ -122,17 +122,17 @@ class XfaPdfController extends Controller
     {
         $document = XfaDocument::findOrFail($id);
         $fullPath = $this->getFullPath($document);
-        $xfaPdf = $this->manager->load($fullPath);
+        $this->xfa->setFile($fullPath);
 
-        $sections = $this->manager->getSections($xfaPdf);
+        $sections = $this->xfa->sections();
         $allData = [];
         foreach ($sections as $name) {
-            $allData[$name] = $this->manager->getFields($xfaPdf, $name);
+            $allData[$name] = $this->xfa->read($name);
         }
 
-        $fieldMeta = $this->manager->getFieldMetadata($xfaPdf);
-        $repeatables = $this->manager->getRepeatableSubforms($xfaPdf);
-        $navSections = $this->manager->getNavigationSections($xfaPdf);
+        $fieldMeta = $this->xfa->fieldMetadata();
+        $repeatables = $this->xfa->repeatableSubforms();
+        $navSections = $this->xfa->navigationSections();
 
         $sectionLabels = $this->buildSectionLabels($sections, $navSections);
 
@@ -153,7 +153,7 @@ class XfaPdfController extends Controller
     {
         $document = XfaDocument::findOrFail($id);
         $fullPath = $this->getFullPath($document);
-        $xfaPdf = $this->manager->load($fullPath);
+        $xfaPdf = $this->xfa->load($fullPath);
 
         $fields = $request->input('fields', []);
 
@@ -161,7 +161,7 @@ class XfaPdfController extends Controller
         $flatFields = $this->flattenFields($fields);
 
         if (!empty($flatFields)) {
-            $this->manager->setFieldValues($xfaPdf, $flatFields);
+            $this->xfa->setFieldValues($xfaPdf, $flatFields);
         }
 
         // Handle repeatable items
@@ -171,7 +171,7 @@ class XfaPdfController extends Controller
                 $elementName = $containerData['element'] ?? 'item';
                 $items = $containerData['items'] ?? [];
 
-                $this->manager->setRepeatableItems(
+                $this->xfa->setRepeatableItems(
                     $xfaPdf,
                     $sectionName,
                     $containerName,
@@ -181,7 +181,7 @@ class XfaPdfController extends Controller
             }
         }
 
-        $this->manager->save($xfaPdf);
+        $this->xfa->saveXfaPdf($xfaPdf);
 
         return redirect()->route('xfa-pdf.show', $document->id)
             ->with('success', 'Document updated successfully.');
@@ -209,14 +209,14 @@ class XfaPdfController extends Controller
     {
         $document = XfaDocument::findOrFail($id);
         $fullPath = $this->getFullPath($document);
-        $xfaPdf = $this->manager->load($fullPath);
+        $xfaPdf = $this->xfa->load($fullPath);
 
         $sectionName = $request->input('section');
         $container = $request->input('container');
         $data = $request->input('data', []);
 
-        $this->manager->addRepeatableItem($xfaPdf, $sectionName, $container, $data);
-        $this->manager->save($xfaPdf);
+        $this->xfa->addRepeatableItem($xfaPdf, $sectionName, $container, $data);
+        $this->xfa->saveXfaPdf($xfaPdf);
 
         return response()->json(['success' => true]);
     }
@@ -228,14 +228,14 @@ class XfaPdfController extends Controller
     {
         $document = XfaDocument::findOrFail($id);
         $fullPath = $this->getFullPath($document);
-        $xfaPdf = $this->manager->load($fullPath);
+        $xfaPdf = $this->xfa->load($fullPath);
 
         $sectionName = $request->input('section');
         $container = $request->input('container');
         $index = (int) $request->input('index', 0);
 
-        $this->manager->removeRepeatableItem($xfaPdf, $sectionName, $container, $index);
-        $this->manager->save($xfaPdf);
+        $this->xfa->removeRepeatableItem($xfaPdf, $sectionName, $container, $index);
+        $this->xfa->saveXfaPdf($xfaPdf);
 
         return response()->json(['success' => true]);
     }
@@ -260,7 +260,6 @@ class XfaPdfController extends Controller
         $labels = [];
 
         foreach ($sections as $name) {
-            // Try to extract section number and match to nav tooltip
             if (preg_match('/Section_(\d+)_/', $name, $m)) {
                 $num = (int) $m[1];
                 if (isset($navSections[$num])) {
@@ -269,7 +268,7 @@ class XfaPdfController extends Controller
                 }
             }
 
-            $labels[$name] = \Xfa\Pdf\Services\PreviewService::humanize($name);
+            $labels[$name] = PreviewService::humanize($name);
         }
 
         return $labels;

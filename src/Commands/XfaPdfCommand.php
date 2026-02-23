@@ -5,11 +5,6 @@ declare(strict_types=1);
 namespace Xfa\Pdf\Commands;
 
 use Illuminate\Console\Command;
-use Xfa\Pdf\Services\DatasetService;
-use Xfa\Pdf\Services\NamespaceService;
-use Xfa\Pdf\Services\PdfBinaryService;
-use Xfa\Pdf\Services\PreviewService;
-use Xfa\Pdf\Services\TemplateService;
 use Xfa\Pdf\XfaPdfManager;
 
 class XfaPdfCommand extends Command
@@ -27,12 +22,12 @@ class XfaPdfCommand extends Command
 
     protected $description = 'Read, write, and preview XFA PDF form data';
 
-    private XfaPdfManager $manager;
+    private XfaPdfManager $xfa;
 
-    public function __construct(XfaPdfManager $manager)
+    public function __construct(XfaPdfManager $xfa)
     {
         parent::__construct();
-        $this->manager = $manager;
+        $this->xfa = $xfa;
     }
 
     public function handle(): int
@@ -46,7 +41,7 @@ class XfaPdfCommand extends Command
         }
 
         try {
-            $xfaPdf = $this->manager->load($filename);
+            $this->xfa->setFile($filename);
         } catch (\Exception $e) {
             $this->error("Failed to load PDF: " . $e->getMessage());
 
@@ -54,31 +49,31 @@ class XfaPdfCommand extends Command
         }
 
         if ($this->option('preview')) {
-            return $this->handlePreview($xfaPdf);
+            return $this->handlePreview();
         }
 
         if ($this->option('raw') && $this->option('read')) {
-            return $this->handleReadRaw($xfaPdf);
+            return $this->handleReadRaw();
         }
 
         if ($this->option('read')) {
-            return $this->handleRead($xfaPdf);
+            return $this->handleRead();
         }
 
         if ($this->option('sections')) {
-            return $this->handleSections($xfaPdf);
+            return $this->handleSections();
         }
 
         if ($this->option('section')) {
-            return $this->handleSection($xfaPdf, $this->option('section'));
+            return $this->handleSection($this->option('section'));
         }
 
         if ($this->option('get')) {
-            return $this->handleGet($xfaPdf, $this->option('get'));
+            return $this->handleGet($this->option('get'));
         }
 
         if ($this->option('set')) {
-            return $this->handleSet($xfaPdf, $this->option('set'));
+            return $this->handleSet($this->option('set'));
         }
 
         $this->info('Usage examples:');
@@ -93,10 +88,10 @@ class XfaPdfCommand extends Command
         return 0;
     }
 
-    private function handlePreview($xfaPdf): int
+    private function handlePreview(): int
     {
         try {
-            $html = $this->manager->generatePreview($xfaPdf);
+            $html = $this->xfa->preview();
 
             $outputPath = $this->option('output') ?: storage_path('xfa-pdf/preview.html');
             $dir = dirname($outputPath);
@@ -121,10 +116,10 @@ class XfaPdfCommand extends Command
         }
     }
 
-    private function handleReadRaw($xfaPdf): int
+    private function handleReadRaw(): int
     {
         try {
-            $xml = $this->manager->getRawXml($xfaPdf);
+            $xml = $this->xfa->rawXml();
             $this->line($xml);
 
             return 0;
@@ -135,14 +130,14 @@ class XfaPdfCommand extends Command
         }
     }
 
-    private function handleRead($xfaPdf): int
+    private function handleRead(): int
     {
         try {
-            $sections = $this->manager->getSections($xfaPdf);
+            $sections = $this->xfa->sections();
 
             foreach ($sections as $sectionName) {
                 $this->info("=== {$sectionName} ===");
-                $fields = $this->manager->getFields($xfaPdf, $sectionName);
+                $fields = $this->xfa->read($sectionName);
                 $this->printFields($fields, 1);
                 $this->line('');
             }
@@ -155,10 +150,10 @@ class XfaPdfCommand extends Command
         }
     }
 
-    private function handleSections($xfaPdf): int
+    private function handleSections(): int
     {
         try {
-            $sections = $this->manager->getSections($xfaPdf);
+            $sections = $this->xfa->sections();
             $this->info('Sections in XFA PDF:');
 
             foreach ($sections as $index => $name) {
@@ -173,10 +168,10 @@ class XfaPdfCommand extends Command
         }
     }
 
-    private function handleSection($xfaPdf, string $sectionName): int
+    private function handleSection(string $sectionName): int
     {
         try {
-            $fields = $this->manager->getFields($xfaPdf, $sectionName);
+            $fields = $this->xfa->read($sectionName);
 
             if (empty($fields)) {
                 $this->warn("Section '{$sectionName}' is empty or not found.");
@@ -195,10 +190,24 @@ class XfaPdfCommand extends Command
         }
     }
 
-    private function handleGet($xfaPdf, string $fieldPath): int
+    private function handleGet(string $fieldPath): int
     {
         try {
-            $value = $this->manager->getFieldValue($xfaPdf, $fieldPath);
+            // Split "Section/field" into section + field
+            $parts = explode('/', $fieldPath, 2);
+
+            if (count($parts) === 2) {
+                $value = $this->xfa->readField($parts[0], $parts[1]);
+            } else {
+                // Single part — try all sections
+                $value = null;
+                foreach ($this->xfa->sections() as $section) {
+                    $value = $this->xfa->readField($section, $fieldPath);
+                    if ($value !== null) {
+                        break;
+                    }
+                }
+            }
 
             if ($value === null) {
                 $this->warn("Field not found: {$fieldPath}");
@@ -216,7 +225,7 @@ class XfaPdfCommand extends Command
         }
     }
 
-    private function handleSet($xfaPdf, string $setExpression): int
+    private function handleSet(string $setExpression): int
     {
         $eqPos = strpos($setExpression, '=');
         if ($eqPos === false) {
@@ -230,12 +239,21 @@ class XfaPdfCommand extends Command
         $outputPath = $this->option('output');
 
         try {
-            $oldValue = $this->manager->getFieldValue($xfaPdf, $fieldPath);
+            // Split "Section/field" into section + field
+            $parts = explode('/', $fieldPath, 2);
+
+            if (count($parts) !== 2) {
+                $this->error('Field path must be "SectionName/fieldName"');
+
+                return 1;
+            }
+
+            $oldValue = $this->xfa->readField($parts[0], $parts[1]);
             $this->line("Current value: {$oldValue}");
             $this->line("New value: {$value}");
 
-            $this->manager->setFieldValue($xfaPdf, $fieldPath, $value);
-            $this->manager->save($xfaPdf, $outputPath);
+            $this->xfa->updateField($parts[0], $parts[1], $value);
+            $this->xfa->save($outputPath);
 
             $target = $outputPath ?? $this->argument('filename');
             $this->info("Successfully updated '{$fieldPath}' in {$target}");

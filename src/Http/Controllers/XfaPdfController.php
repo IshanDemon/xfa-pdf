@@ -276,6 +276,7 @@ class XfaPdfController extends Controller
 
     /**
      * Flatten nested input arrays to slash-separated field paths.
+     * Skips indexed arrays (repeatable items) — those are handled separately.
      *
      * @return array<string, string>
      */
@@ -284,9 +285,27 @@ class XfaPdfController extends Controller
         $flat = [];
 
         foreach ($fields as $key => $value) {
+            // Skip numeric keys and keys containing "[" — these are repeatable items
+            // e.g. numeric index 0, 1, 2 or bracket keys like "Error[0", "cpd[1"
+            if (is_int($key) || strpos((string) $key, '[') !== false) {
+                continue;
+            }
+
             $path = $prefix ? $prefix . '/' . $key : $key;
 
             if (is_array($value)) {
+                // Skip indexed arrays (repeatable items)
+                $keys = array_keys($value);
+                $hasNumericKey = false;
+                foreach ($keys as $k) {
+                    if (is_int($k) || strpos((string) $k, '[') !== false) {
+                        $hasNumericKey = true;
+                        break;
+                    }
+                }
+                if ($hasNumericKey) {
+                    continue;
+                }
                 $flat = array_merge($flat, $this->flattenFields($value, $path));
             } else {
                 $flat[$path] = (string) $value;
